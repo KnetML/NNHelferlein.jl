@@ -107,11 +107,11 @@ end
 """
     struct FeatureSelection  <: Layer
 
-Simple feature selection layer that maps an input to output with
+Simple feature selection layer that maps input to output with
 one-by-one connections; i.e. a layer of size 128 has 128 weights
 (plus optional biases).
 
-Biases ans actvation functions are disabled by default.
+Biases and activation functions are disabled by default.
 
 ### Constructors:
 + `FeatureSelection(i; bias=false, actf=identity)`: with the same

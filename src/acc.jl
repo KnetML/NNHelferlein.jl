@@ -462,7 +462,8 @@ Calculate the negative log-likelihood (i.e. cross entropy) with increased weight
 weekly classified samples. *focal nll* for sample *j* is defined as
 
 ```math
-(1 - p_{j})^{\\gamma} \\cdot \\ln p_{j}
+- (1 - p_{j})^{\\gamma} \\cdot \\ln p_{j} =
+(1 - p_{j})^{\\gamma} \\cdot nll(p_{j})
 ```
 where *p* is the softmax-scaled likelyhood for the true class of the 
 *j*-th sample. 

@@ -14,6 +14,10 @@ All examples are at [GitHub/examples](https://github.com/KnetML/NNHelferlein.jl/
   A simple LeNet for MNIST classification, 
   build with help of the *Helferlein* layers in just two (ok: long) lines of code. 
 
++ [`Training unbalanced data with help of a focal loss function`]
+  (https://github.com/KnetML/NNHelferlein.jl/blob/main/examples/11-focal_loss.ipynb):
+  A simple MLP with focal loss demonstrate classification of highly unbalanced data.
+
 
 + [`Vanilla Autoencoder`]
   (https://github.com/KnetML/NNHelferlein.jl/blob/main/examples/30-ae.ipynb):

@@ -1,5 +1,6 @@
 # ChangeLog of NNHelferlein package
 
++ focal loss functions added to classifier 
 + FeatureSelection layer added
 + explicit signature added for 3d-convolution
 + train: possibility to disable tensorboard logs

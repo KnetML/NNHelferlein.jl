@@ -28,16 +28,23 @@ end
 """
     struct Classifier <: DNN
 
-Classifier with nll loss.
+Classifier with default nll loss.
+An alternative loss function can be supplied as keyword argument.
+The function must provide a signature to be called as 
+`loss(model(x), y)`.
+
+### Constructors:
+    Classifier(layers...; loss=Knet.nll)
 
 ### Signatures:
-    (m::Classifier)(x,y) = nll(m(x), y)
+    (m::Classifier)(x,y) = m.loss(m(x), y)
 """
 struct Classifier <: DNN
     layers
-    Classifier(layers...) = new(Any[layers...])
+    loss
+    Classifier(layers...; loss=Knet.nll) = new(Any[layers...], loss)
 end
-(m::Classifier)(x,y) = Knet.nll(m(x), y)
+(m::Classifier)(x,y) = m.loss(m(x), y)
 
 
 
@@ -48,15 +55,19 @@ end
 
 Regression network with square loss as loss function.
 
+### Constructors:
+    Regressor(layers...; loss=mean_squared_error.nll)
+
 ### Signatures:
     (m::Regression)(x,y) = mean(abs2, Array(m(x)) - y)
 """
 struct Regressor <: DNN
     layers
-    Regressor(layers...) = new(Any[layers...])
+    loss
+    Regressor(layers...; loss=mean_squared_error) = new(Any[layers...], loss)
 end
 #(m::Regressor)(x,y) = mean(abs2, ifgpu(y) .- m(x))
-(m::Regressor)(x,y) = mean_squared_error(ifgpu(y), m(x))
+(m::Regressor)(x,y) = (m(x), ifgpu(y))
 
 
 
@@ -182,9 +193,11 @@ function print_network(mdl; n=0, indent=0)
                 if l isa DNN
                     n = print_network(l, n=n, indent=indent)
                     println(" ")
-                else
+                elseif l isa Layer
                     println(summary(l, indent=indent))
                     n += 1
+                else
+                   print_summary_line(indent, "custom function", get_n_params(l)) 
                 end
             end
         elseif p isa DNN
@@ -199,6 +212,8 @@ function print_network(mdl; n=0, indent=0)
                 #println(summary(l, indent=indent))
                 n += 1
             end
+        else
+            print_summary_line(indent, "custom function", get_n_params(p)) 
         end
     end
     

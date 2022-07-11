@@ -167,6 +167,7 @@ tb_train!
 
 ```@docs
 focal_nll
+focal_bce
 predict
 predict_top5
 minibatch_eval

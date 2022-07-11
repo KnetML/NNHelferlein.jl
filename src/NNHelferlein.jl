@@ -94,7 +94,7 @@ export DNN, Classifier, Regressor, Chain, VAE,          # chains
        DATA_DIR, 
        confusion_matrix,
        squared_error_acc, abs_error_acc, minibatch_eval,
-       focal_nll,
+       focal_nll, focal_bce,
        dataset_mit_nsr, dataset_iris, dataset_mnist
 
 end # module

@@ -365,7 +365,7 @@ function confusion_matrix(y, p; labels=nothing, pretty_print=true)
 end
 
 
-function mean_squared_error(y, p)
+function mean_squared_error(p, y)
     
     # TODO: use oftype() like in bce!
     return mean(abs2, y .- p) 
@@ -391,7 +391,7 @@ end
 
 
 
-function mean_abs_error(y, p)
+function mean_abs_error(p, y)
     
     return mean(abs, y .- p)
 end
@@ -481,7 +481,8 @@ a dataset of minibatches of (x,y)-tuples.
             one neuron per class
 + `labels`: ground truth as integer values
 + `γ=2.0`: The parameter *γ* controls the strength of the effect: 
-            for *γ=0*, all weights become exactly 1.0; with higher values for *γ* 
+            for *γ=0*, all weights become exactly 1.0; with higher values 
+            for *γ*, 
             focus on mis-classified or weakly classified sample is increased.
 `dims=1`: dimension in which the instances are organised.
 """
@@ -502,6 +503,27 @@ function focal_nll(mdl; data, γ=2.0, dims=1)
 end
 
 
+"""
+    function focal_bce(scores, labels::AbstractArray{<:Integer}; 
+    function focal_bce(mdl; data, γ=2.0, dims=1)
+
+Calculate the biray crossentropywith increased weights on 
+weekly classified samples. *focal bce* for sample *j* is defined as
+
+
+```math
+(1 - p_{j})^{\\gamma} \\cdot bce(p_{j})
+```
+where *p* is the softmax-scaled likelyhood for the true class of the 
+*j*-th sample. 
+The sample weight is high, if predicted *p* << 1.
+
+The second signature can be used to caclulate the mean *focus bce* for
+a dataset of minibatches of (x,y)-tuples.
+
+For arguments and details, please refer to the documentation of 
+`focal_nll`.
+"""
 function focal_bce(scores, labels::AbstractArray{<:Integer}; 
         γ=2.0, dims=1)
 

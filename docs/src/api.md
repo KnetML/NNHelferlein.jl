@@ -166,6 +166,7 @@ tb_train!
 # Evaluation and accuracy
 
 ```@docs
+focal_nll
 predict
 predict_top5
 minibatch_eval

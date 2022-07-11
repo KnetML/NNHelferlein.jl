@@ -367,6 +367,7 @@ end
 
 function mean_squared_error(y, p)
     
+    # TODO: use oftype() like in bce!
     return mean(abs2, y .- p) 
 end
 
@@ -452,19 +453,76 @@ function minibatch_eval(mdl, fun, data; o...)
     return sum / cnt
 end
     
-# TODO: FocalLoss
 
-# function focal_nll(scores, labels::AbstractArray{<:Integer}; 
-#             dims=1, γ=2)
-#     indices = findindices(scores,labels,dims=dims)
-#     lp = -logsoftmax(scores,dims=dims)[indices]
-#     p = softmax(scores,dims=dims)[indices]
-#     
-#     focal = exp.(1.0 .- p, γ) .* lp
+"""
+    function focal_nll(scores, labels::AbstractArray{<:Integer}; γ=2.0, dims=1)
+    function focal_nll(mdl; data, γ=2.0, dims=1)
+
+Calculate the negative log-likelihood (i.e. cross entropy) with increased weights on 
+weekly classified samples. *focal nll* for sample *j* is defined as
+
+```math
+(1 - p_{j})^{\\gamma} \\cdot \\ln p_{j}
+```
+where *p* is the softmax-scaled likelyhood for the true class of the 
+*j*-th sample. 
+The sample weight is high, if the predicted *p* << 1.
+
+The second signature can be used to caclulate the mean focus nll for
+a dataset of minibatches of (x,y)-tuples.
+
+### Arguments:
++ `scores`: unnormalised scores (i.e. activations of output neurons
+            without applying an activation function), typically of a classifier with 
+            one neuron per class
++ `lables`: ground truth as integer value as id of the correct class
++ `γ=2.0`: The parameter *γ* controls the strength of the effect: 
+            for *γ=0*, all weights become exactly 1.0; with higher values for *γ* 
+            focus on mis-classified or weakly classified sample is increased.
+`dims=1`: dimension in which the instaces are organised.
+"""
+function focal_nll(scores, labels::AbstractArray{<:Integer}; 
+            γ=2.0, dims=1)
+
+    indices = Knet.Ops20.findindices(scores,labels,dims=dims)
+    lp = -logsoftmax(scores,dims=dims)[indices]
+    p = softmax(scores,dims=dims)[indices]
+    
+    focal = (1.0 .- p).^γ .* lp
+    return sum(focal) / length(focal)
+end
+
+function focal_nll(mdl; data, γ=2.0, dims=1)
+
+    return minibatch_eval(mdl, focal_nll, data; dims=dims, γ=γ)
+end
+
+
+function focal_bce(scores, labels::AbstractArray{<:Integer}; 
+        γ=2.0, dims=1)
+
+    labels = oftype(scores, labels)
+    lp = max.(0, scores) .- labels .* scores .+ log.(1 .+ exp.(-abs.(scores)))
+    p = Knet.sigm.(scores)
+
+    focal = (1.0 .- p).^ γ .* lp
+    return sum(focal) / length(focal)
+end
+
+function focal_bce(mdl; data, γ=2.0, dims=1)
+
+    return minibatch_eval(mdl, focal_bce, data; dims=dims, γ=γ)
+end
+
+
+# function focal_mse(preds, teach; γ=2.0)
+# 
+#     teach = oftype(preds, teach)
+#     @show errs = vec(abs2.(preds .- teach))
+#     @show p = softmax(errs)
+# 
+#     @show focal = (1.0 .- p).^ γ #.* errs
 #     return sum(focal) / length(focal)
 # end
-# 
-# function focal_nll(mdl; data, dims=1)
-# 
-#     return minibatch_eval(mdl, focal_nll, data; dims=dims, γ=γ)
-# end
+
+

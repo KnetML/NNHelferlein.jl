@@ -463,6 +463,9 @@ weekly classified samples. *focal nll* for sample *j* is defined as
 
 ```math
 - (1 - p_{j})^{\\gamma} \\cdot \\ln p_{j} =
+```
+
+```math
 (1 - p_{j})^{\\gamma} \\cdot nll(p_{j})
 ```
 where *p* is the softmax-scaled likelyhood for the true class of the 

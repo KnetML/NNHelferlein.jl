@@ -467,20 +467,20 @@ weekly classified samples. *focal nll* for sample *j* is defined as
 ```
 where *p* is the softmax-scaled likelyhood for the true class of the 
 *j*-th sample. 
-The sample weight is high, if the predicted *p* << 1.
+The sample weight is high, if predicted *p* << 1.
 
-The second signature can be used to caclulate the mean focus nll for
+The second signature can be used to caclulate the mean *focus nll* for
 a dataset of minibatches of (x,y)-tuples.
 
 ### Arguments:
 + `scores`: unnormalised scores (i.e. activations of output neurons
             without applying an activation function), typically of a classifier with 
             one neuron per class
-+ `lables`: ground truth as integer value as id of the correct class
++ `labels`: ground truth as integer values
 + `γ=2.0`: The parameter *γ* controls the strength of the effect: 
             for *γ=0*, all weights become exactly 1.0; with higher values for *γ* 
             focus on mis-classified or weakly classified sample is increased.
-`dims=1`: dimension in which the instaces are organised.
+`dims=1`: dimension in which the instances are organised.
 """
 function focal_nll(scores, labels::AbstractArray{<:Integer}; 
             γ=2.0, dims=1)

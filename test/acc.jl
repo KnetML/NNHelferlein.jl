@@ -127,3 +127,20 @@ function test_mb_eval()
      return isapprox(sq_err, 15.6667, atol=0.001) &&
             isapprox(ab_err,  3.3333, atol=0.001)
 end
+
+function test_focal_loss()
+
+     y = [0, 1, 2]
+     s = [0.8 0.1 0.3
+          0.1 0.9 0.0
+          0.0 0.3 1.0]
+     fnll = focal_nll(s, y)  # 0.9711265498008855
+
+     y = [0, 1, 0]
+     s = [0.2, 1.0, 0.1]
+     fbce = focal_bce(s, y) # 0.11745655310473864
+
+     return isapprox(fnll, 0.97112, atol=0.001) &&
+            isapprox(fbce, 0.11745, atol=0.001)
+end
+     

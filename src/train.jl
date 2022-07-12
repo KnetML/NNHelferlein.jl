@@ -512,13 +512,13 @@ predictions as softmax probabilities.
 """
 function predict_top5(mdl; data, top_n=5, classes=nothing)
 
-    y = predict(mdl; data=data, softmax=false)
+    y = predict(mdl; data=data, softmax=true)
 
     if isnothing(classes)
         classes = repeat(["-"], size(y)[1])
     end
     for (i,o) in enumerate(eachcol(y))
-        o = Knet.softmax(vec(Array(o)))
+        o = vec(Array(o))
         top = sortperm(vec(Array(o)), rev=true)[1:top_n]
         println("top-$top_n hits for sample $i: $top"); flush(stdout)
 

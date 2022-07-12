@@ -40,14 +40,10 @@ end
 """ 
     function get_vgg16(; filters_only=false, trainable=true)
 
-Return a VGG16 model with pretrained parameters. 
-Parameters have been exported from the Keras application. For details about original model 
+Return a VGG16 model with pretrained parameters
+from Tensorflow/Keras applications API. For details about original model 
 and training see
 `https://keras.io/api/applications/`.
-
-Model structure is:
-
-![vgg structure](assets/netron-vgg16.png "VGG16")
 
 ### Arguments
 + `filters_only=false`: if `true`, only the filterstack is returned   
@@ -57,6 +53,9 @@ Model structure is:
             only the classifier part is trainable and the filter weights are 
             fixed.
 
+Model structure is:
+
+![vgg_structure](assets/netron-vgg16.png)
 """
 function get_vgg16(; filters_only=false, trainable=true)
 

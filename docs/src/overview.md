@@ -139,6 +139,9 @@ HDF5-constructors for the layers
 row-major-flattening, necessary to make sure, that the parameters
 of an imported layer after flattening are in the correct order.
 
+*NNHelferlein* provides an increasing number of pretrained 
+models from the Tensorflow/Keras model zoo, such as vgg or resnet.
+Please see the reference section for a up-to-date list.
 
 
 ## Training

@@ -228,3 +228,9 @@ dataset_mit_nsr
 dataset_mnist
 dataset_iris
 ```
+
+# Pretrained networks
+
+```@docs
+get_vgg16
+```

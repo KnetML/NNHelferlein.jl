@@ -40,8 +40,8 @@ include("acc.jl")
 include("imagenet.jl")
 include("datasets.jl")
 
-
 DATA_DIR = normpath(joinpath(dirname(pathof(@__MODULE__)), "..", "data"))
+include("pretrained.jl")
 
 export DNN, Classifier, Regressor, Chain, VAE,          # chains
        DataLoader, SequenceData, PartialIterator,
@@ -85,7 +85,7 @@ export DNN, Classifier, Regressor, Chain, VAE,          # chains
        get_tatoeba_corpus,
        sequence_minibatch, pad_sequence, truncate_sequence, 
        TOKEN_START, TOKEN_END, TOKEN_PAD, TOKEN_UNKOWN,
-       crop_array, init0, 
+       crop_array, init0,                               # utils
        convert2CuArray, emptyCuArray, ifgpu,
        convert2KnetArray, emptyKnetArray,
        blowup_array, recycle_array,
@@ -93,8 +93,9 @@ export DNN, Classifier, Regressor, Chain, VAE,          # chains
        print_network,
        DATA_DIR, 
        confusion_matrix,
-       squared_error_acc, abs_error_acc, minibatch_eval,
+       squared_error_acc, abs_error_acc, minibatch_eval,   # eval
        focal_nll, focal_bce,
-       dataset_mit_nsr, dataset_iris, dataset_mnist
+       dataset_mit_nsr, dataset_iris, dataset_mnist,
+       get_vgg16                                               # pretrained
 
 end # module

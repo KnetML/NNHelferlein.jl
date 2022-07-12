@@ -52,8 +52,8 @@ All examples are at [GitHub/examples](https://github.com/KnetML/NNHelferlein.jl/
   The example includes the definition on peephole LSTMs to display
   how to integrate non-standard rnn-units with the *NNHelfrelein* framework.
 
-+ [`Pretrained VGG16`]
-  (https://github.com/KnetML/NNHelferlein.jl/blob/main/examples/70-pretrained_vgg.ipynb):
++ [`Import a Keras model`]
+  (https://github.com/KnetML/NNHelferlein.jl/blob/main/examples/75-keras-model.ipynb):
   The notebook shows the import of a pretrained VGG16 model
   from Tensorflow/Keras into a Knet-style CNN
   and its application to example images utilising the

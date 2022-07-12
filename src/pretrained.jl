@@ -55,7 +55,7 @@ and training see
 
 Model structure is:
 
-![vgg_structure](assets/netron-vgg16.png)
+![netron](assets/netron-vgg16-w200.png)
 """
 function get_vgg16(; filters_only=false, trainable=true)
 

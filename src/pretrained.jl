@@ -47,7 +47,7 @@ and training see
 
 Model structure is:
 
-<img src="assets/netron-vgg16.png"/>
+![vgg structure](assets/netron-vgg16.png "VGG16")
 
 ### Arguments
 + `filters_only=false`: if `true`, only the filterstack is returned   

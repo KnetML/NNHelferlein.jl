@@ -253,16 +253,35 @@ struct DepthwiseConv  <: Layer
     dilation
     group
     
-    DepthwiseConv(w, b, actf; kwargs...) = new(w, b, actf, kwargs)
-    DepthwiseConv(w1::Int, w2::Int, i::Int, o::Int; actf=Knet.relu, 
-            padding=0, stride=1, dilation=1) =
-            new(Knet.param(w1,w2,1,o; init=xavier_normal), Knet.param0(1,1,o,1),
+    DepthwiseConv(w, b, actf; kwargs...) = (depthwise_warn(); new(w, b, actf, kwargs))
+    function DepthwiseConv(w1::Int, w2::Int, i::Int, o::Int; actf=Knet.relu, 
+            padding=0, stride=1, dilation=1)
+    depthwise_warn()
+    new(Knet.param(w1,w2,1,o; init=xavier_normal), Knet.param0(1,1,o,1),
                 actf, padding, stride, dilation, i)
 end
+end
 
-(c::DepthwiseConv)(x) = c.actf.(Knet.conv4(c.w, x; group=c.group, 
+function (c::DepthwiseConv)(x)
+    
+    if depthwise_warn()
+        return x
+    else
+        return c.actf.(Knet.conv4(c.w, x; group=c.group, 
                             padding=c.padding, stride=c.stride, dilation=c.dilation) .+ c.b)
+    end
+end
 
+
+function depthwise_warn()
+    if !CUDA.functional()
+        println("Grouped convolutions (DepthwiseConv) are not yet supported on CPU!")
+        println("As long as there is no functional CUDA backend available, the layer will be ignored!")
+        return false
+    else
+        return true
+    end
+end
 
 function Base.summary(l::DepthwiseConv; indent=0)
     n = get_n_params(l)

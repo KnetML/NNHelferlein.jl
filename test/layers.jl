@@ -48,9 +48,14 @@ end
 
 function test_layer_depthwise()
     l = DepthwiseConv(3,3,4,8)
-    x = convert2KnetArray(rand(Float32, 28,28,4,16))
+    x = ifgpu(rand(Float32, 28,28,4,16))
     y = l(x)
-    return size(y) == (26,26,8,16)
+
+    if CUDA.functional()
+        return size(y) == (26,26,8,16)
+    else
+        return size(y) == (26,26,4,16)
+    end
 end
 
 function test_conv_hdf5()

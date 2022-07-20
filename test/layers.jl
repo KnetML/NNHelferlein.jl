@@ -46,6 +46,13 @@ function test_layer_conv()
     return size(y) == (26,26,8,16)
 end
 
+function test_layer_depthwise()
+    l = DepthwiseConv(3,3,4,8)
+    x = convert2KnetArray(rand(Float32, 28,28,4,16))
+    y = l(x)
+    return size(y) == (26,26,8,16)
+end
+
 function test_conv_hdf5()
     h5file = h5open(joinpath("data", "dummykeras.h5"))
     l = Conv(h5file, "conv2d", trainable=true, padding=1) # 3x3x16, inp: 28x28x1

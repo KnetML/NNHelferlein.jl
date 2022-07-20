@@ -73,6 +73,7 @@ using Statistics: mean
 @test test_layer_fs()
 
 @test test_layer_conv()
+@test test_layer_depthwise()
 @test test_conv_hdf5()
 @test test_layer_pool()
 @test test_layer_deconv()

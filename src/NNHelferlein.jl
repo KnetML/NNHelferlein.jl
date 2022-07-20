@@ -14,6 +14,7 @@ import DataFrames
 import Random
 using Printf
 import CUDA
+# import NNlib
 using Knet #: KnetArray, Param, @diff
 import Images, Colors
 import Augmentor
@@ -53,7 +54,7 @@ export DNN, Classifier, Regressor, Chain, VAE,          # chains
        iterate, length,
        Layer, Dense, Conv, Pool, Flat, PyFlat,         # layers
        FeatureSelection,
-       DeConv, UnPool,
+       DeConv, UnPool,  DepthwiseConv,
        Embed, Recurrent,
        Softmax, Logistic,
        Dropout, BatchNorm, LayerNorm,

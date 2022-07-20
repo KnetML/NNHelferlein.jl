@@ -223,7 +223,88 @@ function Base.summary(l::Conv; indent=0)
 end
 
 
+ """
+    DepthwiseConv  <: Layer
 
+Conv layer with seperate filters per input channel. As a result
+*o* times *i* output feature maps will be created.
+
+### Constructors:
++ `DepthwiseConv(w, b, padding, actf)`: default constructor
++ `Conv(w1::Int, w2::Int,  i::Int, o::Int; actf=relu; kwargs...)`: layer with
+    `o` kernels of size (w1,w2) for every input channel of an 2-d input of `i` layers.
+    `o` must be a multiple of `i`; if `o == i`, each output feature map is 
+    generated from one channel. If `o == n*i`, `n` feature maps are 
+    generated from each channel.    
+
+### Keyword arguments:
++ `padding=0`: the number of extra zeros implicitly concatenated
+        at the start and end of each dimension.
++ `stride=1`: the number of elements to slide to reach the next filtering window.
++ `dilation=1`: dilation factor for each dimension.
+"""
+struct DepthwiseConv  <: Layer
+    w
+    b
+    actf
+    padding
+    stride
+    dilation
+    group
+    
+    DepthwiseConv(w, b, actf; kwargs...) = new(w, b, actf, kwargs)
+    DepthwiseConv(w1::Int, w2::Int, i::Int, o::Int; actf=Knet.relu, 
+            padding=0, stride=1, dilation=1) =
+            new(Knet.param(w1,w2,1,o; init=xavier_normal), Knet.param0(1,1,o,1),
+                actf, padding, stride, dilation, i)
+end
+
+(c::DepthwiseConv)(x) = c.actf.(Knet.conv4(c.w, x; group=c.group, 
+                            padding=c.padding, stride=c.stride, dilation=c.dilation) .+ c.b)
+
+
+function Base.summary(l::DepthwiseConv; indent=0)
+    n = get_n_params(l)
+
+    siz = size(l.w)  
+    i,o = siz[end-1:end]
+    w_siz = siz[1:end-2]
+    
+    if length(l.kwargs) > 0
+        kwa = " $(collect(l.kwargs))"
+    else
+        kwa = ""
+    end
+    s1 = "DepthwiseConv layer $i → $o ($w_siz) $kwa with $(l.actf),"
+    return print_summary_line(indent, s1, n)
+end
+
+
+
+
+struct DeConvUnet <: Layer
+    w
+    b
+    actf
+    kwargs
+    Conv(w, b, actf; kwargs...) = new(w, b, actf, kwargs)
+    Conv(w1::Int, w2::Int,  i::Int, i_enc::Int, o::Int; actf=Knet.relu, kwargs...) =
+            new(Knet.param(w1,w2,i+i_enc,o; init=xavier_normal), Knet.param0(1,1,o,1),
+                actf, kwargs)
+end
+
+function (c::Conv)(x, enc)
+    
+    # crop featuremaps to make encoder maps and decoder maps the same dims:
+    #
+    x = crop_array(x, (size(enc,1), size(enc,2),:,:))
+    enc = crop_array(enc, (size(x,1), size(x,2),:,:))
+    cat(x, enc, dims=3)
+
+    return c.actf.(Knet.conv4(c.w, x; c.kwargs...) .+ c.b)
+end
+
+    
 
 """
     struct Pool <: Layer

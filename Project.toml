@@ -34,7 +34,6 @@ Unicode = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 ZipFile = "a5390f91-8eb1-5f08-bee0-b1d1ffed6cea"
 
 [compat]
-julia = "1.7"
 Augmentor = "0.6"
 CSV = "0.1 - 0.10"
 CUDA = "3.10"
@@ -54,3 +53,4 @@ MLDatasets = "0.5"
 ProgressMeter = "1.7"
 TensorBoardLogger = "0.1"
 ZipFile = "0.9"
+julia = "1.7"

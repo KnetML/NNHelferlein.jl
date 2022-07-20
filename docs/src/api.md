@@ -35,6 +35,7 @@ Embed
 ```@docs
 Conv
 DeConv
+DepthwiseConv
 Pool
 UnPool
 ```

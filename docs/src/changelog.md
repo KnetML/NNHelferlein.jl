@@ -1,5 +1,6 @@
 # ChangeLog of NNHelferlein package
 
+### v1.1.2
 + Depthwise conv-layer added
 + focal loss functions added to classifier 
 + FeatureSelection layer added

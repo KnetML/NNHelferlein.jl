@@ -226,8 +226,9 @@ end
  """
     DepthwiseConv  <: Layer
 
-Conv layer with seperate filters per input channel. As a result
-*o* times *i* output feature maps will be created.
+Conv layer with seperate filters per input channel. 
+*o* output feature maps will be created by performing a convolution 
+on only one input channel. `o` must be a multiple of `i`.
 
 ### Constructors:
 + `DepthwiseConv(w, b, padding, actf)`: default constructor

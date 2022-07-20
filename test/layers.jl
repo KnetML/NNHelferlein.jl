@@ -54,7 +54,7 @@ function test_layer_depthwise()
     if CUDA.functional()
         return size(y) == (26,26,8,16)
     else
-        return size(y) == (26,26,4,16)
+        return size(y) == (28,28,4,16)
     end
 end
 

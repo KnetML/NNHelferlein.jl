@@ -277,9 +277,9 @@ function depthwise_warn()
     if !CUDA.functional()
         println("Grouped convolutions (DepthwiseConv) are not yet supported on CPU!")
         println("As long as there is no functional CUDA backend available, the layer will be ignored!")
-        return false
-    else
         return true
+    else
+        return false
     end
 end
 

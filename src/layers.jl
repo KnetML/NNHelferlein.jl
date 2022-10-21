@@ -167,6 +167,7 @@ struct Conv  <: Layer
     b
     actf
     kwargs
+    Conv(w::AbstractArray, b::AbstractArray, actf::Function, kwargs::Base.Pairs) = new(w, b, actf, kwargs)
     Conv(w, b, actf; kwargs...) = new(w, b, actf, kwargs)
     Conv(w1::Int, w2::Int,  i::Int, o::Int; actf=Knet.relu, kwargs...) =
             new(Knet.param(w1,w2,i,o; init=xavier_normal), Knet.param0(1,1,o,1),

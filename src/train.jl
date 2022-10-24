@@ -430,7 +430,7 @@ function write_cp(model, step, dir)
         mkdir(dir)
     end
     fname = joinpath(dir, "checkpoint_$step.jld2")
-    JLD2.@save fname model
+    save_network(fname, model)
 end
 
 function calc_loss(mdl; data)

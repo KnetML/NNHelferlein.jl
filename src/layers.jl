@@ -23,7 +23,7 @@ struct Dense  <: Layer
     w
     b
     actf
-    Dense(w, b, actf) = new(w, b, actf)
+    Dense(w::Param, b::Param, actf) = new(w, b, actf)
     Dense(i::Int, j::Int; actf=Knet.sigm) = new(Knet.param(j,i), Knet.param0(j), actf)
  end
 
@@ -83,7 +83,7 @@ struct Linear  <: Layer
     w
     b
     actf
-    Linear(w, b, actf) = new(w, b, actf)
+    Linear(w::Param, b::Param, actf) = new(w, b, actf)
     Linear(i::Int, j::Int; bias=true, actf=identity) = new(Knet.param(j,i),
             bias ? Knet.param0(j) : init0(j), actf)
  end
@@ -123,6 +123,7 @@ struct FeatureSelection  <: Layer
     w
     b
     actf
+    FeatureSelection(w::Param, b::Param, actf) = new(w, b, actf)
     FeatureSelection(i; bias=false, actf=identity) = 
                 new(param(i...), bias ? Knet.param0(i...) : init0(i...), actf)
 end
@@ -143,7 +144,6 @@ end
 Default Conv layer.
 
 ### Constructors:
-+ `Conv(w, b, padding, actf)`: default constructor
 + `Conv(w1::Int, w2::Int,  i::Int, o::Int; actf=relu; kwargs...)`: layer with
     o kernels of size (w1,w2) for an input of i layers.
 + `Conv(w1::Int, w2::Int, w3::Int, i::Int, o::Int; actf=relu; kwargs...)`: layer 
@@ -167,7 +167,7 @@ struct Conv  <: Layer
     b
     actf
     kwargs
-    Conv(w::AbstractArray, b::AbstractArray, actf::Function, kwargs::Base.Pairs) = new(w, b, actf, kwargs)
+    Conv(w::Param, b::Param, actf::Function, kwargs) = new(w, b, actf, kwargs)
     Conv(w, b, actf; kwargs...) = new(w, b, actf, kwargs)
     Conv(w1::Int, w2::Int,  i::Int, o::Int; actf=Knet.relu, kwargs...) =
             new(Knet.param(w1,w2,i,o; init=xavier_normal), Knet.param0(1,1,o,1),
@@ -256,11 +256,12 @@ struct DepthwiseConv  <: Layer
     
     DepthwiseConv(w, b, actf; kwargs...) = (depthwise_warn(); new(w, b, actf, kwargs))
     function DepthwiseConv(w1::Int, w2::Int, i::Int, o::Int; actf=Knet.relu, 
-            padding=0, stride=1, dilation=1)
-    depthwise_warn()
-    new(Knet.param(w1,w2,1,o; init=xavier_normal), Knet.param0(1,1,o,1),
+                           padding=0, stride=1, dilation=1)
+        
+        depthwise_warn()
+        new(Knet.param(w1,w2,1,o; init=xavier_normal), Knet.param0(1,1,o,1),
                 actf, padding, stride, dilation, i)
-end
+    end
 end
 
 function (c::DepthwiseConv)(x)
@@ -308,13 +309,14 @@ struct DeConvUnet <: Layer
     b
     actf
     kwargs
-    Conv(w, b, actf; kwargs...) = new(w, b, actf, kwargs)
-    Conv(w1::Int, w2::Int,  i::Int, i_enc::Int, o::Int; actf=Knet.relu, kwargs...) =
+    DeConvUnet(w::Param, b::Param, actf::Function, kwargs) = new(w, b, actf, kwargs)
+    DeConvUnet(w, b, actf; kwargs...) = new(w, b, actf, kwargs)
+    DeConvUnet(w1::Int, w2::Int,  i::Int, i_enc::Int, o::Int; actf=Knet.relu, kwargs...) =
             new(Knet.param(w1,w2,i+i_enc,o; init=xavier_normal), Knet.param0(1,1,o,1),
                 actf, kwargs)
 end
 
-function (c::Conv)(x, enc)
+function (c::DeConvUnet)(x, enc)
     
     # crop featuremaps to make encoder maps and decoder maps the same dims:
     #
@@ -344,6 +346,7 @@ Pooling layer.
 """
 struct Pool    <: Layer
     kwargs
+    Pool(kwargs::Base.Pairs) = new(kwargs)
     Pool(;kwargs...) = new(kwargs)
 end
 
@@ -393,6 +396,7 @@ struct DeConv  <: Layer
     b
     actf
     kwargs
+    DeConv(w::Param, b::Param, actf, kwargs) = new(w, b, actf, kwargs)
     DeConv(w, b, actf; kwargs...) = new(w, b, actf, kwargs)
     DeConv(w1::Int, w2::Int,  i::Int, o::Int; actf=Knet.relu, kwargs...) =
             new(Knet.param(w1,w2,o,i; init=xavier_normal), Knet.param0(1,1,o,1),
@@ -432,6 +436,7 @@ Unpooling layer.
 """
 struct UnPool <: Layer
     kwargs
+    UnPool(kwargs::Param) = new(kwargs)
     UnPool(;kwargs...) = new(kwargs)
 end
 (l::UnPool)(x) = Knet.unpool(x; l.kwargs...)
@@ -484,6 +489,7 @@ tensorflow are applied after the flatten layer.
 """
 struct PyFlat <: Layer
     python
+    PyFlat(python::Bool) = new(python)
     PyFlat(; python=true) = new(python)
 end
 (l::PyFlat)(x) = l.python ? Knet.mat(permutedims(x, (3,2,1,4))) : mat(x)
@@ -530,6 +536,7 @@ a matrix, the value is a 3-d array, etc.
 struct Embed <: Layer
     w
     actf
+    Embed(w::Param, actf::Function) = new= Embed(w, actf)
     Embed(i, embed; actf=identity) = new(Knet.param(embed,i), actf)
 end
 
@@ -578,6 +585,7 @@ almoset linear.
 """
 struct Logistic <: Layer
     T
+    Logistic(T) = new(T)
     Logistic(;T=1.0) = new(Float32(T))
 end
 (l::Logistic)(x) = sigm.(x / l.T)
@@ -799,6 +807,7 @@ Gaussian noise layer. Multiplies Gaussian-distributed random values with
 struct GaussianNoise <: Layer
     σ
     train_only
+    GaussianNoise(σ::Number, train_only::Bool) = new(σ, train_only)
     GaussianNoise(σ; train_only=true) = new(σ, train_only)
 end
 
@@ -921,6 +930,10 @@ struct Recurrent <: Layer
     back_rnn
     has_c
     allow_mask
+
+    Recurrent(n_inputs::Int, n_units::Int, unit_type::Symbol, 
+              rnn::Knet.RNN, back_rnn::Union{Knet.RNN, Nothing},
+              has_c::Bool, allow_mask::Bool) = new(n_inputs, n_units, unit_type, rnn, back_rnn, has_c, allow_mask) 
 
     function Recurrent(n_inputs::Int, n_units::Int; u_type=:lstm, 
                        allow_mask=false, bidirectional=false, o...)

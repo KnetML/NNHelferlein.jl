@@ -5,6 +5,12 @@
 Adapt.@adapt_structure Param 
 Adapt.@adapt_structure Recurrent
 Adapt.@adapt_structure RNN
+Adapt.@adapt_structure MultiHeadAttn
+Adapt.@adapt_structure AttnBahdanau
+Adapt.@adapt_structure AttnLuong
+Adapt.@adapt_structure AttnDot
+Adapt.@adapt_structure AttnLocation
+Adapt.@adapt_structure AttnInFeed
 
 # all layer types are handled by the Layer type:
 #

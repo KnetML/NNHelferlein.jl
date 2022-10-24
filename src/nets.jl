@@ -42,7 +42,7 @@ The function must provide a signature to be called as
 struct Classifier <: DNN
     layers
     loss
-    Classifier(layers::Vector, loss::Function)=new(layers, loss)
+    Classifier(layers::Vector, loss::Function) = new(layers, loss)
     Classifier(layers...; loss=Knet.nll) = new(Any[layers...], loss)
 end
 (m::Classifier)(x,y) = m.loss(m(x), y)
@@ -65,7 +65,7 @@ Regression network with square loss as loss function.
 struct Regressor <: DNN
     layers
     loss
-    Regressor(layers::Vector, loss::Function)=new(layers, loss)
+    Regressor(layers::Vector, loss::Function) = new(layers, loss)
     Regressor(layers...; loss=mean_squared_error) = new(Any[layers...], loss)
 end
 #(m::Regressor)(x,y) = mean(abs2, ifgpu(y) .- m(x))
@@ -81,7 +81,7 @@ Simple wrapper to chain layers and execute them one after another.
 """
 struct Chain <: DNN
     layers
-    Chain(layers::Vector)=new(layers)
+    Chain(layers::Vector) = new(layers)
     Chain(layers...) = new(Any[layers...])
 end
 

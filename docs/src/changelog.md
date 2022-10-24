@@ -1,7 +1,9 @@
 # ChangeLog of NNHelferlein package
 
++ copy model and save/load as JLD2 added
+
 ### v1.1.2
-+ Depthwise conv-layer added
++ Depthwise conv-layer added (experimental)
 + focal loss functions added to classifier 
 + FeatureSelection layer added
 + explicit signature added for 3d-convolution

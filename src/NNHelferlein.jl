@@ -23,6 +23,7 @@ using MLDatasets: MNIST
 using TensorBoardLogger, Logging
 import MLBase: confusmat
 import Downloads
+import Adapt
 # TODO: tidy-up!
 
 include("types.jl")
@@ -40,6 +41,7 @@ include("train.jl")
 include("acc.jl")
 include("imagenet.jl")
 include("datasets.jl")
+include("io.jl")
 
 DATA_DIR = normpath(joinpath(dirname(pathof(@__MODULE__)), "..", "data"))
 include("pretrained.jl")
@@ -92,6 +94,7 @@ export DNN, Classifier, Regressor, Chain, VAE,          # chains
        blowup_array, recycle_array,
        de_embed,
        print_network,
+       copy_network, save_network, load_network,
        DATA_DIR, 
        confusion_matrix,
        squared_error_acc, abs_error_acc, minibatch_eval,   # eval

@@ -222,6 +222,14 @@ ifgpu
 emptyCuArray
 ```
 
+## Saving and loading models
+
+```@docs
+copy_network
+save_network
+load_network
+```
+
 ## Datasets
 
 ```@docs

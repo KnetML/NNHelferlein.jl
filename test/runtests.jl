@@ -129,6 +129,10 @@ using Statistics: mean
 @test test_recycle()
 @test test_de_embed()
 
+@show include("io.jl")
+@test test_copy()
+@test test_save()
+
 # other funs:
 #
 @show include("funs.jl")

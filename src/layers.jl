@@ -346,7 +346,7 @@ Pooling layer.
 """
 struct Pool    <: Layer
     kwargs
-    Pool(kwargs::Base.Pairs) = new(kwargs)
+    Pool(kwargs) = new(kwargs)
     Pool(;kwargs...) = new(kwargs)
 end
 

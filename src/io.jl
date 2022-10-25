@@ -83,7 +83,7 @@ Save a model as jld2-file.
 + `mdl`: network model to be saved. The model will be copied to a 
           cpu-based model via `copy_network(mdl, to=:cpu)` before
           saving, to remove hardware dependencies of 
-          paramneters on the gpu.
+          parameters on the gpu.
 """
 function save_network(fname, mdl)
     

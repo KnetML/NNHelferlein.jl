@@ -861,7 +861,7 @@ end
 """
     struct Recurrent <: Layer
 
-One layer RNN that works with minimatches of (time) series data.
+One layer RNN that works with minibatches of (time) series data.
 Minibatch can be a 2- or 3-dimensional Array.
 If 2-d, inputs for one step are in one column and the Array has as
 many colums as steps.

@@ -9,21 +9,56 @@
 Mother type for AbstractNN hierarchy with implementation for a chain of layers.
 
 ### Signatures:
-```Julia
-(m::AbstractNN)(x) = (for l in m.layers; x = l(x); end; x)
-(m::AbstractNN)(x,y) = m(x,y)
-(m::AbstractNN)(d::Knet.Data) = mean( m(x,y) for (x,y) in d)
-(m::AbstractNN)(d::Tuple) = mean( m(x,y) for (x,y) in d)
-(m::AbstractNN)(d::NNHelferlein.DataLoader) = mean( m(x,y) for (x,y) in d)
++ `(m::AbstractNN)(x)`: run the AbstractArray `x` througth all layers and return
+                        the output
++ `(m::AbstractNN)(x,y)`: Calculate the loss for one minibatch `x` and teaching input `y`
++ `(m::AbstractNN)(d::Knet.Data)`: Calculate the loss for all minibatches in `d`
++ `(m::AbstractNN)(d::Tuple)`: Calculate the loss for all minibatches in `d`
++ `(m::AbstractNN)(d::NNHelferlein.DataLoader)`: Calculate the loss for all minibatches in `d` 
+                        if teaching input is included (i.e. elements of d are tuples).
+                        Otherwise return the out of all minibatches as one array with 
+                        samples as columns.
 ```
 """
 abstract type AbstractNN
 end
 (m::AbstractNN)(x) = (for l in m.layers; x = l(x); end; x)
 (m::AbstractNN)(x,y) = m(x,y)
-(m::AbstractNN)(d::Knet.Data) = mean( m(x,y) for (x,y) in d)
-(m::AbstractNN)(d::Tuple) = mean( m(x,y) for (x,y) in d)
-(m::AbstractNN)(d::NNHelferlein.DataLoader) = mean( m(x,y) for (x,y) in d)
+function (m::AbstractNN)(d::Union{Tuple, Knet.Data, NNHelferlein.DataLoader}) 
+    if first(d) isa AbstractArray # only x without teaching input
+        return hcat([m(x) for x in d]...)
+    else
+        return mean( m(x,y) for (x,y) in d)
+    end
+end
+
+
+
+"""
+    abstract type AbstractChain
+
+Mother type for AbstractChain hierarchy with implementation for a chain of layers.
+
+### Signatures:
+```Julia
+(m::AbstractChain)(x) = (for l in m.layers; x = l(x); end; x)
+(m::AbstractChain)(x,y) = m(x)
+(m::AbstractChain)(d::Knet.Data) = hcat([m(x) for (x,y) in d]...)
+(m::AbstractChain)(d::Tuple) = mean( m(x,y) for (x,y) in d)
+(m::AbstractChain)(d::NNHelferlein.DataLoader) = mean( m(x,y) for (x,y) in d)
+```
+"""
+abstract type AbstractChain
+end
+(m::AbstractChain)(x) = (for l in m.layers; x = l(x); end; x)
+(m::AbstractChain)(x,y) = m(x,y)
+(m::AbstractChain)(d::Knet.Data) = mean( m(x,y) for (x,y) in d)
+(m::AbstractChain)(d::Tuple) = mean( m(x,y) for (x,y) in d)
+(m::AbstractChain)(d::Union{Tuple, Knet.Data, NNHelferlein.DataLoader}) = mean( m(x,y) for (x,y) in d)
+
+
+
+
 
 """
     struct Classifier <: AbstractNN

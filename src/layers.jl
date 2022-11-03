@@ -23,12 +23,10 @@ struct Dense  <: Layer
     w
     b
     actf
-    Dense(w::Param, b::Param, actf) = new(w, b, actf)
+    Dense(w, b, actf) = new(w, b, actf)
     Dense(i::Int, j::Int; actf=Knet.sigm) = new(Knet.param(j,i), Knet.param0(j), actf)
  end
 
-Dense(h5::HDF5.File, group::String; trainable=false, actf=Knet.sigm) =
-    Dense(h5, "$group/$group/kernel:0","$group/$group/bias:0", trainable=trainable, actf=actf)
 
 function Dense(h5::HDF5.File, kernel::String, bias::String; trainable=false, actf=Knet.sigm)
 
@@ -47,6 +45,21 @@ function Dense(h5::HDF5.File, kernel::String, bias::String; trainable=false, act
     println("Generating $actf Dense layer from hdf with $o neurons and $i fan-in.")
     return Dense(w, b, actf)
 end
+    
+
+function Dense(h5::HDF5.File, group::String; trainable=false, actf=Knet.sigm, tf=true) 
+    
+    if tf 
+        w_path = "model_weights/$group/$group/kernel:0"
+        b_path = "model_weights/$group/$group/bias:0"
+    else
+        w_path = "$group/kernel:0"
+        b_path = "$group/bias:0"
+    end
+
+    return Dense(h5, w_path, b_path, trainable=trainable, actf=actf)
+end
+
 
 (l::Dense)(x) = l.actf.(l.w * x .+ l.b)
 
@@ -148,10 +161,19 @@ Default Conv layer.
     o kernels of size (w1,w2) for an input of i layers.
 + `Conv(w1::Int, w2::Int, w3::Int, i::Int, o::Int; actf=relu; kwargs...)`: layer 
         with 3-dimensional kernels for 3D convolution (requires 5-dimensional input)
-+ `Conv(h5::HDF5.File, group::String; trainable=false, actf=relu)`:
-+ `Conv(h5::HDF5.File, group::String; trainable=false, actf=relu)`: layer
-        imported from a hdf5-file from TensorFlow with the
-        hdf-object hdfo and the group name group.
+
+### Constructors to read parameters from Tensorflow/Keras HDF-files:
++ `Conv(h5::HDF5.File, kernel::String, bias::String; trainable=false, actf=Knet.relu, kwargs...)`:
+        Import parameters from HDF file `h5` with `kernel` and `bias` specifying
+        the full path to weights and biases, respectively.
++ `Conv(h5::HDF5.File, group::String; trainable=false, actf=relu, tf=true)`:
+        Import a conv-layer from a default TF/Keras HDF5 file. 
+        If `tf=false`, `group` defines the full path to the parameters
+        `group/kernel:0` and `group/bias:0`. 
+        If `tf=true`, `group` defines the  only the group name and 
+        parameters are addressed as `model_weights/group/group/kernel:0` and
+        `model_weights/group/group/bias:0`.
+        
 
 ### Keyword arguments:
 + `padding=0`: the number of extra zeros implicitly concatenated
@@ -179,8 +201,18 @@ end
 
 (c::Conv)(x) = c.actf.(Knet.conv4(c.w, x; c.kwargs...) .+ c.b)
 
-Conv(h5::HDF5.File, group::String; trainable=false, actf=Knet.relu, kwargs...) =
-    Conv(h5, "$group/$group/kernel:0","$group/$group/bias:0"; trainable=trainable, actf=actf, kwargs...)
+function Conv(h5::HDF5.File, group::String; trainable=false, actf=Knet.relu, 
+              tf=true, kwargs...)
+        if tf 
+            kernel = "model_weights/$group/$group/kernel:0"
+            bias = "model_weights/$group/$group/bias:0"
+        else
+            kernel = "$group/kernel:0"
+            bias = "$group/bias:0"
+        end
+
+        return Conv(h5, kernel, bias; trainable=trainable, actf=actf, kwargs...)
+    end
 
 function Conv(h5::HDF5.File, kernel::String, bias::String; trainable=false, actf=Knet.relu, kwargs...)
 
@@ -673,6 +705,21 @@ y = a \\cdot \\frac{(x - \\mu)}{(\\sigma + \\epsilon)} + b
         `trainable==true` (in this case, the number of channels must
         be defined - for CNNs this is the number of feature maps).
 
+### Constructors to read parameters from Tensorflow/Keras HDF-files:
++ `BatchNorm(h5::HDF5.File, β_path, γ_path, μ_path, var_path; 
+                       trainable=false, momentum=0.1, ε=1e-5)`:
+        Import parameters from HDF file `h5` with `β_path`, `γ_path`, 
+        `μ_path` and `var_path` specifying
+        the full path to β, γ, μ and variance respectively.
++ `BatchNorm(h5::HDF5.File, group::String, trainable=false, momentum=0.1, 
+                        ε=1e-5, tf=true)`:
+        Import parameters from HDF file `h5` with parameters in the group
+        `group`. Paths to β, γ, μ and variance are constructed 
+        if `tf=true` as `model_weights/group/group/beta:0`, etc.
+        If `tf=false` group must define the full group path:
+        `group/beta:0`.
+
+
 ### Details:
 2d, 4d and 5d inputs are supported. Mean and variance are computed over
 dimensions (2), (1,2,4) and (1,2,3,5) for 2d, 4d and 5d arrays, respectively.
@@ -694,16 +741,52 @@ mutable struct BatchNorm <: Layer
     trainable
     moments
     params
+    ε
+    BatchNorm(t, m, p, ε) = new(t, m, p, ε)
+
+    function BatchNorm(; trainable=false, channels=0, ε=1e-5)
+        if trainable
+            p = init_bn_params(channels)
+        else
+            p = nothing
+        end
+        return new(trainable, Knet.bnmoments(), p, ε)
+    end
+
+    function BatchNorm(h5::HDF5.File, β_path, γ_path, μ_path, var_path; 
+                       trainable=false, momentum=0.1, ε=1e-5)
+
+        γ = read(h5, γ_path)
+        β = read(h5, β_path)
+        μ = read(h5, μ_path)
+        var = read(h5, var_path)
+
+        bn_moments = bnmoments(momentum=momentum, mean=μ, var=var)
+        bn_params = vcat(μ, β)
+
+        return new(trainable, bn_moments, bn_params, ε)
+    end
+
+    function BatchNorm(h5::HDF5.File, group::String; trainable=false, momentum=0.1, 
+                        ε=1e-5, tf=true) 
+        
+        if tf 
+            β_path = "model_weights/$group/$group/beta:0"
+            γ_path = "model_weights/$group/$group/gamma:0"
+            μ_path = "model_weights/$group/$group/moving_mean:0"
+            var_path = "model_weights/$group/$group/moving_variance:0"
+        else
+            β_path = "$group/beta:0"
+            γ_path = "$group/gamma:0"
+            μ_path = "$group/moving_mean:0"
+            var_path = "$group/moving_variance:0"
+        end
+
+        return BatchNorm(h5, β_path, γ_path, μ_path, var_path,
+                  trainable, momentum, ε)
+    end
 end
 
-function BatchNorm(; trainable=false, channels=0)
-    if trainable
-        p = init_bn_params(channels)
-    else
-        p = nothing
-    end
-    return BatchNorm(trainable, Knet.bnmoments(), p)
-end
 
 function (l::BatchNorm)(x)
     if l.trainable
@@ -711,9 +794,9 @@ function (l::BatchNorm)(x)
             l.params = init_bn_params(x)
         end
 
-        return Knet.batchnorm(x, l.moments, l.params)
+        return Knet.batchnorm(x, l.moments, l.params; eps=l.ε)
     else
-        return Knet.batchnorm(x, l.moments)
+        return Knet.batchnorm(x, l.moments; eps=l.ε)
     end
 end
 

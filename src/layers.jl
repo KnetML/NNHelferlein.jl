@@ -17,7 +17,7 @@ Default Dense layer.
 + `Dense(h5::HDF5.File, kernel::String, bias::String;
         trainable=false, actf=sigm)`: layer
         imported from a hdf5-file from TensorFlow with the
-        hdf-object hdfo and the group name group.
+        hdf-object h5 and the group name group.
 """
 struct Dense  <: AbstractLayer
     w

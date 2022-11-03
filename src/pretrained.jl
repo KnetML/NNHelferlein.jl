@@ -411,16 +411,16 @@ function get_resnet50v2(; filters_only=false, trainable=true)
 end
 
 
-struct ResNetBlock <: AbstractNN
-    layers      # conv layers Chain
-    shortcut    # Chain in the shortcut route
-    post        # Chain after rejoining 
+struct ResNetBlock <: AbstractChain
+    layers      # [1]: conv layers Chain
+                # [2]: Chain in the shortcut route
+                # [3]: Chain after rejoining 
 
     ResNetBlock(layers; shortcut=[identity], post=[identity]) = 
-            new(Chain(layers...), Chain(shortcut...), Chain(post...))
+            new([Chain(layers...), Chain(shortcut...), Chain(post...)])
 
     function (b::ResNetBlock)(x)
-        return y = post(b.layers .+ b.shortcut)
+        return y = b.layers[3](b.layers[1](x) .+ b.layers[2](x))
     end
 end
 

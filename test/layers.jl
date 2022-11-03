@@ -21,7 +21,7 @@ end
 
 function test_dense_hdf5()
     h5file = h5open(joinpath("data", "dummykeras.h5"))
-    l = Dense(h5file, "dense", trainable=true)
+    l = Dense(h5file, "dense/dense", trainable=true, tf=false)
 
     i,o,mb = 3136, 128, 16
     x = convert2KnetArray(rand(Float32, i, mb))
@@ -60,7 +60,7 @@ end
 
 function test_conv_hdf5()
     h5file = h5open(joinpath("data", "dummykeras.h5"))
-    l = Conv(h5file, "conv2d", trainable=true, padding=1) # 3x3x16, inp: 28x28x1
+    l = Conv(h5file, "conv2d/conv2d", trainable=true, padding=1, tf=false) # 3x3x16, inp: 28x28x1
     x = convert2KnetArray(rand(Float32, 28,28,1,8))
     y = l(x)
     return size(y) == (28,28,16,8)

@@ -119,8 +119,8 @@ end
 # sequencial interface:
 #
 import Base: push!, length
-push!(n::NNHelferlein.AbstractNN, l) = push!(n.layers, l)
-length(n::NNHelferlein.AbstractNN) = length(n.layers)
+push!(n::Union{NNHelferlein.AbstractNN, NNHelferlein.AbstractChain}, l) = push!(n.layers, l)
+length(n::Union{NNHelferlein.AbstractNN, NNHelferlein.AbstractChain}) = length(n.layers)
 
 """
     add_layer!(n::Union{NNHelferlein.AbstractNN, NNHelferlein.AbstractChain}, l)

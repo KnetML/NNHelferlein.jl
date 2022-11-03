@@ -38,24 +38,20 @@ end
     abstract type AbstractChain
 
 Mother type for AbstractChain hierarchy with implementation for a chain of layers.
+By default every `AbstractChain` has a property `layers` with a iterable list of 
+`AbstractLayer`s or `AbstractChain`s that are executed recursively.
+
+Non-standard Chains in which Layers are not execueted sequnetially (such as ResnetBlocks)
+must provide a custom implementation with the signature `chain(x)`.
 
 ### Signatures:
-```Julia
-(m::AbstractChain)(x) = (for l in m.layers; x = l(x); end; x)
-(m::AbstractChain)(x,y) = m(x)
-(m::AbstractChain)(d::Knet.Data) = hcat([m(x) for (x,y) in d]...)
-(m::AbstractChain)(d::Tuple) = mean( m(x,y) for (x,y) in d)
-(m::AbstractChain)(d::NNHelferlein.DataLoader) = mean( m(x,y) for (x,y) in d)
++ `(m::AbstractChain)(x)`: run the AbstractArray `x` througth all layers and return
+                        the output
 ```
 """
 abstract type AbstractChain
 end
 (m::AbstractChain)(x) = (for l in m.layers; x = l(x); end; x)
-(m::AbstractChain)(x,y) = m(x,y)
-(m::AbstractChain)(d::Knet.Data) = mean( m(x,y) for (x,y) in d)
-(m::AbstractChain)(d::Tuple) = mean( m(x,y) for (x,y) in d)
-(m::AbstractChain)(d::Union{Tuple, Knet.Data, NNHelferlein.DataLoader}) = mean( m(x,y) for (x,y) in d)
-
 
 
 
@@ -110,11 +106,11 @@ end
 
 
 """
-    struct Chain
+    struct Chain <: AbstractChain
 
 Simple wrapper to chain layers and execute them one after another.
 """
-struct Chain <: AbstractNN
+struct Chain <: AbstractChain
     layers
     Chain(layers::Vector) = new(layers)
     Chain(layers...) = new(Any[layers...])
@@ -127,21 +123,21 @@ push!(n::NNHelferlein.AbstractNN, l) = push!(n.layers, l)
 length(n::NNHelferlein.AbstractNN) = length(n.layers)
 
 """
-    add_layer!(n::NNHelferlein.AbstractNN, l)
+    add_layer!(n::Union{NNHelferlein.AbstractNN, NNHelferlein.AbstractChain}, l)
 
 Add a layer `l` or a chain to a model `n`. The layer is always added 
 at the end of the chains. 
 The modified model is returned.
 """
-function add_layer!(n::NNHelferlein.AbstractNN, l)
+function add_layer!(n::Union{NNHelferlein.AbstractNN, NNHelferlein.AbstractChain}, l)
     push!(n.layers, l)
     return n
 end
 
 
 """
-    function +(n::AbstractNN, l::Union{Layer, Chain})
-    function +(l1::Layer, l2::Union{Layer, Chain})
+    function +(n::Union{NNHelferlein.AbstractNN, NNHelferlein.AbstractChain}, l::Union{Layer, AbstractChain})
+    function +(l1::Layer, l2::Union{Layer, AbstractChain})
 
 The `plus`-operator is overloaded to be able to add layers and chains 
 to a network.
@@ -179,19 +175,19 @@ Total number of layers: 3
 Total number of parameters: 51
 ```
 """
-function Base.:+(n::NNHelferlein.AbstractNN, l::Union{NNHelferlein.Layer, NNHelferlein.Chain})
+function Base.:+(n::Union{NNHelferlein.AbstractNN, NNHelferlein.AbstractChain}, l::Union{NNHelferlein.Layer, NNHelferlein.AbstractChain})
     add_layer!(n, l)
     return n
 end
 
-function Base.:+(l1::NNHelferlein.Layer, l2::Union{NNHelferlein.Layer, NNHelferlein.Chain})
+function Base.:+(l1::NNHelferlein.Layer, l2::Union{NNHelferlein.Layer, NNHelferlein.AbstractChain})
     return NNHelferlein.Chain(l1, l2)
 end
 
 
 
 
-function Base.summary(mdl::AbstractNN; indent=0)
+function Base.summary(mdl::Union{NNHelferlein.AbstractNN, NNHelferlein.AbstractChain}; indent=0)
     n = get_n_params(mdl)
     if hasproperty(mdl, :layers)
         ls = length(mdl.layers)
@@ -228,7 +224,7 @@ function print_network(mdl; n=0, indent=0)
 
         if pn == :layers
             for l in p
-                if l isa AbstractNN
+                if l isa AbstractChain
                     n = print_network(l, n=n, indent=indent)
                     println(" ")
                 elseif l isa Layer
@@ -238,7 +234,7 @@ function print_network(mdl; n=0, indent=0)
                    print_summary_line(indent, "custom function", get_n_params(l)) 
                 end
             end
-        elseif p isa AbstractNN
+        elseif p isa AbstractChain
             n = print_network(p, n=n, indent=indent)
             println(" ")
         elseif p isa Layer

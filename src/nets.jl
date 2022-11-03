@@ -4,29 +4,29 @@
 
 
 """
-    abstract type DNN end
+    abstract type AbstractNN
 
-Mother type for DNN hierarchy with implementation for a chain of layers.
+Mother type for AbstractNN hierarchy with implementation for a chain of layers.
 
 ### Signatures:
 ```Julia
-(m::DNN)(x) = (for l in m.layers; x = l(x); end; x)
-(m::DNN)(x,y) = m(x,y)
-(m::DNN)(d::Knet.Data) = mean( m(x,y) for (x,y) in d)
-(m::DNN)(d::Tuple) = mean( m(x,y) for (x,y) in d)
-(m::DNN)(d::NNHelferlein.DataLoader) = mean( m(x,y) for (x,y) in d)
+(m::AbstractNN)(x) = (for l in m.layers; x = l(x); end; x)
+(m::AbstractNN)(x,y) = m(x,y)
+(m::AbstractNN)(d::Knet.Data) = mean( m(x,y) for (x,y) in d)
+(m::AbstractNN)(d::Tuple) = mean( m(x,y) for (x,y) in d)
+(m::AbstractNN)(d::NNHelferlein.DataLoader) = mean( m(x,y) for (x,y) in d)
 ```
 """
-abstract type DNN
+abstract type AbstractNN
 end
-(m::DNN)(x) = (for l in m.layers; x = l(x); end; x)
-(m::DNN)(x,y) = m(x,y)
-(m::DNN)(d::Knet.Data) = mean( m(x,y) for (x,y) in d)
-(m::DNN)(d::Tuple) = mean( m(x,y) for (x,y) in d)
-(m::DNN)(d::NNHelferlein.DataLoader) = mean( m(x,y) for (x,y) in d)
+(m::AbstractNN)(x) = (for l in m.layers; x = l(x); end; x)
+(m::AbstractNN)(x,y) = m(x,y)
+(m::AbstractNN)(d::Knet.Data) = mean( m(x,y) for (x,y) in d)
+(m::AbstractNN)(d::Tuple) = mean( m(x,y) for (x,y) in d)
+(m::AbstractNN)(d::NNHelferlein.DataLoader) = mean( m(x,y) for (x,y) in d)
 
 """
-    struct Classifier <: DNN
+    struct Classifier <: AbstractNN
 
 Classifier with default nll loss.
 An alternative loss function can be supplied as keyword argument.
@@ -39,7 +39,7 @@ The function must provide a signature to be called as
 ### Signatures:
     (m::Classifier)(x,y) = m.loss(m(x), y)
 """
-struct Classifier <: DNN
+struct Classifier <: AbstractNN
     layers
     loss
     Classifier(layers::Vector, loss::Function) = new(layers, loss)
@@ -62,7 +62,7 @@ Regression network with square loss as loss function.
 ### Signatures:
     (m::Regression)(x,y) = mean(abs2, Array(m(x)) - y)
 """
-struct Regressor <: DNN
+struct Regressor <: AbstractNN
     layers
     loss
     Regressor(layers::Vector, loss::Function) = new(layers, loss)
@@ -79,7 +79,7 @@ end
 
 Simple wrapper to chain layers and execute them one after another.
 """
-struct Chain <: DNN
+struct Chain <: AbstractNN
     layers
     Chain(layers::Vector) = new(layers)
     Chain(layers...) = new(Any[layers...])
@@ -88,24 +88,24 @@ end
 # sequencial interface:
 #
 import Base: push!, length
-push!(n::NNHelferlein.DNN, l) = push!(n.layers, l)
-length(n::NNHelferlein.DNN) = length(n.layers)
+push!(n::NNHelferlein.AbstractNN, l) = push!(n.layers, l)
+length(n::NNHelferlein.AbstractNN) = length(n.layers)
 
 """
-    add_layer!(n::NNHelferlein.DNN, l)
+    add_layer!(n::NNHelferlein.AbstractNN, l)
 
 Add a layer `l` or a chain to a model `n`. The layer is always added 
 at the end of the chains. 
 The modified model is returned.
 """
-function add_layer!(n::NNHelferlein.DNN, l)
+function add_layer!(n::NNHelferlein.AbstractNN, l)
     push!(n.layers, l)
     return n
 end
 
 
 """
-    function +(n::DNN, l::Union{Layer, Chain})
+    function +(n::AbstractNN, l::Union{Layer, Chain})
     function +(l1::Layer, l2::Union{Layer, Chain})
 
 The `plus`-operator is overloaded to be able to add layers and chains 
@@ -144,7 +144,7 @@ Total number of layers: 3
 Total number of parameters: 51
 ```
 """
-function Base.:+(n::NNHelferlein.DNN, l::Union{NNHelferlein.Layer, NNHelferlein.Chain})
+function Base.:+(n::NNHelferlein.AbstractNN, l::Union{NNHelferlein.Layer, NNHelferlein.Chain})
     add_layer!(n, l)
     return n
 end
@@ -156,7 +156,7 @@ end
 
 
 
-function Base.summary(mdl::DNN; indent=0)
+function Base.summary(mdl::AbstractNN; indent=0)
     n = get_n_params(mdl)
     if hasproperty(mdl, :layers)
         ls = length(mdl.layers)
@@ -169,9 +169,9 @@ end
 
 
 """
-    function print_network(mdl::DNN)
+    function print_network(mdl::AbstractNN)
 
-Print a network summary of any model of Type `DNN`.
+Print a network summary of any model of Type `AbstractNN`.
 If the model has a field `layers`, the summary of all included layers
 will be printed recursively.
 """
@@ -193,7 +193,7 @@ function print_network(mdl; n=0, indent=0)
 
         if pn == :layers
             for l in p
-                if l isa DNN
+                if l isa AbstractNN
                     n = print_network(l, n=n, indent=indent)
                     println(" ")
                 elseif l isa Layer
@@ -203,7 +203,7 @@ function print_network(mdl; n=0, indent=0)
                    print_summary_line(indent, "custom function", get_n_params(l)) 
                 end
             end
-        elseif p isa DNN
+        elseif p isa AbstractNN
             n = print_network(p, n=n, indent=indent)
             println(" ")
         elseif p isa Layer
@@ -283,7 +283,7 @@ of the autoencoder is cropped to the size of input before
 loss calculation (and before prediction); i.e. the output has always the same dimensions
 as the input, even if the last layer generates a bigger shape.
 """
-struct VAE <: DNN
+struct VAE <: AbstractNN
     layers
     VAE(layers::Vector) = new(layers)
     VAE(e,d) = new([e,d])

@@ -7,12 +7,12 @@ For more details, please visit the API-Section.
   
 ## Neural network definitions
 
-The abstract type `DNN` provides signatures to be called as
-+ `(m::DNN)(x)`: evaluate x (sample or minibatch)
-+ `(m::DNN)(x,y)`: evaluate x and calculate the loss
-+ `(m::DNN)(d)`: return the mean loss for a dataset, if d is an iterator
+The abstract type `AbstractNN` provides signatures to be called as
++ `(m::AbstractNN)(x)`: evaluate x (sample or minibatch)
++ `(m::AbstractNN)(x,y)`: evaluate x and calculate the loss
++ `(m::AbstractNN)(d)`: return the mean loss for a dataset, if d is an iterator
                 of type `Knet.Data` or `NNHelferlen.DataLoader`
-+ `(m::DNN)((x,y))`: return the mean loss for a x,y-tuple.
++ `(m::AbstractNN)((x,y))`: return the mean loss for a x,y-tuple.
 
 Explicit signatures exist for types `Classifier` and `Regressor` with
 negative log-likelihood and square loss as loss, respectively.
@@ -20,8 +20,8 @@ For variational autoencoders the type `VAE` exists.
 
 The type `Chain` wraps a list of layers that are executed sequentially.
 
-A network summary can be printed with `summary(mdl::DNN)` and
-a more detailed list of all layers with `print_network(mdl::DNN)`.
+A network summary can be printed with `summary(mdl::AbstractNN)` and
+a more detailed list of all layers with `print_network(mdl::AbstractNN)`.
 
 
 ## Layer definitions

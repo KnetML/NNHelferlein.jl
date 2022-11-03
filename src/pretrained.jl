@@ -411,7 +411,7 @@ function get_resnet50v2(; filters_only=false, trainable=true)
 end
 
 
-struct ResNetBlock <: DNN
+struct ResNetBlock <: AbstractNN
     layers      # conv layers Chain
     shortcut    # Chain in the shortcut route
     post        # Chain after rejoining 

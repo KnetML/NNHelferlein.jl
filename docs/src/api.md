@@ -3,7 +3,7 @@ API doc of all exported functions are listed here:
 # Chains
 
 ```@docs
-DNN
+AbstractNN
 add_layer!
 +
 print_network

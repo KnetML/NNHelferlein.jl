@@ -5,7 +5,7 @@
 
 
 """
-    struct Dense  <: Layer
+    struct Dense  <: AbstractLayer
 
 Default Dense layer.
 
@@ -19,7 +19,7 @@ Default Dense layer.
         imported from a hdf5-file from TensorFlow with the
         hdf-object hdfo and the group name group.
 """
-struct Dense  <: Layer
+struct Dense  <: AbstractLayer
     w
     b
     actf
@@ -72,7 +72,7 @@ end
 
 
 """
-    struct Linear  <: Layer
+    struct Linear  <: AbstractLayer
 
 Almost standard dense layer, but functionality inspired by
 the TensorFlow-layer:
@@ -92,7 +92,7 @@ first dim is changed from in to out.
 + `bias=true`: if false biases are fixed to 0.0
 + `actf=identity`: activation function.
 """
-struct Linear  <: Layer
+struct Linear  <: AbstractLayer
     w
     b
     actf
@@ -118,7 +118,7 @@ end
 
 
 """
-    struct FeatureSelection  <: Layer
+    struct FeatureSelection  <: AbstractLayer
 
 Simple feature selection layer that maps input to output with
 one-by-one connections; i.e. a layer of size 128 has 128 weights
@@ -132,7 +132,7 @@ Biases and activation functions are disabled by default.
             or a Tuple of the input dimensions.
 
 """
-struct FeatureSelection  <: Layer
+struct FeatureSelection  <: AbstractLayer
     w
     b
     actf
@@ -152,7 +152,7 @@ function Base.summary(l::FeatureSelection; indent=0)
 end
 
 """
-    struct Conv  <: Layer
+    struct Conv  <: AbstractLayer
 
 Default Conv layer.
 
@@ -184,7 +184,7 @@ Default Conv layer.
         https://denizyuret.github.io/Knet.jl/latest/reference/#Convolution-and-Pooling.
         All keywords to the Knet function `conv4()` are supported.
 """
-struct Conv  <: Layer
+struct Conv  <: AbstractLayer
     w
     b
     actf
@@ -257,7 +257,7 @@ end
 
 
  """
-    DepthwiseConv  <: Layer
+    DepthwiseConv  <: AbstractLayer
 
 Conv layer with seperate filters per input channel. 
 *o* output feature maps will be created by performing a convolution 
@@ -277,7 +277,7 @@ on only one input channel. `o` must be a multiple of `i`.
 + `stride=1`: the number of elements to slide to reach the next filtering window.
 + `dilation=1`: dilation factor for each dimension.
 """
-struct DepthwiseConv  <: Layer
+struct DepthwiseConv  <: AbstractLayer
     w
     b
     actf
@@ -336,7 +336,7 @@ end
 
 
 
-struct DeConvUnet <: Layer
+struct DeConvUnet <: AbstractLayer
     w
     b
     actf
@@ -362,7 +362,7 @@ end
     
 
 """
-    struct Pool <: Layer
+    struct Pool <: AbstractLayer
 
 Pooling layer.
 
@@ -376,7 +376,7 @@ Pooling layer.
         https://denizyuret.github.io/Knet.jl/latest/reference/#Convolution-and-Pooling.
         All keywords to the Knet function `pool` are supported.
 """
-struct Pool    <: Layer
+struct Pool    <: AbstractLayer
     kwargs
     Pool(kwargs) = new(kwargs)
     Pool(;kwargs...) = new(kwargs)
@@ -402,7 +402,7 @@ end
 
 
 """
-    struct DeConv  <: Layer
+    struct DeConv  <: AbstractLayer
 
 Default deconvolution layer.
 
@@ -423,7 +423,7 @@ Default deconvolution layer.
         All keywords to the Knet function `deconv4()` are supported.
 
 """
-struct DeConv  <: Layer
+struct DeConv  <: AbstractLayer
     w
     b
     actf
@@ -459,14 +459,14 @@ end
 
 
 """
-    struct UnPool <: Layer
+    struct UnPool <: AbstractLayer
 
 Unpooling layer.
 
 ### Constructors:
 + `UnPool(;kwargs...)`: user-defined unpooling
 """
-struct UnPool <: Layer
+struct UnPool <: AbstractLayer
     kwargs
     UnPool(kwargs::Param) = new(kwargs)
     UnPool(;kwargs...) = new(kwargs)
@@ -488,14 +488,14 @@ end
 
 
 """
-    struct Flat <: Layer
+    struct Flat <: AbstractLayer
 
 Default flatten layer.
 
 ### Constructors:
 + `Flat()`: with no options.
 """
-struct Flat <: Layer
+struct Flat <: AbstractLayer
 end
 (l::Flat)(x) = Knet.mat(x)
 
@@ -510,7 +510,7 @@ end
 
 
 """
-    struct PyFlat <: Layer
+    struct PyFlat <: AbstractLayer
 
 Flatten layer with optional Python-stype flattening (row-major).
 This layer can be used if pre-trained weight matrices from
@@ -519,7 +519,7 @@ tensorflow are applied after the flatten layer.
 ### Constructors:
 + `PyFlat(; python=true)`: if true, row-major flatten is performed.
 """
-struct PyFlat <: Layer
+struct PyFlat <: AbstractLayer
     python
     PyFlat(python::Bool) = new(python)
     PyFlat(; python=true) = new(python)
@@ -539,7 +539,7 @@ end
 
 
 """
-    struct Embed <: Layer
+    struct Embed <: AbstractLayer
 
 Simple type for an embedding layer to embed a virtual onehot-vector
 into a smaller number of neurons by linear combination.
@@ -565,7 +565,7 @@ with number of rows = embedding depth.
 If `x` is a column vector, the value is a matrix. If `x` is as row-vector or
 a matrix, the value is a 3-d array, etc.
 """
-struct Embed <: Layer
+struct Embed <: AbstractLayer
     w
     actf
     Embed(w::Param, actf::Function) = new= Embed(w, actf)
@@ -585,14 +585,14 @@ end
 
 
 """
-    struct Softmax <: Layer
+    struct Softmax <: AbstractLayer
 
 Simple softmax layer to compute softmax probabilities.
 
 ### Constructors:
 + `Softmax()`
 """
-struct Softmax <: Layer
+struct Softmax <: AbstractLayer
 end
 (l::Softmax)(x) = Knet.softmax(x)
 
@@ -603,7 +603,7 @@ function Base.summary(l::Softmax; indent=0)
 end
 
 """
-    struct Logistic <: Layer
+    struct Logistic <: AbstractLayer
 
 Logistic (sigmoid) layer activation with additional
 Temperature parameter to control the slope of the curve.
@@ -615,7 +615,7 @@ almoset linear.
 ### Constructors:
 + `Logistic(; T=1.0)`
 """
-struct Logistic <: Layer
+struct Logistic <: AbstractLayer
     T
     Logistic(T) = new(T)
     Logistic(;T=1.0) = new(Float32(T))
@@ -632,7 +632,7 @@ end
 
 
 """
-    struct Activation <: Layer
+    struct Activation <: AbstractLayer
 
 Simple activation layer with the desired activation function as argument.
 
@@ -641,7 +641,7 @@ Simple activation layer with the desired activation function as argument.
 + `Relu()`: return an Activation layer with ReLU activation
 + `Sigm()`
 """
-struct Activation <: Layer
+struct Activation <: AbstractLayer
     actf
 end
 (l::Activation)(x) = l.actf.(x)
@@ -658,7 +658,7 @@ end
 
 
 """
-    struct Dropout <: Layer
+    struct Dropout <: AbstractLayer
 
 Dropout layer.
 Implemented with help of Knet's dropout() function that evaluates
@@ -668,7 +668,7 @@ Dropouts are applied only if prediction.
 ### Constructors:
 + `Dropout(p)` with the dropout rate *p*.
 """
-struct Dropout <: Layer
+struct Dropout <: AbstractLayer
     p
 end
 (l::Dropout)(x) = Knet.dropout(x, l.p)
@@ -684,7 +684,7 @@ end
 
 
 """
-    struct BatchNorm <: Layer
+    struct BatchNorm <: AbstractLayer
 
 Batchnormalisation layer.
 Implemented with help of Knet's batchnorm() function that evaluates
@@ -737,7 +737,7 @@ as:
 5d: `size(x)[4]`
 or `0` otherwise.
 """
-mutable struct BatchNorm <: Layer
+mutable struct BatchNorm <: AbstractLayer
     trainable
     moments
     params
@@ -831,7 +831,7 @@ end
 
 
 """
-    struct LayerNorm  <: Layer
+    struct LayerNorm  <: AbstractLayer
 
 Simple layer normalisation (inspired by TFs LayerNormalization).
 Implementation is from Deniz Yuret's answer to feature request
@@ -850,7 +850,7 @@ added to every value of the sample vector.
 + `function (l::LayerNorm)(x; dims=1)`: normalise `x` along the given dimensions.
         The size of the specified dimension must fit with the initialised `depth`.
 """
-struct LayerNorm  <: Layer
+struct LayerNorm  <: AbstractLayer
     a
     b
     ϵ
@@ -887,7 +887,7 @@ Gaussian noise layer. Multiplies Gaussian-distributed random values with
 + `σ`: Standard deviation for the distribution of noise
 + `train_only=true`: if `true`, noise will only be applied in training.
 """
-struct GaussianNoise <: Layer
+struct GaussianNoise <: AbstractLayer
     σ
     train_only
     GaussianNoise(σ::Number, train_only::Bool) = new(σ, train_only)
@@ -912,7 +912,7 @@ end
 
 
 """
-    struct GlobalAveragePooling  <: Layer
+    struct GlobalAveragePooling  <: AbstractLayer
 
 Layer to return a matrix with the mean values of the first two
 dimensions for each sample of the minibatch.
@@ -925,7 +925,7 @@ number of *output*-columns equals size of minibatch.
     GlobalAveragePooling()
 
 """
-struct GlobalAveragePooling  <: Layer
+struct GlobalAveragePooling  <: AbstractLayer
 end
 
 (l::GlobalAveragePooling)(x) = mean(x, dims=(1,2)) |> x-> reshape(x, size(x,3),:)
@@ -942,7 +942,7 @@ end
 #
 
 """
-    struct Recurrent <: Layer
+    struct Recurrent <: AbstractLayer
 
 One layer RNN that works with minibatches of (time) series data.
 Minibatch can be a 2- or 3-dimensional Array.
@@ -1005,7 +1005,7 @@ Please be aware that the actual number of units is 2*n_units for
 bidirectional layers and the output dimension is [2*units, steps, mb] or
 [2*units, mb].
 """
-struct Recurrent <: Layer
+struct Recurrent <: AbstractLayer
     n_inputs
     n_units
     unit_type

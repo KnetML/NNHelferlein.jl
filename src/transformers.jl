@@ -25,7 +25,7 @@ end
 
 
 """
-    struct PositionalEncoding <: Layer
+    struct PositionalEncoding <: AbstractLayer
 
 Positional encoding layer. Only *sincos*-style (according to
 Vaswani, et al., NIPS 2017) is implemented.
@@ -34,7 +34,7 @@ The layer takes an array of any number of dimensions (>=2), calculates
 the Vaswani-2017-style positional encoding and adds the encoding to each plane
 of the array.
 """
-struct PositionalEncoding <: Layer
+struct PositionalEncoding <: AbstractLayer
     style
     PositionalEncoding(;style=:sincos) = new(style)
 end
@@ -139,7 +139,7 @@ end
 
 
 """
-    struct MultiHeadAttn <: Layer
+    struct MultiHeadAttn <: AbstractLayer
 
 Multi-headed attention layer, designed following the Vaswani, 2017 paper.
 

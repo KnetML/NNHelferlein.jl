@@ -1,8 +1,12 @@
 """
-    abstract type Layer end
+    abstract type AbstractLayer
+    abstract type Layer 
 
 Mother type for layers hierarchy.
+(The type `Layer` is kept for backward compatibility)
 """
+abstract type AbstractLayer
+end
 abstract type Layer
 end
 

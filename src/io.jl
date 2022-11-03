@@ -25,7 +25,7 @@ Adapt.@adapt_structure AttnInFeed
 #
 # adapt for all Layers:
 #
-function Adapt.adapt_structure(to::Type, x::Layer)
+function Adapt.adapt_structure(to::Type, x::AbstractLayer)
     
     T = typeof(x)
     new_fields = [Adapt.adapt(to, getfield(x, pn)) for pn in propertynames(x)]

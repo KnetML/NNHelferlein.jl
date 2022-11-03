@@ -136,8 +136,8 @@ end
 
 
 """
-    function +(n::Union{NNHelferlein.AbstractNN, NNHelferlein.AbstractChain}, l::Union{Layer, AbstractChain})
-    function +(l1::Layer, l2::Union{Layer, AbstractChain})
+    function +(n::Union{NNHelferlein.AbstractNN, NNHelferlein.AbstractChain}, l::Union{AbstractLayer, AbstractChain})
+    function +(l1::AbstractLayer, l2::Union{AbstractLayer, AbstractChain})
 
 The `plus`-operator is overloaded to be able to add layers and chains 
 to a network.
@@ -175,12 +175,12 @@ Total number of layers: 3
 Total number of parameters: 51
 ```
 """
-function Base.:+(n::Union{NNHelferlein.AbstractNN, NNHelferlein.AbstractChain}, l::Union{NNHelferlein.Layer, NNHelferlein.AbstractChain})
+function Base.:+(n::Union{NNHelferlein.AbstractNN, NNHelferlein.AbstractChain}, l::Union{NNHelferlein.AbstractLayer, NNHelferlein.AbstractChain})
     add_layer!(n, l)
     return n
 end
 
-function Base.:+(l1::NNHelferlein.Layer, l2::Union{NNHelferlein.Layer, NNHelferlein.AbstractChain})
+function Base.:+(l1::NNHelferlein.AbstractLayer, l2::Union{NNHelferlein.AbstractLayer, NNHelferlein.AbstractChain})
     return NNHelferlein.Chain(l1, l2)
 end
 
@@ -227,7 +227,7 @@ function print_network(mdl; n=0, indent=0)
                 if l isa AbstractChain
                     n = print_network(l, n=n, indent=indent)
                     println(" ")
-                elseif l isa Layer
+                elseif l isa AbstractLayer
                     println(summary(l, indent=indent))
                     n += 1
                 else
@@ -237,7 +237,7 @@ function print_network(mdl; n=0, indent=0)
         elseif p isa AbstractChain
             n = print_network(p, n=n, indent=indent)
             println(" ")
-        elseif p isa Layer
+        elseif p isa AbstractLayer
             println(summary(p, indent=indent))
             n += 1
         elseif p isa AbstractArray

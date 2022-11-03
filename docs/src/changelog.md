@@ -1,5 +1,7 @@
 # ChangeLog of NNHelferlein package
 
++ Pretrained nets saved at zenodo and simplified constructors added
++ AbstractNN and AbstractLayer added
 + copy model and save/load as JLD2 added
 
 ### v1.1.2

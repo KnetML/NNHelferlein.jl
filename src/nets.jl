@@ -83,7 +83,7 @@ end
 
 
 """
-    struct Regressor
+    struct Regressor <: AbstractNN
 
 Regression network with square loss as loss function.
 
@@ -187,77 +187,70 @@ end
 
 
 
-function Base.summary(mdl::Union{NNHelferlein.AbstractNN, NNHelferlein.AbstractChain}; indent=0)
-    n = get_n_params(mdl)
-    if hasproperty(mdl, :layers)
-        ls = length(mdl.layers)
-        s1 = "$(typeof(mdl)) with $ls layers,"
-    else
-        s1 = "$(typeof(mdl)),"
-    end
-    return print_summary_line(indent, s1, n)
-end
+function summary_scan_properties(mdl; n=0, indent=0)
 
-
-"""
-    function print_network(mdl::AbstractNN)
-
-Print a network summary of any model of Type `AbstractNN`.
-If the model has a field `layers`, the summary of all included layers
-will be printed recursively.
-"""
-function print_network(mdl; n=0, indent=0)
-
-    top = indent == 0
-    if top
-        println("NNHelferlein neural network summary:")
-        println(summary(mdl))
-        println("Details:")
-    else
-        println(summary(mdl, indent=indent))
-    end
-
-    indent += 4
-    println(" ")
     for pn in propertynames(mdl)
         p = getproperty(mdl, pn)
 
-        if pn == :layers
+        if p isa AbstractChain || p isa AbstractLayer || p isa AbstractLayer
+            n += summary(p, indent=indent)
+        elseif pn == :layers
             for l in p
-                if l isa AbstractChain
-                    n = print_network(l, n=n, indent=indent)
-                    println(" ")
-                elseif l isa AbstractLayer
-                    println(summary(l, indent=indent))
-                    n += 1
-                else
-                   print_summary_line(indent, "custom function", get_n_params(l)) 
-                end
+                n += summary(l, indent=indent)
             end
-        elseif p isa AbstractChain
-            n = print_network(p, n=n, indent=indent)
-            println(" ")
-        elseif p isa AbstractLayer
-            println(summary(p, indent=indent))
-            n += 1
-        elseif p isa AbstractArray
-            for l in p
-                n = print_network(l, n=n, indent=indent)
-                #println(summary(l, indent=indent))
-                n += 1
-            end
-        else
-            print_summary_line(indent, "custom function", get_n_params(p)) 
         end
     end
-    
-        if top
-            println(" ")
-            println("Total number of layers: $n")
-            println("Total number of parameters: $(get_n_params(mdl))")
-        end
     return n
 end
+
+
+"""
+    summary(model)
+
+Print a network summary of any model of Type `AbstractNN`, 
+`AbstractChain` or `AbstractLayer`.
+"""
+function Base.summary(mdl::AbstractNN; n=0, indent=0)
+
+    println("NNHelferlein neural network of type $(typeof(mdl)):")
+    println(" ")
+
+    indent += 2
+    n += summary_scan_properties(mdl, n=0, indent=indent)
+
+    println(" ")
+    println("Total number of layers: $n")
+    println("Total number of parameters: $(get_n_params(mdl))")
+    return n
+end
+
+
+
+function Base.summary(mdl::AbstractChain; n=0, indent=0)
+
+    println(" "^indent*"Chain of type $(typeof(mdl)):")
+
+    indent += 2
+    n += summary_scan_properties(mdl, n=0, indent=indent)
+end
+
+
+function print_network(l::AbstractLayer, n=0, indent=0)
+
+    println(summary(l, intent=indent))
+    return 1
+end
+
+
+
+
+"""
+    print_network(mdl::AbstractNN)
+
+Alias to `summary()`, kept for backward compatibility only.
+"""
+print_network(mdl; n=0, indent=0) = summary(mdl, n, indent)
+
 
 function print_summary_line(indent, line, params)
 

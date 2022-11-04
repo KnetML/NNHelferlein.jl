@@ -10,6 +10,14 @@ end
 abstract type Layer
 end
 
+function Base.summary(l::AbstractLayer; indent=0)
+    layer_type = "$(typeof(l))"
+    n = get_n_params(l)
+    s1 = "Layer of type $layer_type,"
+
+    println(print_summary_line(indent, s1, n))
+    return 1
+end
 
 """ 
     abstract type RecurrentUnit end

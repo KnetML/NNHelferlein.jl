@@ -396,18 +396,18 @@ function get_resnet50v2(; filters_only=false, trainable=true)
             Dense(h5, "predictions", trainable=true, actf=identity))
 
     if filters_only
-         vgg = Chain(filter_layers)
+         r50 = Chain(filter_layers)
     else
-        vgg = Classifier( 
+        r50 = Classifier( 
             filter_layers,
             GlobalAveragePooling(),
             classif_layers)
     end
 
     println("")
-    println("Imported pretrained network $VGG16_NAME")
-    print_network(vgg)
-    return vgg
+    println("Imported pretrained network $RESNET50V2_NAME")
+    print_network(r50)
+    return r50
 end
 
 

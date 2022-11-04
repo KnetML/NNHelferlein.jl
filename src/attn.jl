@@ -65,7 +65,7 @@ derived from projections of the encoder hidden states:
 
 Attention mechanisms implemented:
 """
-abstract type AttentionMechanism
+abstract type AttentionMechanism <: AbstractLayer
 end
 
 function (attn::AttentionMechanism)(;reset=false)
@@ -75,6 +75,12 @@ function (attn::AttentionMechanism)(;reset=false)
     end
 end
 
+function Base.summary(l::AttentionMechanism; indent=0)
+    n = get_n_params(l)
+    s1 = "Attention mechanism of type $(typeof(l)), "
+    println(print_summary_line(indent, s1, n))
+    return 1
+end
 
 """
     mutable struct AttnBahdanau <: AttentionMechanism

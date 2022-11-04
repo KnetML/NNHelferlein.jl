@@ -67,7 +67,8 @@ function Base.summary(l::Dense; indent=0)
     n = get_n_params(l)
     o,i = size(l.w)
     s1 = "Dense layer $i → $o with $(l.actf),"
-    return print_summary_line(indent, s1, n)
+    println(print_summary_line(indent, s1, n))
+    return 1
 end
 
 
@@ -113,7 +114,8 @@ function Base.summary(l::Linear; indent=0)
     n = get_n_params(l)
     o,i = size(l.w)
     s1 = "Linear layer $i → $o, with $(l.actf),"
-    return print_summary_line(indent, s1, n)
+    println(print_summary_line(indent, s1, n))
+    return 1
 end
 
 
@@ -148,7 +150,8 @@ function Base.summary(l::FeatureSelection; indent=0)
     n = get_n_params(l)
     i = size(l.w)
     s1 = "Feature selection layer $i → $i, with $(l.actf),"
-    return print_summary_line(indent, s1, n)
+    println(print_summary_line(indent, s1, n))
+    return 1
 end
 
 """
@@ -252,7 +255,9 @@ function Base.summary(l::Conv; indent=0)
         kwa = ""
     end
     s1 = "Conv layer $i → $o ($w_siz) $kwa with $(l.actf),"
-    return print_summary_line(indent, s1, n)
+
+    println(print_summary_line(indent, s1, n))
+    return 1
 end
 
 
@@ -330,7 +335,8 @@ function Base.summary(l::DepthwiseConv; indent=0)
         kwa = ""
     end
     s1 = "DepthwiseConv layer $i → $o ($w_siz) $kwa with $(l.actf),"
-    return print_summary_line(indent, s1, n)
+    println(print_summary_line(indent, s1, n))
+    return 1
 end
 
 
@@ -393,8 +399,8 @@ function Base.summary(l::Pool; indent=0)
         kwa = ""
     end
     s1 = "Pool layer$kwa,"
-    s2 = @sprintf("%10d params", n)
-    return print_summary_line(indent, s1, n)
+    println(print_summary_line(indent, s1, n))
+    return 1
 end
 
 
@@ -453,7 +459,8 @@ function Base.summary(l::DeConv; indent=0)
         kwa = ""
     end
     s1 = "DeConv layer $o → $i ($w_siz) $kwa with $(l.actf),"
-    return print_summary_line(indent, s1, n)
+    println(print_summary_line(indent, s1, n))
+    return 1
 end
 
 
@@ -481,7 +488,9 @@ function Base.summary(l::UnPool; indent=0)
         kwa = ""
     end
     s1 = "UnPool layer$kwa,"
-    return print_summary_line(indent, s1, n)
+
+    println(print_summary_line(indent, s1, n))
+    return 1
 end
 
 
@@ -502,8 +511,10 @@ end
 
 function Base.summary(l::Flat; indent=0)
     n = get_n_params(l)
-    s1 = "Flat layer,"
-    return print_summary_line(indent, s1, n)
+    s1 = "Flatten layer,"
+
+    println(print_summary_line(indent, s1, n))
+    return 1
 end
 
 
@@ -533,7 +544,9 @@ function Base.summary(l::PyFlat; indent=0)
     else
         s1 = "PyFlat layer with column-major (Julia) flattening,"
     end
-    return print_summary_line(indent, s1, n)
+
+    println(print_summary_line(indent, s1, n))
+    return 1
 end
 
 
@@ -579,7 +592,9 @@ function Base.summary(l::Embed; indent=0)
     n = get_n_params(l)
     o,i = size(l.w)
     s1 = "Embed layer $i → $o, with $(l.actf),"
-    return print_summary_line(indent, s1, n)
+
+    println(print_summary_line(indent, s1, n))
+    return 1
 end
 
 
@@ -597,9 +612,11 @@ end
 (l::Softmax)(x) = Knet.softmax(x)
 
 function Base.summary(l::Softmax; indent=0)
-    n = get_n_params(l)
+    n = 0
     s1 = "Softmax layer,"
-    return print_summary_line(indent, s1, n)
+
+    println(print_summary_line(indent, s1, n))
+    return 1
 end
 
 """
@@ -623,9 +640,11 @@ end
 (l::Logistic)(x) = sigm.(x / l.T)
 
 function Base.summary(l::Logistic; indent=0)
-    n = get_n_params(l)
+    n = 0
     s1 = "Logistic actication layer (T=$(l.T)),"
-    return print_summary_line(indent, s1, n)
+
+    println(print_summary_line(indent, s1, n))
+    return 1
 end
 
 
@@ -652,7 +671,9 @@ Sigm() = Activation(sigm)
 
 function Base.summary(l::Activation; indent=0)
     s1 = "Activation layer, actf=$(l.actf)"
-    return print_summary_line(indent, s1, 0)
+
+    println(print_summary_line(indent, s1, 0))
+    return 1
 end
 
 
@@ -676,7 +697,8 @@ end
 function Base.summary(l::Dropout; indent=0)
     n = get_n_params(l)
     s1 = "Dropout layer with p = $(l.p),"
-    return print_summary_line(indent, s1, n)
+    println(print_summary_line(indent, s1, n))
+    return 1
 end
 
 
@@ -825,7 +847,8 @@ function Base.summary(l::BatchNorm; indent=0)
     else
         s1 = "BatchNorm layer,"
     end
-    return print_summary_line(indent, s1, n)
+    println(print_summary_line(indent, s1, n))
+    return 1
 end
 
 
@@ -871,7 +894,9 @@ end
 function Base.summary(l::LayerNorm; indent=0)
     n = get_n_params(l)
     s1 = "Trainable LayerNorm layer,"
-    return print_summary_line(indent, s1, n)
+
+    println(print_summary_line(indent, s1, n))
+    return 1
 end
 
 """
@@ -905,7 +930,8 @@ end
 
 function Base.summary(l::GaussianNoise; indent=0)
     s1 = "GaussianNoise layer with σ = $(l.σ)"
-    return print_summary_line(indent, s1, 0)
+    println(print_summary_line(indent, s1, 0))
+    return 1
 end
 
 
@@ -932,7 +958,8 @@ end
 
 function Base.summary(l::GlobalAveragePooling; indent=0)
     s1 = "Global average pooling layer"
-    return print_summary_line(indent, s1, 0)
+    println(print_summary_line(indent, s1, 0))
+    return 1
 end
 
 
@@ -1169,7 +1196,8 @@ function Base.summary(l::Recurrent; indent=0)
         s1 = "Bidirectional Recurrent layer, "
     end
     s1 = s1 * "$(l.n_inputs) → $(l.n_units) of type $(l.unit_type),"
-    return print_summary_line(indent, s1, n)
+    println(print_summary_line(indent, s1, n))
+    return 1
 end
 
 """

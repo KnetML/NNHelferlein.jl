@@ -205,7 +205,7 @@ end
 
 
 """
-    summary(model)
+    function summary(model)
 
 Print a network summary of any model of Type `AbstractNN`, 
 `AbstractChain` or `AbstractLayer`.
@@ -245,11 +245,11 @@ end
 
 
 """
-    print_network(mdl::AbstractNN)
+    function print_network(mdl::AbstractNN)
 
 Alias to `summary()`, kept for backward compatibility only.
 """
-print_network(mdl; n=0, indent=0) = summary(mdl, n, indent)
+print_network(mdl; n=0, indent=0) = summary(mdl, n=n, indent=indent)
 
 
 function print_summary_line(indent, line, params)

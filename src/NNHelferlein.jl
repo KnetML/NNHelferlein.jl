@@ -100,6 +100,6 @@ export AbstractNN, Classifier, Regressor, Chain, VAE,          # chains
        squared_error_acc, abs_error_acc, minibatch_eval,   # eval
        focal_nll, focal_bce,
        dataset_mit_nsr, dataset_iris, dataset_mnist,
-       get_vgg16                                               # pretrained
+       get_vgg16, get_resten50v2, ResNetBlock                           # pretrained
 
 end # module

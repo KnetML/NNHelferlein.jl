@@ -411,6 +411,20 @@ function get_resnet50v2(; filters_only=false, trainable=true)
 end
 
 
+"""
+    struct ResNetBlock <: AbstractChain
+
+Exectable type for one block of a ResNet-type network.
+
+### Constructors:
++ `ResNetBlock(layers; shortcut=[identity], post=[identity])`:
+        3 chains to form the block: 
+        the main chain, the shortcut and a chain of layers 
+        to be added after the confluence.
+        All chains must be specified as lists, even if they are 
+        empty (`[idendity]`) or comprise only one layer
+        (`[BatchNorm]`).
+"""
 struct ResNetBlock <: AbstractChain
     layers      # [1]: conv layers Chain
                 # [2]: Chain in the shortcut route

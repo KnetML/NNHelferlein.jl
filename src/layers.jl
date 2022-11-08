@@ -450,7 +450,7 @@ function (l::Pad)(x)
     end
 
     if l.type == :ones
-        return NNlib.pad_constant(x, l.padding, 1, dims=dims)
+        return NNlib.pad_constant(x, l.padding, 1.0, dims=dims)
     elseif l.type == :repeat
         return NNlib.pad_repeat(x, l.padding, dims=dims)
     elseif l.type == :reflect

@@ -196,12 +196,28 @@ function summary_scan_properties(mdl; n=0, indent=0)
             n += summary(p, indent=indent)
         elseif pn == :layers
             for l in p
-                n += summary(l, indent=indent)
+                if l isa AbstractChain || l isa AbstractLayer || l isa AbstractLayer
+                    n += summary(l, indent=indent)
+                else
+                    n += any_summary(l, indent=indent)
+                end
             end
         end
     end
     return n
 end
+
+
+# simulate summary for unknown layer typle:
+#
+function any_summary(layer; indent=indent)
+    n = get_n_params(layer)
+    s1 = "Function layer of type $(typeof(layer)),"
+    println(print_summary_line(indent, s1, n))
+    return 1
+end
+
+
 
 
 """

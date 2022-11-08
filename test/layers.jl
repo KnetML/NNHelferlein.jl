@@ -401,3 +401,17 @@ function test_layer_fs()
 
     return size(y) == (256,16)
 end
+
+
+function test_layer_padding()
+    
+    x = randn(Float32, 16,16,4,2)
+    y1 = NNHelferlein.Pad(2)(x)
+    y2 = NNHelferlein.Pad(2, dims=(1,2))(x)
+    y3 = NNHelferlein.Pad(2, type=:ones)(x)
+    y4 = NNHelferlein.Pad(2, type=:reflect)(x)
+    y5 = NNHelferlein.Pad(2, type=:repeat)(x)
+    
+    return size(y1) == size(y2) == size(y3) == 
+           size(y4) == size(y5) == (20,20,4,2) 
+end

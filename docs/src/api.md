@@ -38,6 +38,7 @@ DeConv
 DepthwiseConv
 Pool
 UnPool
+Pad
 ```
 
 ## Recurrent

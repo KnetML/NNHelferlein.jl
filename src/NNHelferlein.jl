@@ -24,6 +24,7 @@ using TensorBoardLogger, Logging
 import MLBase: confusmat
 import Downloads
 import Adapt
+import NNlib
 # TODO: tidy-up!
 
 include("types.jl")
@@ -55,6 +56,7 @@ export AbstractNN, Classifier, Regressor, Chain, VAE,          # chains
        get_class_labels,
        iterate, length,
        AbstractLayer, Layer, Dense, Conv, Pool, Flat, PyFlat,         # layers
+       Pad,
        FeatureSelection,
        DeConv, UnPool,  DepthwiseConv,
        Embed, Recurrent,
@@ -100,6 +102,6 @@ export AbstractNN, Classifier, Regressor, Chain, VAE,          # chains
        squared_error_acc, abs_error_acc, minibatch_eval,   # eval
        focal_nll, focal_bce,
        dataset_mit_nsr, dataset_iris, dataset_mnist,
-       get_vgg16, get_resten50v2, ResNetBlock                           # pretrained
+       get_vgg16, get_resnet50v2, ResNetBlock                           # pretrained
 
 end # module

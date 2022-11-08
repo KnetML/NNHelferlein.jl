@@ -1,5 +1,6 @@
 # ChangeLog of NNHelferlein package
 
++ Padding layer added
 + print_network changed to summary
 + Pretrained nets saved at zenodo and simplified constructors added
 + AbstractNN and AbstractLayer added

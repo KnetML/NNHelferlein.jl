@@ -413,6 +413,65 @@ end
 
 
 
+"""
+    struct Pad     <: AbstractLayer
+    
+Pad an an-dimensional array along `dims` with one of the types
+supported by `Flux.NNlib`.
+
+### Constructors:
++ `Pad(padding::Int; type=:zeros, dims=nothing)`: Pad with `padding`
+            along all dims.
+
+### Keyword arguments:
++ `type`: one of 
+    * `:zeros`: zero-padding
+    * `:ones`: one-padding
+    * `:repeat`: repeat values on the border
+    * `:relect`: reflect values across the border
++ `dims`: Tuple of dims to be padded. If `dims==nothing` 
+    all except of the last 2 dimensions (i.e. channel and 
+    minibatch dimension for convolution layers) are padded.
+"""
+struct Pad     <: AbstractLayer
+    padding
+    type
+    dims
+    Pad(padding, type, dims) = new(padding, type, dims)
+    Pad(padding::Int; type=:zeros, dims=nothing) = new(padding, type, dims)
+end
+
+function (l::Pad)(x) 
+    
+    if isnothing(l.dims)
+        dims = Tuple(i for i in 1:ndims(x)-2)
+    else
+        dims=l.dims
+    end
+
+    if l.type == :ones
+        return NNlib.pad_constant(x, l.padding, 1, dims=dims)
+    elseif l.type == :repeat
+        return NNlib.pad_repeat(x, l.padding, dims=dims)
+    elseif l.type == :reflect
+        return NNlib.pad_reflect(x, l.padding, dims=dims)
+    else # type == :zeros
+        return NNlib.pad_zeros(x, l.padding, dims=dims)
+    end
+end
+
+
+
+function Base.summary(l::Pad; indent=0)
+    
+    s1 = "Padding layer: padding=$(l.padding), $(l.type),"
+    println(print_summary_line(indent, s1, 0))
+    return 1
+end
+
+
+
+
 
 
 """

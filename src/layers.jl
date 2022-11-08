@@ -788,20 +788,20 @@ y = a \\cdot \\frac{(x - \\mu)}{(\\sigma + \\epsilon)} + b
 ```
 
 ### Constructors:
-+ `BatchNorm(; trainable=false, channels=0)` will initialise
++ `BatchNorm(; scale=true, channels=0)` will initialise
         the moments with `Knet.bnmoments()` and
-        trainable parameters `a` and `b` only if
-        `trainable==true` (in this case, the number of channels must
+        trainable parameters `β` and `γ` only if
+        `scale==true` (in this case, the number of channels must
         be defined - for CNNs this is the number of feature maps).
 
 ### Constructors to read parameters from Tensorflow/Keras HDF-files:
 + `BatchNorm(h5::HDF5.File, β_path, γ_path, μ_path, var_path; 
-                       trainable=false, momentum=0.1, ε=1e-5, dims=4)`:
+                       scale=false, trainable=true, momentum=0.1, ε=1e-5, dims=4)`:
         Import parameters from HDF file `h5` with `β_path`, `γ_path`, 
         `μ_path` and `var_path` specifying
         the full path to β, γ, μ and variance respectively.
 
-+ `BatchNorm(h5::HDF5.File, group::String, trainable=false, momentum=0.1, 
++ `BatchNorm(h5::HDF5.File, group::String; scale=false, trainable=true, momentum=0.1, 
                         ε=1e-5, dims=4, tf=true)`:
         Import parameters from HDF file `h5` with parameters in the group
         `group`. Paths to β, γ, μ and variance are constructed 
@@ -812,16 +812,21 @@ y = a \\cdot \\frac{(x - \\mu)}{(\\sigma + \\epsilon)} + b
         2, 4 or 5. The default (4) applies to standard CNNs 
         (imgsize, imgsize, channels, batchsize).
 
+### Keyword arguments:
++ `scale=true`: if `true`, the trainable scale parameters β and γ
+        are used. 
++ `trainable=true`. only used with hdf5-import. If `true` the 
+        parameters β and γ are initialised as `Param` and trained in training.
 
 ### Details:
 2d, 4d and 5d inputs are supported. Mean and variance are computed over
 dimensions (2), (1,2,4) and (1,2,3,5) for 2d, 4d and 5d arrays, respectively.
 
-If `trainable=true` and `channels != 0`, trainable
-parameters `a` and `b` will be initialised for each channel.
+If `scale=true` and `channels != 0`, trainable
+parameters `β` and `γ` will be initialised for each channel.
 
-If `trainable=true` and `channels == 0` (i.e. `BatchNorm(trainable=true)`),
-the params `a` and `b` are not initialised by the constructor.
+If `scale=true` and `channels == 0` (i.e. `BatchNorm(trainable=true)`),
+the params `β` and `γ` are not initialised by the constructor.
 Instead,
 the number of channels is inferred when the first minibatch is normalised
 as:
@@ -831,27 +836,24 @@ as:
 or `0` otherwise.
 """
 mutable struct BatchNorm <: AbstractLayer
-    trainable
+    scale
     moments
     params
     ε
     BatchNorm(t, m, p, ε) = new(t, m, p, ε)
 
-    function BatchNorm(; trainable=false, channels=0, ε=1e-5)
-        if trainable
+    function BatchNorm(; scale=true, channels=0, ε=1e-5)
+        if scale
             p = init_bn_params(channels)
         else
             p = nothing
         end
-        return new(trainable, Knet.bnmoments(), p, ε)
+        return new(scale, Knet.bnmoments(), p, ε)
     end
 
     function BatchNorm(h5::HDF5.File, β_path, γ_path, μ_path, var_path; 
-                       trainable=false, momentum=0.1, ε=1e-5, dims=4)
+                       scale=true, trainable=false, momentum=0.1, ε=1e-5, dims=4)
 
-        γ = read(h5, γ_path)
-        β = read(h5, β_path)
-        
         μ = read(h5, μ_path)
         var = read(h5, var_path)
 
@@ -863,17 +865,25 @@ mutable struct BatchNorm <: AbstractLayer
         var = reshape(var, shape...) |> ifgpu
 
         bn_moments = bnmoments(momentum=momentum, mean=μ, var=var)
-        bn_params = vcat(γ, β) 
-        if trainable    # param casts to CuArray{Float32} if in GPU context:
-            bn_params = param(bn_params)
+
+        if scale
+            γ = read(h5, γ_path)
+            β = read(h5, β_path)
+        
+            bn_params = vcat(γ, β) 
+            if trainable    # param casts to CuArray{Float32} if in GPU context:
+                bn_params = param(bn_params)
+            else
+                bn_params = ifgpu(bn_params)
+            end
         else
-            bn_params = ifgpu(bn_params)
+            bn_params = nothing
         end
 
-        return new(trainable, bn_moments, bn_params, ε)
+        return new(scale, bn_moments, bn_params, ε)
     end
 
-    function BatchNorm(h5::HDF5.File, group::String; trainable=false, momentum=0.1, 
+    function BatchNorm(h5::HDF5.File, group::String; scale=true, trainable=false, momentum=0.1, 
                         ε=1e-5, dims=4, tf=true) 
         
         if tf 
@@ -888,19 +898,19 @@ mutable struct BatchNorm <: AbstractLayer
             var_path = "$group/moving_variance:0"
         end
 
-        if trainable
-            println("Generating trainable BatchNorm layer from hdf.")
+        if scale
+            println("Generating scaled BatchNorm layer from hdf.")
         else
-            println("Generating non-trainable BatchNorm layer from hdf.")
+            println("Generating non-scaled BatchNorm layer from hdf.")
         end
         return BatchNorm(h5, β_path, γ_path, μ_path, var_path;
-                  trainable=trainable, momentum=momentum, ε=ε, dims=dims)
+                  scale=scale, trainabla=trainable, momentum=momentum, ε=ε, dims=dims)
     end
 end
 
 
 function (l::BatchNorm)(x)
-    if l.trainable
+    if l.scale
         if length(l.params) == 0
             l.params = init_bn_params(x)
         end
@@ -932,9 +942,9 @@ end
 function Base.summary(l::BatchNorm; indent=0)
     n = get_n_params(l)
     if l.trainable
-        s1 = "Trainable BatchNorm layer,"
+        s1 = "Scaled BatchNorm layer,"
     else
-        s1 = "BatchNorm layer,"
+        s1 = "Unscaled BatchNorm layer,"
     end
     println(print_summary_line(indent, s1, n))
     return 1

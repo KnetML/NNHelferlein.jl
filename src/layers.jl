@@ -33,8 +33,8 @@ function Dense(h5::HDF5.File, kernel::String, bias::String; trainable=false, act
     w = read(h5, kernel)
     b = read(h5, bias)
 
-    w = convert2KnetArray(w)
-    b = convert2KnetArray(b)
+    w = ifgpu(w)
+    b = ifgpu(b)
 
     if trainable
         w = Param(w)
@@ -166,10 +166,11 @@ Default Conv layer.
         with 3-dimensional kernels for 3D convolution (requires 5-dimensional input)
 
 ### Constructors to read parameters from Tensorflow/Keras HDF-files:
-+ `Conv(h5::HDF5.File, kernel::String, bias::String; trainable=false, actf=Knet.relu, kwargs...)`:
++ `Conv(h5::HDF5.File, kernel::String, bias::String; trainable=false, actf=Knet.relu, 
+   use_bias=true, kwargs...)`:
         Import parameters from HDF file `h5` with `kernel` and `bias` specifying
         the full path to weights and biases, respectively.
-+ `Conv(h5::HDF5.File, group::String; trainable=false, actf=relu, tf=true)`:
++ `Conv(h5::HDF5.File, group::String; trainable=false, actf=relu, tf=true, use_bias=true)`:
         Import a conv-layer from a default TF/Keras HDF5 file. 
         If `tf=false`, `group` defines the full path to the parameters
         `group/kernel:0` and `group/bias:0`. 
@@ -202,10 +203,12 @@ struct Conv  <: AbstractLayer
                 actf, kwargs)
 end
 
+# TODO: bias optional!
+
 (c::Conv)(x) = c.actf.(Knet.conv4(c.w, x; c.kwargs...) .+ c.b)
 
 function Conv(h5::HDF5.File, group::String; trainable=false, actf=Knet.relu, 
-              tf=true, kwargs...)
+              tf=true, use_bias=true, kwargs...)
         if tf 
             kernel = "model_weights/$group/$group/kernel:0"
             bias = "model_weights/$group/$group/bias:0"
@@ -214,30 +217,35 @@ function Conv(h5::HDF5.File, group::String; trainable=false, actf=Knet.relu,
             bias = "$group/bias:0"
         end
 
-        return Conv(h5, kernel, bias; trainable=trainable, actf=actf, kwargs...)
+        return Conv(h5, kernel, bias; trainable=trainable, actf=actf, use_bias=use_bias, kwargs...)
     end
 
-function Conv(h5::HDF5.File, kernel::String, bias::String; trainable=false, actf=Knet.relu, kwargs...)
+function Conv(h5::HDF5.File, kernel::String, bias::String; trainable=false, actf=Knet.relu, use_bias=true, kwargs...)
 
     w = read(h5, kernel)
     w = permutedims(w, [4,3,2,1])
-
-    b = read(h5, bias)
-    b = reshape(b, 1,1,:,1)
-
-        w = convert2KnetArray(w)
-        b = convert2KnetArray(b)
-
+    w = ifgpu(w)
     if trainable
         w = Param(w)
-        b = Param(b)
     end
 
     siz = size(w)  
     i,o = siz[end-1:end]
     w_siz = siz[1:end-2]
-    #pad = (w1-1)÷2
-    println("Generating layer from hdf with kernel $w_siz, $i channels, $o kernels.")
+
+    if use_bias
+        b = read(h5, bias)
+        b = reshape(b, 1,1,:,1)
+        if trainable
+            b = param(b)
+        else
+            b = ifgpu(b)
+        end
+    else
+        b = zeros(Float32, 1,1,o,1) |> ifgpu
+    end
+
+    println("Generating Conv layer from hdf with kernel $w_siz, $i channels, $o kernels.")
 
     return Conv(w, b, actf; kwargs...)
 end
@@ -729,17 +737,21 @@ y = a \\cdot \\frac{(x - \\mu)}{(\\sigma + \\epsilon)} + b
 
 ### Constructors to read parameters from Tensorflow/Keras HDF-files:
 + `BatchNorm(h5::HDF5.File, β_path, γ_path, μ_path, var_path; 
-                       trainable=false, momentum=0.1, ε=1e-5)`:
+                       trainable=false, momentum=0.1, ε=1e-5, dims=4)`:
         Import parameters from HDF file `h5` with `β_path`, `γ_path`, 
         `μ_path` and `var_path` specifying
         the full path to β, γ, μ and variance respectively.
+
 + `BatchNorm(h5::HDF5.File, group::String, trainable=false, momentum=0.1, 
-                        ε=1e-5, tf=true)`:
+                        ε=1e-5, dims=4, tf=true)`:
         Import parameters from HDF file `h5` with parameters in the group
         `group`. Paths to β, γ, μ and variance are constructed 
         if `tf=true` as `model_weights/group/group/beta:0`, etc.
         If `tf=false` group must define the full group path:
         `group/beta:0`.
+        `dims` specifies the number of dimensions of the input and may be
+        2, 4 or 5. The default (4) applies to standard CNNs 
+        (imgsize, imgsize, channels, batchsize).
 
 
 ### Details:
@@ -776,21 +788,34 @@ mutable struct BatchNorm <: AbstractLayer
     end
 
     function BatchNorm(h5::HDF5.File, β_path, γ_path, μ_path, var_path; 
-                       trainable=false, momentum=0.1, ε=1e-5)
+                       trainable=false, momentum=0.1, ε=1e-5, dims=4)
 
         γ = read(h5, γ_path)
         β = read(h5, β_path)
+        
         μ = read(h5, μ_path)
         var = read(h5, var_path)
 
+        channels = length(μ)
+        shape = ones(Int, dims)
+        shape[dims-1] = channels
+
+        μ = reshape(μ, shape...) |> ifgpu
+        var = reshape(var, shape...) |> ifgpu
+
         bn_moments = bnmoments(momentum=momentum, mean=μ, var=var)
-        bn_params = vcat(μ, β)
+        bn_params = vcat(γ, β) 
+        if trainable    # param casts to CuArray{Float32} if in GPU context:
+            bn_params = param(bn_params)
+        else
+            bn_params = ifgpu(bn_params)
+        end
 
         return new(trainable, bn_moments, bn_params, ε)
     end
 
     function BatchNorm(h5::HDF5.File, group::String; trainable=false, momentum=0.1, 
-                        ε=1e-5, tf=true) 
+                        ε=1e-5, dims=4, tf=true) 
         
         if tf 
             β_path = "model_weights/$group/$group/beta:0"
@@ -804,8 +829,13 @@ mutable struct BatchNorm <: AbstractLayer
             var_path = "$group/moving_variance:0"
         end
 
-        return BatchNorm(h5, β_path, γ_path, μ_path, var_path,
-                  trainable, momentum, ε)
+        if trainable
+            println("Generating trainable BatchNorm layer from hdf.")
+        else
+            println("Generating non-trainable BatchNorm layer from hdf.")
+        end
+        return BatchNorm(h5, β_path, γ_path, μ_path, var_path;
+                  trainable=trainable, momentum=momentum, ε=ε, dims=dims)
     end
 end
 
@@ -836,7 +866,7 @@ function init_bn_params(x)
     else
         channels = 0
     end
-    p = Knet.bnparams(Float32, channels)
+    p = Knet.bnparams(Float32, channels) |> ifgpu
     return p
 end
 
@@ -954,7 +984,7 @@ number of *output*-columns equals size of minibatch.
 struct GlobalAveragePooling  <: AbstractLayer
 end
 
-(l::GlobalAveragePooling)(x) = mean(x, dims=(1,2)) |> x-> reshape(x, size(x,3),:)
+(l::GlobalAveragePooling)(x) = mean(x, dims=(1,2)) |> x-> reshape(x, size(x)[end-1],:)
 
 function Base.summary(l::GlobalAveragePooling; indent=0)
     s1 = "Global average pooling layer"

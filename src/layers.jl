@@ -416,7 +416,7 @@ end
 """
     struct Pad     <: AbstractLayer
     
-Pad an an-dimensional array along `dims` with one of the types
+Pad an n-dimensional array along `dims` with one of the types
 supported by `Flux.NNlib`.
 
 ### Constructors:

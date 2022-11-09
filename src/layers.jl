@@ -223,7 +223,8 @@ function Conv(h5::HDF5.File, group::String; trainable=false, actf=Knet.relu,
 function Conv(h5::HDF5.File, kernel::String, bias::String; trainable=false, actf=Knet.relu, use_bias=true, kwargs...)
 
     w = read(h5, kernel)
-    w = permutedims(w, [4,3,2,1])
+    #w = permutedims(w, [4,3,2,1])
+    w = permutedims(w, [3,4,2,1])  # transpose filters
     w = ifgpu(w)
     if trainable
         w = Param(w)
@@ -247,7 +248,7 @@ function Conv(h5::HDF5.File, kernel::String, bias::String; trainable=false, actf
 
     println("Generating Conv layer from hdf with kernel $w_siz, $i channels, $o kernels.")
 
-    return Conv(w, b, actf; kwargs...)
+    return Conv(w, b, actf; mode=1, kwargs...)
 end
 
 function Base.summary(l::Conv; indent=0)
@@ -904,7 +905,7 @@ mutable struct BatchNorm <: AbstractLayer
             println("Generating non-scaled BatchNorm layer from hdf.")
         end
         return BatchNorm(h5, β_path, γ_path, μ_path, var_path;
-                  scale=scale, trainabla=trainable, momentum=momentum, ε=ε, dims=dims)
+                  scale=scale, trainable=trainable, momentum=momentum, ε=ε, dims=dims)
     end
 end
 
@@ -941,7 +942,7 @@ end
 
 function Base.summary(l::BatchNorm; indent=0)
     n = get_n_params(l)
-    if l.trainable
+    if l.scale
         s1 = "Scaled BatchNorm layer,"
     else
         s1 = "Unscaled BatchNorm layer,"

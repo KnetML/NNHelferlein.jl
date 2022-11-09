@@ -33,7 +33,7 @@ const VGG19_NAME = "VGG19 (pretrained, TF/Keras)"
 const VGG19_FILE_NAME = "vgg19keras_model.h5"
 
 const RESNET50V2_NAME = "Resnet50 v2 (pretrained, TF/Keras)"
-const RESNET50V2_FILE_NAME = "resnet50v2keras_model.h5"
+const RESNET50V2_FILE_NAME = "resnret50v2keras_model.h5"
 
 
 
@@ -47,7 +47,7 @@ function download_pretrained(name, file_name)
     if isfile(local_file)
         println("Using already downloaded weights for $name")
     else
-        println("Downloading weights for $name from Zonodo")
+        println("Downloading weights for $name from Zenodo")
         println("$url"); flush(stdout)
 
         if !isdir(PRETRAINED_DIR)
@@ -171,229 +171,238 @@ function get_resnet50v2(; filters_only=false, trainable=true)
     h5 = HDF5.h5open(local_file)
 
     filter_layers = Chain(
-        Conv(h5, "conv1_conv", 
-            trainable=trainable, padding=3, stride=2, actf=identity),
-        Pool(;padding=1, window=3, stride=1),
-        BatchNorm(h5, "conv2_block1_preact_bn",
-            trainable=trainable, momentum=0.99, ε=1.001e-5),
+        Pad(3),
+        Conv(h5, "conv1_conv", trainable=trainable, stride=2, actf=identity),
+        Pad(1),
+        Pool(;window=3, stride=2),
+        BatchNorm(h5, "conv2_block1_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
         Relu(),
         ResNetBlock([
-                    Conv(h5, "conv2_block1_1_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv2_block1_1_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm( h5, "conv2_block1_1_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv2_block1_2_conv", trainable=trainable, padding=1, stride=1, actf=identity),
+                    Pad(1),
+                    Conv(h5, "conv2_block1_2_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm( h5, "conv2_block1_2_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv2_block1_3_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv2_block1_3_conv", trainable=trainable, actf=identity),
                     ];
-                    shortcut=[
-                    Conv(h5, "conv2_block1_0_conv", trainable=trainable, padding=0, stride=1, actf=identity)
+                shortcut=[
+                    Conv(h5, "conv2_block1_0_conv", trainable=trainable, actf=identity)
                     ]),
+                    # 1st Block is correct! (Tensor == keras)
         ResNetBlock([
                     BatchNorm(h5, "conv2_block2_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv2_block2_1_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv2_block2_1_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm( h5, "conv2_block2_1_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv2_block2_2_conv", trainable=trainable, padding=1, stride=1, actf=identity),
+                    Pad(1),
+                    Conv(h5, "conv2_block2_2_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm( h5, "conv2_block2_2_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv2_block2_3_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv2_block2_3_conv", trainable=trainable, actf=identity),
                     ]),
         ResNetBlock([
                     BatchNorm(h5, "conv2_block3_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv2_block3_1_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv2_block3_1_conv",use_bias=false,  trainable=trainable, actf=identity),
                     BatchNorm( h5, "conv2_block3_1_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv2_block3_2_conv", trainable=trainable, padding=1, stride=1, actf=identity),
+                    Pad(1),
+                    Conv(h5, "conv2_block3_2_conv", use_bias=false, stride=2, trainable=trainable, actf=identity),
                     BatchNorm( h5, "conv2_block3_2_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv2_block3_3_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv2_block3_3_conv", trainable=trainable, actf=identity),
                     ],
-                    shortcut = [
-                    Pool(1, stride=[2,2])
+                shortcut = [
+                    Pool(;window=1, stride=2)
+                    ],
+                post = [
+                    BatchNorm( h5, "conv3_block1_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
+                    Relu()
                     ]),
-        BatchNorm( h5, "conv3_block1_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
-        Relu(),
         ResNetBlock([
-                    Conv(h5, "conv3_block1_1_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv3_block1_1_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm(h5, "conv3_block1_1_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv3_block1_2_conv", trainable=trainable, padding=1, stride=1, actf=identity),
+                    Pad(1),
+                    Conv(h5, "conv3_block1_2_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm( h5, "conv3_block1_2_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv3_block1_3_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv3_block1_3_conv", trainable=trainable, actf=identity),
                     ],
-                    shortcut = [
-                    Conv(h5, "conv3_block1_0_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                shortcut = [
+                    Conv(h5, "conv3_block1_0_conv", trainable=trainable, actf=identity),
                     ]),
         ResNetBlock([
                     BatchNorm(h5, "conv3_block2_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv3_block2_1_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv3_block2_1_conv"; use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm(h5, "conv3_block2_1_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv3_block2_2_conv", trainable=trainable, padding=1, stride=1, actf=identity),
+                    Pad(1),
+                    Conv(h5, "conv3_block2_2_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm( h5, "conv3_block2_2_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv3_block2_3_conv", trainable=trainable, padding=0, stride=1, actf=identity),
-                    ],
-                    shortcut = []
-                    ),
+                    Conv(h5, "conv3_block2_3_conv", trainable=trainable, actf=identity),
+                    ]),
         ResNetBlock([
                     BatchNorm(h5, "conv3_block3_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv3_block3_1_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv3_block3_1_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm(h5, "conv3_block3_1_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv3_block3_2_conv", trainable=trainable, padding=1, stride=1, actf=identity),
+                    Pad(1),
+                    Conv(h5, "conv3_block3_2_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm( h5, "conv3_block3_2_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv3_block3_3_conv", trainable=trainable, padding=0, stride=1, actf=identity),
-                    ],
-                    shortcut = []
-                    ),
+                    Conv(h5, "conv3_block3_3_conv", trainable=trainable, actf=identity),
+                    ]),
         ResNetBlock([
                     BatchNorm(h5, "conv3_block4_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv3_block4_1_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv3_block4_1_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm( h5, "conv3_block4_1_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv3_block4_2_conv", trainable=trainable, padding=1, stride=1, actf=identity),
+                    Pad(1),
+                    Conv(h5, "conv3_block4_2_conv", use_bias=false, trainable=trainable, stride=2, actf=identity),
                     BatchNorm( h5, "conv3_block4_2_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv3_block4_3_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv3_block4_3_conv", trainable=trainable, actf=identity),
                     ],
-                    shortcut = [
-                    Pool(1, stride=[2,2])
+                shortcut = [
+                    Pool(; window=1, stride=2)
+                    ],
+                post = [
+                    BatchNorm( h5, "conv4_block1_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
+                    Relu()
                     ]),
-        BatchNorm( h5, "conv4_block1_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
-        Relu(),
         ResNetBlock([
-                    Conv(h5, "conv4_block1_1_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv4_block1_1_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm( h5, "conv4_block1_1_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv4_block1_2_conv", trainable=trainable, padding=1, stride=1, actf=identity),
+                    Pad(1),
+                    Conv(h5, "conv4_block1_2_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm( h5, "conv4_block1_2_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv4_block1_3_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv4_block1_3_conv", trainable=trainable, actf=identity),
                     ];
-                    shortcut=[
-                    Conv(h5, "conv4_block1_0_conv", trainable=trainable, padding=0, stride=1, actf=identity)
+                shortcut=[
+                    Conv(h5, "conv4_block1_0_conv", trainable=trainable, actf=identity)
                     ]),
         ResNetBlock([
                     BatchNorm(h5, "conv4_block2_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv4_block2_1_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv4_block2_1_conv", use_bias=false, trainable=trainable, padding=0, stride=1, actf=identity),
                     BatchNorm(h5, "conv4_block2_1_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv4_block2_2_conv", trainable=trainable, padding=1, stride=1, actf=identity),
+                    Pad(1),
+                    Conv(h5, "conv4_block2_2_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm( h5, "conv4_block2_2_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
                     Conv(h5, "conv4_block2_3_conv", trainable=trainable, padding=0, stride=1, actf=identity),
-                    ],
-                    shortcut = []
-                    ),
+                    ]),
         ResNetBlock([
                     BatchNorm(h5, "conv4_block3_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv4_block3_1_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv4_block3_1_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm(h5, "conv4_block3_1_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv4_block3_2_conv", trainable=trainable, padding=1, stride=1, actf=identity),
+                    Pad(1),
+                    Conv(h5, "conv4_block3_2_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm( h5, "conv4_block3_2_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv4_block3_3_conv", trainable=trainable, padding=0, stride=1, actf=identity),
-                    ],
-                    shortcut = []
-                    ),
+                    Conv(h5, "conv4_block3_3_conv", trainable=trainable, actf=identity),
+                    ]),
         ResNetBlock([
                     BatchNorm(h5, "conv4_block4_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv4_block4_1_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv4_block4_1_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm(h5, "conv4_block4_1_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv4_block4_2_conv", trainable=trainable, padding=1, stride=1, actf=identity),
+                    Pad(1),
+                    Conv(h5, "conv4_block4_2_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm( h5, "conv4_block4_2_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
                     Conv(h5, "conv4_block4_3_conv", trainable=trainable, padding=0, stride=1, actf=identity),
-                    ],
-                    shortcut = []
-                    ),
+                    ]),
         ResNetBlock([
                     BatchNorm(h5, "conv4_block5_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv4_block5_1_conv", trainable=trainable, padding=0, stride=1, actf=identity),
-                    BatchNorm(h5, "conv4_block4_1_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
+                    Conv(h5, "conv4_block5_1_conv", use_bias=false, trainable=trainable, actf=identity),
+                    BatchNorm(h5, "conv4_block5_1_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv4_block5_2_conv", trainable=trainable, padding=1, stride=1, actf=identity),
+                    Pad(1),
+                    Conv(h5, "conv4_block5_2_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm( h5, "conv4_block5_2_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
                     Conv(h5, "conv4_block5_3_conv", trainable=trainable, padding=0, stride=1, actf=identity),
-                    ],
-                    shortcut = []
-                    ),
+                    ]),
         ResNetBlock([
                     BatchNorm(h5, "conv4_block6_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv4_block6_1_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv4_block6_1_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm( h5, "conv4_block6_1_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv4_block6_2_conv", trainable=trainable, padding=1, stride=1, actf=identity),
+                    Pad(1),
+                    Conv(h5, "conv4_block6_2_conv", use_bias=false, trainable=trainable, stride=2, actf=identity),
                     BatchNorm( h5, "conv4_block6_2_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
                     Conv(h5, "conv4_block6_3_conv", trainable=trainable, padding=0, stride=1, actf=identity),
                     ],
-                    shortcut = [
-                    Pool(1, stride=[2,2])
+                shortcut = [
+                    Pool(; window=1, stride=[2,2])
+                    ],
+                post = [
+                    BatchNorm( h5, "conv5_block1_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
+                    Relu()
                     ]),
-        BatchNorm( h5, "conv5_block1_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
-        Relu(),
         ResNetBlock([
-                    Conv(h5, "conv5_block1_1_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv5_block1_1_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm( h5, "conv5_block1_1_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv5_block1_2_conv", trainable=trainable, padding=1, stride=1, actf=identity),
+                    Pad(1),
+                    Conv(h5, "conv5_block1_2_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm( h5, "conv5_block1_2_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv5_block1_3_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv5_block1_3_conv", trainable=trainable, actf=identity),
                     ];
-                    shortcut=[
-                    Conv(h5, "conv5_block1_0_conv", trainable=trainable, padding=0, stride=1, actf=identity)
+                shortcut=[
+                    Conv(h5, "conv5_block1_0_conv", trainable=trainable, actf=identity)
                     ]),
         ResNetBlock([
                     BatchNorm(h5, "conv5_block2_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv5_block2_1_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv5_block2_1_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm(h5, "conv5_block2_1_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv5_block2_2_conv", trainable=trainable, padding=1, stride=1, actf=identity),
+                    Pad(1),
+                    Conv(h5, "conv5_block2_2_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm( h5, "conv5_block2_2_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv5_block2_3_conv", trainable=trainable, padding=0, stride=1, actf=identity),
-                    ],
-                    shortcut = []
-                    ),
+                    Conv(h5, "conv5_block2_3_conv", trainable=trainable, actf=identity),
+                    ]),
         ResNetBlock([
                     BatchNorm(h5, "conv5_block3_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv5_block3_1_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv5_block3_1_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm(h5, "conv5_block3_1_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv5_block3_2_conv", trainable=trainable, padding=1, stride=1, actf=identity),
+                    Pad(1),
+                    Conv(h5, "conv5_block3_2_conv", use_bias=false, trainable=trainable, actf=identity),
                     BatchNorm( h5, "conv5_block3_2_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
-                    Conv(h5, "conv5_block3_3_conv", trainable=trainable, padding=0, stride=1, actf=identity),
+                    Conv(h5, "conv5_block3_3_conv", trainable=trainable, actf=identity),
                     ],
-                    shortcut = []
-                    ),
-        BatchNorm(h5, "post_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
-        Relu()
+                post = [
+                    BatchNorm(h5, "post_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
+                    Relu()
+                    ])
     )
 
     classif_layers = Chain(
-            Dense(h5, "predictions", trainable=true, actf=identity))
+            Dense(h5, "predictions", trainable=trainable, actf=identity))
 
     if filters_only
          r50 = Chain(filter_layers)
@@ -401,7 +410,9 @@ function get_resnet50v2(; filters_only=false, trainable=true)
         r50 = Classifier( 
             filter_layers,
             GlobalAveragePooling(),
-            classif_layers)
+            #mixup,  ## TODO: find solution!
+            classif_layers
+            )
     end
 
     println("")
@@ -410,6 +421,11 @@ function get_resnet50v2(; filters_only=false, trainable=true)
     return r50
 end
 
+function mixup(x)
+    #return reshape(x', :,2)
+    #return vec(x) |> x-> reshape(x, :,2) |> transpose
+    return reverse(x, dims=1)
+end
 
 """
     struct ResNetBlock <: AbstractChain
@@ -434,7 +450,7 @@ struct ResNetBlock <: AbstractChain
             new([Chain(layers...), Chain(shortcut...), Chain(post...)])
 
     function (b::ResNetBlock)(x)
-        return y = b.layers[3](b.layers[1](x) .+ b.layers[2](x))
+        return b.layers[3](b.layers[1](x) .+ b.layers[2](x))
     end
 end
 

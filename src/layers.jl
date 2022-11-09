@@ -841,7 +841,7 @@ mutable struct BatchNorm <: AbstractLayer
     moments
     params
     ε
-    BatchNorm(t, m, p, ε) = new(t, m, p, ε)
+    BatchNorm(s, m, p, ε) = new(s, m, p, ε)
 
     function BatchNorm(; scale=true, channels=0, ε=1e-5)
         if scale

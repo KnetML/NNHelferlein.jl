@@ -338,7 +338,7 @@ function test_summary()
             Embed(100,10),
             Softmax(),
             Dropout(0.1),
-            BatchNorm(trainable=true, channels=16),
+            BatchNorm(scale=true, channels=16),
             LayerNorm(128),
             Recurrent(100, 16),
             )

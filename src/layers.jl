@@ -826,7 +826,7 @@ dimensions (2), (1,2,4) and (1,2,3,5) for 2d, 4d and 5d arrays, respectively.
 If `scale=true` and `channels != 0`, trainable
 parameters `β` and `γ` will be initialised for each channel.
 
-If `scale=true` and `channels == 0` (i.e. `BatchNorm(trainable=true)`),
+If `scale=true` and `channels == 0` (i.e. `BatchNorm(scale=true)`),
 the params `β` and `γ` are not initialised by the constructor.
 Instead,
 the number of channels is inferred when the first minibatch is normalised

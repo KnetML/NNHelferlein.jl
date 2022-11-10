@@ -108,8 +108,8 @@ mini_batches = mk_image_minibatch(img_path, 2, train=false,
 
 
 Model structure is:
-<a href="https://github.com/KnetML/NNHelferlein.jl/blob/main/docs/src/assets/netron-vgg16-w200.png"
-   target="_blank">VGG16 topology plot created by netron</a>
+[`VGG16 topology plot created by netron`]
+(https://github.com/KnetML/NNHelferlein.jl/blob/main/docs/src/assets/netron-vgg16-w200.png)
 """
 function get_vgg16(; filters_only=false, trainable=true)
 

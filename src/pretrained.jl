@@ -82,7 +82,7 @@ end
 Return a VGG16 model with pretrained parameters
 from Tensorflow/Keras applications API. For details about original model 
 and training see
-`https://keras.io/api/applications/`.
+[`Keras Applications`](https://keras.io/api/applications/).
 
 ### Arguments
 + `filters_only=false`: if `true`, only the filterstack is returned   
@@ -93,7 +93,7 @@ and training see
             fixed.
 
 ### Details:
-The model weights are imported from the respectove Keras *Application*,
+The model weights are imported from the respective Keras *Application*,
 which is trained with preprocessed images of size 224x224 pixel.
 
 This can be re-built by using a preprocessing pipeline and the
@@ -167,7 +167,7 @@ end
 Return a ResNet50 v2 model with pretrained parameters
 from Tensorflow/Keras applications API. For details about original model 
 and training see
-`https://keras.io/api/applications/`.
+[`Keras Applications`](https://keras.io/api/applications/).
 
 ### Arguments
 + `filters_only=false`: if `true`, only the filterstack is returned   
@@ -178,7 +178,7 @@ and training see
             fixed.
 
 ### Details:
-The model weights are imported from the respectove Keras *Application*,
+The model weights are imported from the respective Keras *Application*,
 which is trained with images of size 224x224 pixel.     
 *Cave:* The training set images have not been preprocessed with the 
 imagenet default procedure!
@@ -194,6 +194,8 @@ mini_batches = mk_image_minibatch(img_path, 2, train=false,
 ```
 
 Model structure is:
+[`ResNet50 V2 topology plot created by netron`]
+(https://github.com/KnetML/NNHelferlein.jl/blob/main/docs/src/assets/netron-resnet50v2.png)
 
 """
 function get_resnet50v2(; filters_only=false, trainable=true)

@@ -74,4 +74,4 @@ import  pretrained models from the TF/Keras ecosystem.
   (https://github.com/KnetML/NNHelferlein.jl/blob/main/examples/70-pretrained_vgg16.ipynb)
 
 + [`ResNet50 V2`]
-  (https://github.com/KnetML/NNHelferlein.jl/blob/main/examples/71-pretrained-resnet50v2.ipynb)
+  (https://github.com/KnetML/NNHelferlein.jl/blob/main/examples/71-pretrained_resnet50v2.ipynb)

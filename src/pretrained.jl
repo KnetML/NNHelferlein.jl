@@ -92,9 +92,24 @@ and training see
             only the classifier part is trainable and the filter weights are 
             fixed.
 
-Model structure is:
+### Details:
+The model weights are imported from the respectove Keras *Application*,
+which is trained with preprocessed images of size 224x224 pixel.
 
-![netron](assets/netron-vgg16-w200.png)
+This can be re-built by using a preprocessing pipeline and the
+*Helferlein*-function `preproc_imagenet()` from a directory
+`img_path` with images:
+
+```julia
+pipl = CropRatio(ratio=1.0) |> Resize(224,224)
+mini_batches = mk_image_minibatch(img_path, 2, train=false, 
+        aug_pipl=pipl, pre_proc=preproc_imagenet)
+```
+
+
+Model structure is:
+<a href="https://github.com/KnetML/NNHelferlein.jl/blob/main/docs/src/assets/netron-vgg16-w200.png"
+   target="_blank">VGG16 topology plot created by netron</a>
 """
 function get_vgg16(; filters_only=false, trainable=true)
 
@@ -162,6 +177,22 @@ and training see
             only the classifier part is trainable and the filter weights are 
             fixed.
 
+### Details:
+The model weights are imported from the respectove Keras *Application*,
+which is trained with images of size 224x224 pixel.     
+*Cave:* The training set images have not been preprocessed with the 
+imagenet default procedure!
+
+This can be re-built by using a preprocessing pipeline without 
+application `preproc_imagenet()` from a directory
+`img_path` with images:
+
+```julia
+pipl = CropRatio(ratio=1.0) |> Resize(224,224)
+mini_batches = mk_image_minibatch(img_path, 2, train=false, 
+        aug_pipl=pipl)
+```
+
 Model structure is:
 
 """
@@ -202,7 +233,7 @@ function get_resnet50v2(; filters_only=false, trainable=true)
                     BatchNorm( h5, "conv2_block2_2_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
                     Conv(h5, "conv2_block2_3_conv", trainable=trainable, actf=identity),
-                    ]),
+                    ]), # correct
         ResNetBlock([
                     BatchNorm(h5, "conv2_block3_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
@@ -234,7 +265,7 @@ function get_resnet50v2(; filters_only=false, trainable=true)
                     ],
                 shortcut = [
                     Conv(h5, "conv3_block1_0_conv", trainable=trainable, actf=identity),
-                    ]),
+                    ]),  # correct
         ResNetBlock([
                     BatchNorm(h5, "conv3_block2_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
@@ -247,6 +278,7 @@ function get_resnet50v2(; filters_only=false, trainable=true)
                     Relu(),
                     Conv(h5, "conv3_block2_3_conv", trainable=trainable, actf=identity),
                     ]),
+                #shortcut=[x->0.0]), #bis hier correct!
         ResNetBlock([
                     BatchNorm(h5, "conv3_block3_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
@@ -410,7 +442,6 @@ function get_resnet50v2(; filters_only=false, trainable=true)
         r50 = Classifier( 
             filter_layers,
             GlobalAveragePooling(),
-            #mixup,  ## TODO: find solution!
             classif_layers
             )
     end

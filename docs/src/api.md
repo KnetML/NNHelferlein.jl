@@ -247,5 +247,4 @@ dataset_iris
 ```@docs
 get_vgg16
 get_resnet50v2
-ResNetBlock
 ```

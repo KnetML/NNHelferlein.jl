@@ -59,9 +59,19 @@ All examples are at [GitHub/examples](https://github.com/KnetML/NNHelferlein.jl/
   and its application to example images utilising the
   *Helferlein* imagenet-utilities.
 
+
 + [`Transformer for machine translation`]
   (https://github.com/KnetML/NNHelferlein.jl/blob/main/examples/80-transformer.ipynb):
   A simple transformer architecture is set up according to the
   2017 Vaswani paper *Attention is All You Need* with help of 
   *NNHelferlein*-utils.
 
+
+### Pretrained Nets
+Based on the Keras import constructors, it is easy to 
+import  pretrained models from the TF/Keras ecosystem.
++ [`VGG16`]
+  (https://github.com/KnetML/NNHelferlein.jl/blob/main/examples/70-pretrained_vgg16.ipynb)
+
++ [`ResNet50 V2`]
+  (https://github.com/KnetML/NNHelferlein.jl/blob/main/examples/71-pretrained-resnet50v2.ipynb)

@@ -1,5 +1,8 @@
 # ChangeLog of NNHelferlein package
 
++ pretrained fixed
++ ResNetBlock added
++ ResNet added
 + Padding layer added
 + print_network changed to summary
 + Pretrained nets saved at zenodo and simplified constructors added

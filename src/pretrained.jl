@@ -221,7 +221,6 @@ function get_resnet50v2(; filters_only=false, trainable=true)
                 shortcut=[
                     Conv(h5, "conv2_block1_0_conv", trainable=trainable, actf=identity)
                     ]),
-                    # 1st Block is correct! (Tensor == keras)
         ResNetBlock([
                     BatchNorm(h5, "conv2_block2_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
@@ -233,7 +232,7 @@ function get_resnet50v2(; filters_only=false, trainable=true)
                     BatchNorm( h5, "conv2_block2_2_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
                     Conv(h5, "conv2_block2_3_conv", trainable=trainable, actf=identity),
-                    ]), # correct
+                    ]), 
         ResNetBlock([
                     BatchNorm(h5, "conv2_block3_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
@@ -265,7 +264,7 @@ function get_resnet50v2(; filters_only=false, trainable=true)
                     ],
                 shortcut = [
                     Conv(h5, "conv3_block1_0_conv", trainable=trainable, actf=identity),
-                    ]),  # correct
+                    ]),  
         ResNetBlock([
                     BatchNorm(h5, "conv3_block2_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
@@ -278,7 +277,6 @@ function get_resnet50v2(; filters_only=false, trainable=true)
                     Relu(),
                     Conv(h5, "conv3_block2_3_conv", trainable=trainable, actf=identity),
                     ]),
-                #shortcut=[x->0.0]), #bis hier correct!
         ResNetBlock([
                     BatchNorm(h5, "conv3_block3_preact_bn", trainable=trainable, momentum=0.99, ε=1.001e-5),
                     Relu(),
@@ -452,11 +450,6 @@ function get_resnet50v2(; filters_only=false, trainable=true)
     return r50
 end
 
-function mixup(x)
-    #return reshape(x', :,2)
-    #return vec(x) |> x-> reshape(x, :,2) |> transpose
-    return reverse(x, dims=1)
-end
 
 """
     struct ResNetBlock <: AbstractChain
@@ -469,7 +462,7 @@ Exectable type for one block of a ResNet-type network.
         the main chain, the shortcut and a chain of layers 
         to be added after the confluence.
         All chains must be specified as lists, even if they are 
-        empty (`[idendity]`) or comprise only one layer
+        empty (`[]`) or comprise only one layer
         (`[BatchNorm]`).
 """
 struct ResNetBlock <: AbstractChain
@@ -485,7 +478,22 @@ struct ResNetBlock <: AbstractChain
     end
 end
 
-# TODO: summary fpr Resnetblock
+
+function Base.summary(l::ResNetBlock; indent=0)
+
+    println(" "^indent*"ResNet block with")
+    indent += 2
+
+    println(" "^indent*"layers:")
+    summary(l.layers[1], indent=indent+2)
+    
+    println(" "^indent*"shortcut:")
+    summary(l.layers[2], indent=indent+2)
+    
+    println(" "^indent*"post transformations:")
+    summary(l.layers[3], indent=indent+2)
+    return 1
+end
 
 
 

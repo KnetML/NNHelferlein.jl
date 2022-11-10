@@ -481,20 +481,20 @@ struct ResNetBlock <: AbstractChain
 end
 
 
-function Base.summary(l::ResNetBlock; indent=0)
+function Base.summary(l::ResNetBlock; n=0, indent=0)
 
     println(" "^indent*"ResNet block with")
     indent += 2
 
     println(" "^indent*"layers:")
-    summary(l.layers[1], indent=indent+2)
+    n += summary(l.layers[1], indent=indent+2)
     
     println(" "^indent*"shortcut:")
-    summary(l.layers[2], indent=indent+2)
+    n += summary(l.layers[2], indent=indent+2)
     
     println(" "^indent*"post transformations:")
-    summary(l.layers[3], indent=indent+2)
-    return 1
+    n += summary(l.layers[3], indent=indent+2)
+    return n
 end
 
 

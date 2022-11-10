@@ -208,7 +208,7 @@ function summary_scan_properties(mdl; n=0, indent=0)
 end
 
 
-# simulate summary for unknown layer typle:
+# simulate summary for unknown layer type:
 #
 function any_summary(layer; indent=indent)
     n = get_n_params(layer)

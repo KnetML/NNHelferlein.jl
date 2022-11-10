@@ -164,3 +164,7 @@ using Statistics: mean
 
 @test test_summary()
 @test test_print()
+
+
+@show include("pretrained.jl")
+@test test_pretrained()

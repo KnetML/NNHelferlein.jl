@@ -1,8 +1,8 @@
 
 # Networks and chains
 
-+ AbstractNN
-+ AbstractChain
++ [`AbstractNN`](@ref) - *Helferlein* network type
++ [`AbstractChain`](@ref) - *Helferlein* chain type
 
 
 + Classifier
@@ -10,7 +10,7 @@
 + Chain
 + VAE
 
-## Network helpers
+### Network helpers
 
 add_layer!
 +

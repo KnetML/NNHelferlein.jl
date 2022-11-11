@@ -121,7 +121,8 @@ Layers for recurrent networks:
 
 ### For image data
 
-+ [`ImageLoader`](@ref)
++ [`ImageLoader`](@ref) - turn adirectory structure of image files 
+    into minibatches
 
 + [`mk_image_minibatch`](@ref)
 + [`get_class_labels`](@ref)
@@ -143,7 +144,7 @@ Layers for recurrent networks:
 
 + [`WordTokenizer`](@ref)
 
-+ [`sequence_minibatch`](@ref)
++ [`sequence_minibatch`](@ref) - turn a text corpus into minibatches
 + [`pad_sequence`](@ref)
 + [`truncate_sequence`](@ref)
 
@@ -165,7 +166,7 @@ Layers for recurrent networks:
 
 # Training
 
-+ [`tb_train!
++ [`tb_train!`](@ref)
 
 ### Evaluation and accuracy
 
@@ -183,8 +184,8 @@ Layers for recurrent networks:
 
 + [`squared_error_acc`](@ref)
 + [`abs_error_acc`](@ref)
-+ [`hamming_dist`](@ref)
-+ [`peak_finder_acc`](@ref)
++ [`hamming_dist`](@ref) - Hamming distance-like accuracy
++ [`peak_finder_acc`](@ref) - accuracy, suitable for peak detection
 
 
 
@@ -197,7 +198,7 @@ Layers for recurrent networks:
 + [`crop_array`](@ref)
 + [`blowup_array`](@ref)
 + [`recycle_array`](@ref)
-+ [`de_embed`](@ref)
++ [`de_embed`](@ref) - return argmax for a n-dimensional array
 
 ### Utils for fixing types in GPU context
 
@@ -209,12 +210,13 @@ Layers for recurrent networks:
 
 ### Datasets
 
-+ [`dataset_mit_nsr`](@ref)
-+ [`dataset_mnist`](@ref)
-+ [`dataset_iris`](@ref)
-+ [`get_tatoeba_corpus`](@ref)
++ [`dataset_mit_nsr`](@ref) - logterm ECGs
++ [`dataset_mnist`](@ref) - MNIST
++ [`dataset_iris`](@ref) - Fisher's Iris dataset
++ [`get_tatoeba_corpus`](@ref) - machine translation text corpi
 
 # Pretrained networks
+Pretrained network weights, derived from Keras applications.
 
 + [`get_vgg16`](@ref)
 + [`get_resnet50v2`](@ref)

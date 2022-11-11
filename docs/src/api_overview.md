@@ -169,7 +169,8 @@ Layers for recurrent networks:
 
 # Training
 
-+ [`tb_train!`](@ref)
++ [`tb_train!`](@ref) - high-level training utility with 
+    tenorboard support and (maybe too) many optional arguments
 
 ### Evaluation and accuracy
 

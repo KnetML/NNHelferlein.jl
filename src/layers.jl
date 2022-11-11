@@ -1042,7 +1042,7 @@ end
 """
     struct GlobalAveragePooling  <: AbstractLayer
 
-Layer to return a matrix with the mean values of the first two
+Layer to return a matrix with the mean values of all but the last two
 dimensions for each sample of the minibatch.
 If the input is a stack of feature maps from a convolutional layer,
 the result can be seen as the mean value of each feature map.
@@ -1056,7 +1056,8 @@ number of *output*-columns equals size of minibatch.
 struct GlobalAveragePooling  <: AbstractLayer
 end
 
-(l::GlobalAveragePooling)(x) = mean(x, dims=(1,2)) |> x-> reshape(x, size(x)[end-1],:)
+(l::GlobalAveragePooling)(x) = mean(x, dims=(Tuple(collect(1:ndims(x))[1:end-2]))) |> x-> reshape(x, size(x)[end-1],:)
+#(l::GlobalAveragePooling)(x) = mean(x, dims=(1,2)) |> x-> reshape(x, size(x)[end-1],:)
 
 function Base.summary(l::GlobalAveragePooling; indent=0)
     s1 = "Global average pooling layer"

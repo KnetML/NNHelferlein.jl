@@ -5,181 +5,186 @@
 + [`AbstractChain`](@ref) - *Helferlein* chain type
 
 
-+ Classifier
-+ Regressor
-+ Chain
-+ VAE
++ [`Classifier`](@ref) - network with NLL loss
++ [`Regressor`](@ref) - network with MSE soll
++ [`VAE`](@ref) - variational autoencoder wrapper
+
++ [`Chain`](@ref)
 
 ### Network helpers
 
-add_layer!
-+
-summary
++ [`add_layer!`](@ref)
++ [`+`](@ref add_layer!)
 
-save_network
-load_network
-copy_network
++ [`summary`](@ref)
++ [`save_network`](@ref) - save as jld2 file
++ [`load_network`](@ref)
++ [`copy_network`](@ref) - copy from and to GPU
 
 
 
 # Layers
 
-AbstractLayer
++ [`AbstractLayer`](@ref)
 
-## Fully connected layers
+### Fully connected layers
 
-Dense
-Linear
-Embed
-FeatureSelection
-
-
-## Convolutional
-
-Conv
-DeConv
-ResNetBlock
-DepthwiseConv
-Pool
-UnPool
-Pad
-Flat
-PyFlat
-GlobalAveragePooling
-
-## Recurrent
-
-Recurrent
++ [`Dense`](@ref)
++ [`Linear`](@ref)
++ [`Embed`](@ref)
++ [`FeatureSelection`](@ref)
 
 
-### Helpers for recurrent networks
+### Convolutional
 
-RecurrentUnit
-get_hidden_states
-get_cell_states
-set_hidden_states!
-set_cell_states!
-reset_hidden_states!
-reset_cell_states!
+Layers for convolutional networks:
 
++ [`Conv`](@ref)
++ [`DeConv`](@ref)
++ [`ResNetBlock`](@ref)
++ [`DepthwiseConv`](@ref)
++ [`Pool`](@ref)
++ [`UnPool`](@ref)
++ [`Pad`](@ref)
++ [`Flat`](@ref)
++ [`PyFlat`](@ref)
++ [`GlobalAveragePooling`](@ref)
 
+### Recurrent
 
+Layers for recurrent networks:
 
-
-## Other layers
-
-Activation
-Softmax
-Logistic
-Dropout
-BatchNorm
-LayerNorm
-GaussianNoise
++ [`Recurrent`](@ref) - type for recurrent layers
++ [`RecurrentUnit`](@ref) - type for recurrent units
 
 
-## Attention Mechanisms
+#### Helpers for recurrent networks
 
-AttentionMechanism
-AttnBahdanau
-AttnLuong
-AttnDot
-AttnLocation
-AttnInFeed
++ [`get_hidden_states`](@ref)
++ [`get_cell_states`](@ref)
++ [`set_hidden_states!`](@ref)
++ [`set_cell_states`](@ref)!
++ [`reset_hidden_states!`](@ref)
++ [`reset_cell_states!`](@ref)
 
 
 
-## Layers and helpers for transformers
 
-PositionalEncoding
 
-mk_padding_mask
-mk_peek_ahead_mask
+### Other layers
 
-dot_prod_attn
-MultiHeadAttn
-separate_heads
-merge_heads
++ [`Activation`](@ref)
++ [`Softmax`](@ref)
++ [`Logistic`](@ref)
++ [`Dropout`](@ref)
++ [`BatchNorm`](@ref)
++ [`LayerNorm`](@ref)
++ [`GaussianNoise`](@ref)
+
+
+### Attention Mechanisms
+
++ [`AttentionMechanism`](@ref)
++ [`AttnBahdanau`](@ref)
++ [`AttnLuong`](@ref)
++ [`AttnDot`](@ref)
++ [`AttnLocation`](@ref)
++ [`AttnInFeed`](@ref)
+
+
+
+### Layers and helpers for transformers
+
++ [`PositionalEncoding`](@ref)
+
++ [`mk_padding_mask`](@ref)
++ [`mk_peek_ahead_mask`](@ref)
+
++ [`dot_prod_attn`](@ref)
++ [`MultiHeadAttn`](@ref)
++ [`separate_heads`](@ref)
++ [`merge_heads`](@ref)
 
 
 
 # Data provider utilities
 
-DataLoader
++ [`DataLoader`](@ref) - type for iterator of minibatches
 
-## For tabular data
+### For tabular data
 
-dataframe_read
-dataframe_minibatch
-dataframe_split
-mk_class_ids
-
-
-## For image data
-
-ImageLoader
-
-mk_image_minibatch
-get_class_labels
-
-### Image to array tools
-
-image2array
-array2image
-array2RGB
-
-### ImageNet tools
-
-preproc_imagenet
-predict_imagenet
-get_imagenet_classes
++ [`dataframe_read`](@ref)
++ [`dataframe_minibatch`](@ref) - turn a dataframe into minibatches
++ [`dataframe_split`](@ref)
++ [`mk_class_ids`](@ref)
 
 
-## Text data
+### For image data
 
-WordTokenizer
++ [`ImageLoader`](@ref)
 
-sequence_minibatch
-pad_sequence
-truncate_sequence
++ [`mk_image_minibatch`](@ref)
++ [`get_class_labels`](@ref)
 
-### Text corpus example data download
+#### Image to array tools
 
-get_tatoeba_corpus
++ [`image2array`](@ref)
++ [`array2image`](@ref)
++ [`array2RGB`](@ref)
+
+#### ImageNet tools
+
++ [`preproc_imagenet`](@ref)
++ [`predict_imagenet`](@ref)
++ [`get_imagenet_classes`](@ref)
+
+
+### Text data
+
++ [`WordTokenizer`](@ref)
+
++ [`sequence_minibatch`](@ref)
++ [`pad_sequence`](@ref)
++ [`truncate_sequence`](@ref)
+
+#### Text corpus example data download
+
++ [`get_tatoeba_corpus`](@ref)
 
 
 
 # Iteration utilities
 
-PartialIterator
-split_minibatches
-MBNoiser
-MBMasquerade
++ [`PartialIterator`](@ref)
++ [`split_minibatches`](@ref)
++ [`MBNoiser`](@ref)
++ [`MBMasquerade`](@ref)
 
 
 
 
 # Training
 
-tb_train!
++ [`tb_train!
 
-## Evaluation and accuracy
+### Evaluation and accuracy
 
-predict
-predict_top5
-minibatch_eval
-confusion_matrix
++ [`predict`](@ref)
++ [`predict_top5`](@ref)
++ [`minibatch_eval`](@ref)
++ [`confusion_matrix`](@ref)
 
 ### Loss functions
 
-focal_nll
-focal_bce
++ [`focal_nll`](@ref)
++ [`focal_bce`](@ref)
 
 ### Accuracy functions
 
-squared_error_acc
-abs_error_acc
-hamming_dist
-peak_finder_acc
++ [`squared_error_acc`](@ref)
++ [`abs_error_acc`](@ref)
++ [`hamming_dist`](@ref)
++ [`peak_finder_acc`](@ref)
 
 
 
@@ -187,29 +192,29 @@ peak_finder_acc
 
 
 # Other utils
-## Utils for array manipulation
+### Utils for array manipulation
 
-crop_array
-blowup_array
-recycle_array
-de_embed
++ [`crop_array`](@ref)
++ [`blowup_array`](@ref)
++ [`recycle_array`](@ref)
++ [`de_embed`](@ref)
 
-## Utils for fixing types in GPU context
+### Utils for fixing types in GPU context
 
-init0
-convert2CuArray
-ifgpu
-emptyCuArray
++ [`init0`](@ref)
++ [`convert2CuArray`](@ref)
++ [`ifgpu`](@ref)
++ [`emptyCuArray`](@ref)
 
 
-## Datasets
+### Datasets
 
-dataset_mit_nsr
-dataset_mnist
-dataset_iris
-get_tatoeba_corpus
++ [`dataset_mit_nsr`](@ref)
++ [`dataset_mnist`](@ref)
++ [`dataset_iris`](@ref)
++ [`get_tatoeba_corpus`](@ref)
 
 # Pretrained networks
 
-get_vgg16
-get_resnet50v2
++ [`get_vgg16`](@ref)
++ [`get_resnet50v2`](@ref)

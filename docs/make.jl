@@ -8,6 +8,7 @@ makedocs(modules = [NNHelferlein],
                   "Introduction" => "index.md",
                   "Overview" => "overview.md",
                   "Examples" => "examples.md",
+                  "API Overview" => "api_overview.md",
                   "API Reference" => "api.md",
                   "License" => "license.md",
                   hide("Changelog" => "changelog.md")

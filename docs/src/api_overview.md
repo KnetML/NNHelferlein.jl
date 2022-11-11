@@ -74,6 +74,9 @@ Layers for recurrent networks:
 ### Other layers
 
 + [`Activation`](@ref)
++ [`Sigm`](@ref Activation)
++ [`Relu`](@ref Activation)
++ [`Swish`](@ref Activation)
 + [`Softmax`](@ref)
 + [`Logistic`](@ref)
 + [`Dropout`](@ref)

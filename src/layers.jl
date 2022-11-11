@@ -725,8 +725,9 @@ Simple activation layer with the desired activation function as argument.
 
 ### Constructors:
 + `Activation(actf)`
-+ `Relu()`: return an Activation layer with ReLU activation
++ `Relu()`
 + `Sigm()`
++ `Swish()`
 """
 struct Activation <: AbstractLayer
     actf
@@ -735,6 +736,7 @@ end
 
 Relu() = Activation(relu)
 Sigm() = Activation(sigm)
+Swish() = Activation(swish)
 
 
 function Base.summary(l::Activation; indent=0)

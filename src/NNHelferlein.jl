@@ -64,7 +64,7 @@ export AbstractNN, Classifier, Regressor, Chain, VAE,          # chains
        Dropout, BatchNorm, LayerNorm,
        Linear, GaussianNoise,
        GlobalAveragePooling, 
-       Activation, Logistic, Sigm, Relu,
+       Activation, Logistic, Sigm, Relu, Swish,
        ResNetBlock,
        get_hidden_states, get_cell_states,
        set_hidden_states!, set_cell_states!,

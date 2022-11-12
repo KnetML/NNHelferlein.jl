@@ -85,22 +85,6 @@ Layers for recurrent networks:
 + [`GaussianNoise`](@ref)
 
 
-### Activation functions
-
-*Helferlein*-style is to provide all functions (such activation 
-or loss functions) as `functions` (not as strings as in the Python-world).
-Therefore any function from any package or any custom function may be 
-provided as `actf` to the layer constructors.
-
-
-+ ... see [`Knet docu`](https://denizyuret.github.io/Knet.jl/latest/reference/#Activation-functions) 
-  for all activation functions provided by Knet
-  (`elu`, `relu`, `selu`, `sigm`, ...).
-
-+ *Helferlein* provides some derived funs, such as 
-  `leaky_relu`, `leaky_tanh`, `leaky_sigm` or `swish`.
-
-
 
 
 ### Attention Mechanisms
@@ -125,6 +109,25 @@ provided as `actf` to the layer constructors.
 + [`MultiHeadAttn`](@ref)
 + [`separate_heads`](@ref)
 + [`merge_heads`](@ref)
+
+
+
+# Activation functions
+
+*Helferlein*-style is to provide all functions (such activation 
+or loss functions) as `functions` (not as strings as in the Python-world).
+Therefore any function from any package or any custom function may be 
+provided as `actf` to the layer constructors.
+
+
++ ... see [`Knet docu`](https://denizyuret.github.io/Knet.jl/latest/reference/#Activation-functions) 
+  for all activation functions provided by Knet
+  (`elu`, `relu`, `selu`, `sigm`, ...).
+
++ *Helferlein* provides some derived funs, such as 
+  `leaky_relu`, `leaky_tanh`, `leaky_sigm` or `swish`.
+
+
 
 
 

@@ -115,7 +115,7 @@ Layers for recurrent networks:
 # Activation functions
 
 *Helferlein*-style is to provide all functions (such activation 
-or loss functions) as `functions` (not as strings as in the Python-world).
+or loss functions) as `functions`. 
 Therefore any function from any package or any custom function may be 
 provided as `actf` to the layer constructors.
 

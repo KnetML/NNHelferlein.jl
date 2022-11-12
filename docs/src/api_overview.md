@@ -181,11 +181,18 @@ Layers for recurrent networks:
 
 ### Loss functions
 
++ [`Knet.Ops20.nll`](https://denizyuret.github.io/Knet.jl/latest/reference/#Knet.Ops20.nll) - 
+  Cross-entropy for classifiers (aka negative log likelihood)
++ [`Knet.Ops20.bce`](https://denizyuret.github.io/Knet.jl/latest/reference/#Knet.Ops20.bce) - 
+  binary cross-entropy for binary classifiers 
 + [`focal_nll`](@ref)
 + [`focal_bce`](@ref)
++ ... see [`Knet docu`](https://denizyuret.github.io/Knet.jl/latest/reference/#Loss-functions) 
+for all loss functions provided by Knet.
 
 ### Accuracy functions
 
++ [`Knet.Ops20.accuracy`] (https://denizyuret.github.io/Knet.jl/latest/reference/#Knet.Ops20.accuracy) 
 + [`squared_error_acc`](@ref)
 + [`abs_error_acc`](@ref)
 + [`hamming_dist`](@ref) - Hamming distance-like accuracy

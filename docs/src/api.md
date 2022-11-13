@@ -185,7 +185,7 @@ confusion_matrix
 # ImageNet tools
 
 ```@docs
-preproc_imagenet
+preproc_imagenet_vgg
 predict_imagenet
 get_imagenet_classes
 ```

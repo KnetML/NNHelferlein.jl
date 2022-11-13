@@ -159,7 +159,9 @@ provided as `actf` to the layer constructors.
 
 #### ImageNet tools
 
-+ [`preproc_imagenet`](@ref)
++ [`preproc_imagenet_vgg`](@ref)
++ [`preproc_imagenet_resnet`](@ref preproc_imagenet_vgg)
++ [`preproc_imagenet_resnetv2`](@ref preproc_imagenet_vgg)
 + [`predict_imagenet`](@ref)
 + [`get_imagenet_classes`](@ref)
 

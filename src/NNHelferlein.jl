@@ -104,6 +104,7 @@ export AbstractNN, Classifier, Regressor, Chain, VAE,          # chains
        focal_nll, focal_bce,
        dataset_mit_nsr, dataset_iris, dataset_mnist,
        get_vgg16, get_resnet50v2, 
+       preproc_imagenet_vgg, preproc_imagenet_resnet, preproc_imagenet_resnetv2,
        leaky_sigm, leaky_relu, leaky_tanh, swish
 
 end # module

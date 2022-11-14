@@ -25,7 +25,7 @@ pretrained applications:
   (colour space: BGR, values: 0 - 255, centered according to the
   imagenet training set)
 + **RESNET**: `preproc_imagenet_resnet` (identical to vgg)
-+ **RESNET V2**: `preproc_imagenet_resnetv2` (colour space: BGR, 
++ **RESNET V2**: `preproc_imagenet_resnetv2` (colour space: RGB, 
   values: -1.0 - 1.0, scaled for each sample individually) 
 
 

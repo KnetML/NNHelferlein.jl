@@ -18,7 +18,7 @@ augmentation pipeline.
 ### Details
 Unfortunately image preprocessing is not consistent between all 
 pretrained Tenrflow/Keras applications.
-As a result different preprocessing functions must beused for different 
+As a result, different preprocessing functions must be used for different 
 pretrained applications:
 
 + **VGG16, VGG19**: `preproc_imagenet_vgg` 

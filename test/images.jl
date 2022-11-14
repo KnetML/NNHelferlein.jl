@@ -8,7 +8,7 @@ function test_image_loader()
                 4; split=true, fr=0.2,
                 balanced=true, shuffle=true,
                 train=true,
-                aug_pipl=augm, pre_proc=preproc_imagenet)
+                aug_pipl=augm, pre_proc=preproc_imagenet_vgg)
 
     lab = get_class_labels(trn)
 
@@ -50,7 +50,9 @@ end
 function test_preproc_imagenet()
 
     img = rand(32,32,3)
-    img = preproc_imagenet(img)
+    img = preproc_imagenet_vgg(img)
+    img = preproc_imagenet_resnet(img)
+    img = preproc_imagenet_resnetv2(img)
     return size(img) == (32,32,3)
 end
 

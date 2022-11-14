@@ -928,7 +928,7 @@ function init_bn_params(x)
 
     if x isa Int
         channels = x
-    elseif x isa Array
+    elseif x isa AbstractArray
         dims = size(x)
         if length(dims) in (2, 4, 5)
             channels = dims[end-1]

@@ -136,7 +136,7 @@ end
 function test_layer_bn()
     l = BatchNorm()
     x = rand(16, 20)
-    x = convert2KnetArray(x)
+    x = ifgpu(x)
     y = @diff l(x)
     return isapprox(mean(y[1,:]), 0.0, atol=0.01)
 end

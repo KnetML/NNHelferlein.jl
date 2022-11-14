@@ -1,6 +1,7 @@
 # ChangeLog of NNHelferlein package
 
-+ pretrained fixed
+### v1.2
++ imagenet preprocessing fixed for vgg and resnet
 + ResNetBlock added
 + ResNet added
 + Padding layer added

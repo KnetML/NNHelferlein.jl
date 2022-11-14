@@ -10,7 +10,7 @@ function test_lenet()
                 4; split=true, fr=0.2,
                 balanced=false, shuffle=true,
                 train=true,
-                aug_pipl=augm, pre_proc=preproc_imagenet)
+                aug_pipl=augm, pre_proc=preproc_imagenet_resnetv2)
         println("bbb")
 
     lenet = Classifier(Conv(5,5,3,20),

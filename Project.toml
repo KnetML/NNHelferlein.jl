@@ -37,6 +37,7 @@ ZipFile = "a5390f91-8eb1-5f08-bee0-b1d1ffed6cea"
 
 
 [compat]
+Adapt = "3"
 Augmentor = "0.6"
 CSV = "0.1 - 0.10"
 CUDA = "3.10"

@@ -329,7 +329,7 @@ struct VAE <: AbstractNN
     VAE(e,d) = new([e,d])
 end
 
-function (vae::VAE)(x, y=nothing)
+function (vae::VAE)(x, y)
     
     # encode and
     # calc size of decoder input (1/2 of encoder output):
@@ -365,11 +365,38 @@ function (vae::VAE)(x, y=nothing)
        
     # calc loss, if y given:
     #
-    if isnothing(y)
-        return x
-    else
-        loss = sum(abs2, x .- y) / 2
-        loss_KL = -sum(1 .+ logσ² .- abs2.(μ) .- σ²) / 2
-        return loss + loss_KL
-    end
+    loss = sum(abs2, x .- y) / 2
+    loss_KL = -sum(1 .+ logσ² .- abs2.(μ) .- σ²) / 2
+    return loss + loss_KL
+end
+
+function (vae::VAE)(x)
+    
+    # encode and
+    # calc size of decoder input (1/2 of encoder output):
+    #
+    size_in = size(x)
+    x = vae.layers[1](x)
+    size_dec_in = [size(x)...]
+    size_dec_in[end-1] = size_dec_in[end-1] ÷ 2
+    
+    # separate μ and σ:
+    #
+    x = mat(x)
+    code_size = size(x)
+    n_codes = code_size[1] ÷ 2
+
+    μ = x[1:n_codes,:]
+    # logσ² = x[n_codes+1:end,:]
+    
+    x = μ
+    
+    # reshape codes to fit encoder input
+    # and decode:
+    #
+    x = reshape(x, size_dec_in...)
+    x = vae.layers[2](x)
+    x = crop_array(x, size_in)
+       
+    return x
 end

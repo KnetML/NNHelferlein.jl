@@ -1,5 +1,8 @@
 # ChangeLog of NNHelferlein package
 
+### wip
++ disambiguate vae signature
+
 ### v1.2
 + imagenet preprocessing fixed for vgg and resnet
 + ResNetBlock added

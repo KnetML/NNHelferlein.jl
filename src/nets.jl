@@ -329,7 +329,7 @@ struct VAE <: AbstractNN
     VAE(e,d) = new([e,d])
 end
 
-function (vae::VAE)(x, y)
+function (vae::VAE)(x::AbstractArray, y::AbstractArray) 
     
     # encode and
     # calc size of decoder input (1/2 of encoder output):
@@ -370,7 +370,7 @@ function (vae::VAE)(x, y)
     return loss + loss_KL
 end
 
-function (vae::VAE)(x)
+function (vae::VAE)(x::AbstractArray)
     
     # encode and
     # calc size of decoder input (1/2 of encoder output):

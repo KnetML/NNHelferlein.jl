@@ -327,7 +327,7 @@ function tb_train!(mdl, opti, trn, vld=nothing; epochs=1,
         if (!isnothing(lr_decay)) && i > 1 && ((i-1) % lr_nth == 0)
             lr = first(params(mdl)).opt.lr
             lr = lrd_linear ? lr + lr_decay : lr * lr_decay
-            @printf("Setting learning rate to η=%.2e in epoch %.1f\n", lr, i/n_trn)
+            @printf("\nSetting learning rate to η=%.2e in epoch %.1f\n", lr, i/n_trn)
             set_learning_rate(mdl, lr)
         end
     end

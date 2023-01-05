@@ -365,8 +365,8 @@ function (vae::VAE)(x::AbstractArray, y::AbstractArray)
        
     # calc loss, if y given:
     #
-    loss = sum(abs2, x .- y) / 2
-    loss_KL = -sum(1 .+ logσ² .- abs2.(μ) .- σ²) / 2
+    loss = mean(abs2, x .- y) / 2 
+    loss_KL = -mean(1 .+ logσ² .- abs2.(μ) .- σ²) / 2 
     return loss + loss_KL
 end
 

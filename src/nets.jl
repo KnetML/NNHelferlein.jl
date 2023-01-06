@@ -322,11 +322,36 @@ Output
 of the autoencoder is cropped to the size of input before
 loss calculation (and before prediction); i.e. the output has always the same dimensions
 as the input, even if the last layer generates a bigger shape.
+
+### KL-training parameters:
+The parameter β is by default set to 1.0, i.e. mean-squared error and KL 
+has the same weights. The functions `set_beta(vae, beta)` and
+`get_beta(vae)` can be used to set and get the β used in training.
+With β=0.0 no KL-loss will be used.
 """
 struct VAE <: AbstractNN
     layers
-    VAE(layers::Vector) = new(layers)
-    VAE(e,d) = new([e,d])
+    p    # dictionary of additional parameters
+    VAE(layers::Vector; beta=1.0) = new(layers, Dict(:beta=>beta))
+    VAE(e,d; beta=1.0) = new([e,d], Dict(:beta=>beta))
+end
+
+"""
+    function get_beta(vae::VAE)
+
+Helper to get the current value of the VAE-parameter beta.
+"""
+function get_beta(vae::VAE)
+    return vae.p[:beta]
+end
+
+"""
+    function set_beta(vae::VAE, β)
+
+Helper to set the current value of the VAE-parameter beta.
+"""
+function set_beta(vae::VAE, β)
+    vae.p[:beta] = β
 end
 
 function (vae::VAE)(x::AbstractArray, y::AbstractArray) 
@@ -366,7 +391,7 @@ function (vae::VAE)(x::AbstractArray, y::AbstractArray)
     # calc loss, if y given:
     #
     loss = mean(abs2, x .- y) / 2 
-    loss_KL = -mean(1 .+ logσ² .- abs2.(μ) .- σ²) / 2 
+    loss_KL = - vae.p[:beta] * mean(1 .+ logσ² .- abs2.(μ) .- σ²) / 2 
     return loss + loss_KL
 end
 

@@ -47,7 +47,8 @@ include("io.jl")
 DATA_DIR = normpath(joinpath(dirname(pathof(@__MODULE__)), "..", "data"))
 include("pretrained.jl")
 
-export AbstractNN, Classifier, Regressor, Chain, VAE,          # chains
+export AbstractNN, Classifier, Regressor, Chain,           # chains
+       VAE, get_beta, set_beta,
        DataLoader, SequenceData, PartialIterator,
        RecurrentUnit,
        add_layer!, 

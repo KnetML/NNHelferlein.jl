@@ -15,6 +15,8 @@ Classifier
 Regressor
 Chain
 VAE
+get_beta
+set_beta
 ```
 
 # Layers

@@ -332,26 +332,61 @@ With β=0.0 no KL-loss will be used.
 struct VAE <: AbstractNN
     layers
     p    # dictionary of additional parameters
-    VAE(layers::Vector; beta=1.0) = new(layers, Dict(:beta=>beta))
-    VAE(e,d; beta=1.0) = new([e,d], Dict(:beta=>beta))
+    VAE(layers::Vector; beta=1.0) = new(layers, Dict(:ramp=>1.0, :beta_max=>beta, :ramp_up=false, :steps=0, :delta=>0.0))
+    VAE(e,d; beta=1.0) = new([e,d], Dict(:ramp=1.0, :beta_max=>beta, :ramp_up=false, :steps=0, :delta=>0.0))
 end
 
 """
-    function get_beta(vae::VAE)
+    get_beta(vae::VAE; ramp=false)
 
-Helper to get the current value of the VAE-parameter beta.
+Return a `Dict` with the current VAE-parameters beta and ramp-up.
+
+### Arguments:
++ `ramp=false`: if `true`, a vector of β for all ramp-up steps is returned.
 """
 function get_beta(vae::VAE)
-    return vae.p[:beta]
+
+    if ramp 
+        β = []
+        ramp = sigm(-10.0)
+        for i = 1:vae.p[:steps]
+            ramp = ramp + ramp*(1-ramp) * vae.p[:delta]
+            push!(β, ramp * vae.p[:beta_max])
+        end
+        return β
+    else
+        return vae.p
+    end
 end
 
 """
-    function set_beta(vae::VAE, β)
+   set_beta!(vae::VAE, β_max; ramp_up=false, steps=0)
 
-Helper to set the current value of the VAE-parameter beta.
+Helper to set the current value of the VAE-parameter beta
+and ramp-up settings.
+
+VAE loss is calculated as (mean of error squares) + β * (mean of KL divergence).
+
+### Ramp-up:
+In case of `ramp_up=true`, β starts with almost 0.0 (`sigm(-10.0)` ≈4.5e-5) and 
+reaches almost 1.0 after `steps` steps, following a sigmoid curve.
+`steps` should be more than 25, to avoid rounding errors in the calculation of
+the derivative of the sigmoid function.
 """
-function set_beta(vae::VAE, β)
-    vae.p[:beta] = β
+function set_beta!(vae::VAE, β_max; ramp_up=false, steps=0)
+
+    if ramp
+        vae.p[:ramp] = sigm(-10.0)
+        vae.p[:beta_max] = β_max
+        vae.p[:ramp_up] = true
+        vae.p[:steps] =steps
+        vae.p[:delta] = 20/steps
+    else
+        vae.p[:ramp] = 1.0
+        vae.p[:beta_max] = β_max
+        vae.p[:ramp_up] = false
+        vae.p[:steps] = 0
+        vae.p[:delta] = 1.0
 end
 
 function (vae::VAE)(x::AbstractArray, y::AbstractArray) 
@@ -392,7 +427,13 @@ function (vae::VAE)(x::AbstractArray, y::AbstractArray)
     #
     loss = mean(abs2, x .- y) / 2 
     loss_KL = - vae.p[:beta] * mean(1 .+ logσ² .- abs2.(μ) .- σ²) / 2 
-    return loss + loss_KL
+
+    # ramp-up beta:
+    #
+    if vae.p[:ramp_up]
+        vae.p[:ramp] += vae.p[:ramp]*(1-vas.p[:ramp]) * vae.p[:delta]
+    end
+    return loss + vae.p:[ramp] * vae.p[:beta_max] * loss_KL
 end
 
 function (vae::VAE)(x::AbstractArray)

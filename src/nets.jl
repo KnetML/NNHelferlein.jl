@@ -332,8 +332,8 @@ With β=0.0 no KL-loss will be used.
 struct VAE <: AbstractNN
     layers
     p    # dictionary of additional parameters
-    VAE(layers::Vector; beta=1.0) = new(layers, Dict(:ramp=>1.0, :beta_max=>beta, :ramp_up=false, :steps=0, :delta=>0.0))
-    VAE(e,d; beta=1.0) = new([e,d], Dict(:ramp=1.0, :beta_max=>beta, :ramp_up=false, :steps=0, :delta=>0.0))
+    VAE(layers::Vector; beta=1.0) = new(layers, Dict(:ramp=>1.0, :beta_max=>beta, :ramp_up=>false, :steps=>0, :delta=>0.0))
+    VAE(e,d; beta=1.0) = new([e,d], Dict(:ramp=>1.0, :beta_max=>beta, :ramp_up=>false, :steps=>0, :delta=>0.0))
 end
 
 """
@@ -343,8 +343,11 @@ Return a `Dict` with the current VAE-parameters beta and ramp-up.
 
 ### Arguments:
 + `ramp=false`: if `true`, a vector of β for all ramp-up steps is returned.
+                This way, the ramp-up phase can be visualised:
+                [`VAE ramp-up of beta`]
+                (https://github.com/KnetML/NNHelferlein.jl/blob/main/docs/src/assets/vae-example.png)
 """
-function get_beta(vae::VAE)
+function get_beta(vae::VAE; ramp=false)
 
     if ramp 
         β = []
@@ -375,7 +378,7 @@ the derivative of the sigmoid function.
 """
 function set_beta!(vae::VAE, β_max; ramp_up=false, steps=0)
 
-    if ramp
+    if ramp_up
         vae.p[:ramp] = sigm(-10.0)
         vae.p[:beta_max] = β_max
         vae.p[:ramp_up] = true
@@ -387,6 +390,7 @@ function set_beta!(vae::VAE, β_max; ramp_up=false, steps=0)
         vae.p[:ramp_up] = false
         vae.p[:steps] = 0
         vae.p[:delta] = 1.0
+    end
 end
 
 function (vae::VAE)(x::AbstractArray, y::AbstractArray) 

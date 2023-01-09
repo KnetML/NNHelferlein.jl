@@ -8,6 +8,8 @@
 + [`Classifier`](@ref) - network with NLL loss
 + [`Regressor`](@ref) - network with MSE soll
 + [`VAE`](@ref) - variational autoencoder wrapper
+  The VAE supports rampu-up of the KL-weight beta via the functions
+  [`set_beta!`](@ref) and [`get_beta`](@ref).
 
 + [`Chain`](@ref)
 

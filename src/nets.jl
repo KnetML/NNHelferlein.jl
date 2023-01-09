@@ -123,7 +123,7 @@ push!(n::Union{NNHelferlein.AbstractNN, NNHelferlein.AbstractChain}, l) = push!(
 length(n::Union{NNHelferlein.AbstractNN, NNHelferlein.AbstractChain}) = length(n.layers)
 
 """
-    add_layer!(n::Union{NNHelferlein.AbstractNN, NNHelferlein.AbstractChain}, l)
+    function add_layer!(n::Union{NNHelferlein.AbstractNN, NNHelferlein.AbstractChain}, l)
 
 Add a layer `l` or a chain to a model `n`. The layer is always added 
 at the end of the chains. 
@@ -286,7 +286,7 @@ end
 
 
 """
-    struct VAE
+    struct VAE   <: AbstractNN
 
 Type for a generic variational autoencoder.
 
@@ -337,7 +337,7 @@ struct VAE <: AbstractNN
 end
 
 """
-    get_beta(vae::VAE; ramp=false)
+    function get_beta(vae::VAE; ramp=false)
 
 Return a `Dict` with the current VAE-parameters beta and ramp-up.
 
@@ -365,7 +365,7 @@ end
 
 
 """
-   set_beta!(vae::VAE, β_max; ramp_up=false, steps=0)
+   function set_beta!(vae::VAE, β_max; ramp_up=false, steps=0)
 
 Helper to set the current value of the VAE-parameter beta
 and ramp-up settings.

@@ -1,6 +1,7 @@
 # ChangeLog of NNHelferlein package
 
 ### wip
++ ramp-up of beta added to VAE
 + disambiguate vae signature
 
 ### v1.2

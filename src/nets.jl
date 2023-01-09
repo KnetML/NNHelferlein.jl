@@ -430,14 +430,14 @@ function (vae::VAE)(x::AbstractArray, y::AbstractArray)
     # calc loss, if y given:
     #
     loss = mean(abs2, x .- y) / 2 
-    loss_KL = - vae.p[:beta] * mean(1 .+ logσ² .- abs2.(μ) .- σ²) / 2 
+    loss_KL = - mean(1 .+ logσ² .- abs2.(μ) .- σ²) / 2 
 
     # ramp-up beta:
     #
     if vae.p[:ramp_up]
-        vae.p[:ramp] += vae.p[:ramp]*(1-vas.p[:ramp]) * vae.p[:delta]
+        vae.p[:ramp] += vae.p[:ramp]*(1-vae.p[:ramp]) * vae.p[:delta]
     end
-    return loss + vae.p:[ramp] * vae.p[:beta_max] * loss_KL
+    return loss + vae.p[:ramp] * vae.p[:beta_max] * loss_KL
 end
 
 function (vae::VAE)(x::AbstractArray)

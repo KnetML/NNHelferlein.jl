@@ -100,8 +100,16 @@ function test_vae()
                 lr=0.001, lr_decay=0.0001, lrd_steps=5)
 
         loss = vae(first(mb)...)
-        return loss isa Real
+
+        set_beta!(vae, 0.5, ramp_up=true, steps=100)
+        p = get_beta(vae)
+        r = get_beta(vae, ramp=true)
+        
+        return loss isa Real &&
+               p isa Dict &&
+               r isa AbstractArray && length(r) == 100
 end
+
 
 function test_signatures()
 

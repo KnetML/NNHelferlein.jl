@@ -56,7 +56,7 @@ export AbstractNN, Classifier, Regressor, Chain,           # chains
        ImageLoader, preproc_imagenet,
        get_class_labels,
        iterate, length,
-       AbstractLayer, Layer, Dense, Conv, Pool, Flat, PyFlat,         # layers
+       AbstractLayer, Dense, Conv, Pool, Flat, PyFlat,         # layers
        Pad,
        FeatureSelection,
        DeConv, UnPool,  DepthwiseConv,

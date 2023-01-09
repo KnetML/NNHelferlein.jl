@@ -386,12 +386,15 @@ function set_beta!(vae::VAE, β_max; ramp_up=false, steps=1)
         vae.p[:ramp_up] = true
         vae.p[:steps] =steps
         vae.p[:delta] = 20/steps
+        println("Weights β for KL-Loss set to ramp up from 0.0 to $β_max in $steps steps.")
     else
         vae.p[:ramp] = 1.0
         vae.p[:beta_max] = β_max
         vae.p[:ramp_up] = false
         vae.p[:steps] = 1
         vae.p[:delta] = 1.0
+
+        println("Weights β for KL-Loss set to constant $β_max.")
     end
 end
 

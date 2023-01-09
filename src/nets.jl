@@ -344,8 +344,7 @@ Return a `Dict` with the current VAE-parameters beta and ramp-up.
 ### Arguments:
 + `ramp=false`: if `true`, a vector of β for all ramp-up steps is returned.
                 This way, the ramp-up phase can be visualised:
-                [`VAE ramp-up of beta`]
-                (https://github.com/KnetML/NNHelferlein.jl/blob/main/docs/src/assets/vae-example.png)
+                <img src="./assets/vae-beta-range.png"/>
 """
 function get_beta(vae::VAE; ramp=false)
 
@@ -362,6 +361,9 @@ function get_beta(vae::VAE; ramp=false)
     end
 end
 
+
+
+
 """
    set_beta!(vae::VAE, β_max; ramp_up=false, steps=0)
 
@@ -376,7 +378,7 @@ reaches almost 1.0 after `steps` steps, following a sigmoid curve.
 `steps` should be more than 25, to avoid rounding errors in the calculation of
 the derivative of the sigmoid function.
 """
-function set_beta!(vae::VAE, β_max; ramp_up=false, steps=0)
+function set_beta!(vae::VAE, β_max; ramp_up=false, steps=1)
 
     if ramp_up
         vae.p[:ramp] = sigm(-10.0)
@@ -388,7 +390,7 @@ function set_beta!(vae::VAE, β_max; ramp_up=false, steps=0)
         vae.p[:ramp] = 1.0
         vae.p[:beta_max] = β_max
         vae.p[:ramp_up] = false
-        vae.p[:steps] = 0
+        vae.p[:steps] = 1
         vae.p[:delta] = 1.0
     end
 end

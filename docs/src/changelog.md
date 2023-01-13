@@ -1,6 +1,7 @@
 # ChangeLog of NNHelferlein package
 
 ### wip
++ GPU selection added (not yet exported)
 + ramp-up of beta added to VAE
 + disambiguate vae signature
 

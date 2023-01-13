@@ -340,3 +340,38 @@ function de_embed(x; remove_dim=false)
     end
 end
 
+"""
+    function get_gpu_load()
+
+Return a list of tuples with cpu- and memory- utilisation for all
+GPUs.
+"""
+function get_gpu_load()
+
+    devs = collect(CUDA.NVML.DeviceIterator())
+    return [(c,m) for (c,m) in CUDA.NVML.utilization_rates.(devs)]
+end
+
+
+"""
+    function select_gpu!(;memory=false)
+
+Select the GPU with the lowest cpu-load, based on CPU ormemory-utilisation.
+
+### Arguments:
++ `memory=false`: If `false` the GPU with the smallsed CPU-load will be set,
+                  otherwise the GPU with most available memeory will be 
+                  selected.
+"""
+function set_free_gpu!(;memory=false)
+
+    if memory
+        loads = [m for (c,m) in get_gpu_load()]
+    else
+        loads = [c for (c,m) in get_gpu_load()]
+    end
+
+    dev_id = argmin(loads) -1  # nvidia is 0-indexed!
+    CUDA.device!(dev_id)
+end
+

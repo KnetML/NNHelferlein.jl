@@ -354,24 +354,28 @@ end
 
 
 """
-    function select_gpu!(;memory=false)
+    function select_gpu!(look=:memory)
 
 Select the GPU with the lowest cpu-load, based on CPU ormemory-utilisation.
 
 ### Arguments:
-+ `memory=false`: If `false` the GPU with the smallsed CPU-load will be set,
-                  otherwise the GPU with most available memeory will be 
++ `look=:memory`: If `:cpu` the GPU with the smallsed CPU-load will be set,
+                  if `:memory` the GPU with most available memeory will be 
                   selected.
 """
-function set_free_gpu!(;memory=false)
+function set_free_gpu!(look=:memory)
 
-    if memory
+    if look == :memory
         loads = [m for (c,m) in get_gpu_load()]
+        str = "memory"
     else
         loads = [c for (c,m) in get_gpu_load()]
+        str = "cpu"
     end
 
-    dev_id = argmin(loads) -1  # nvidia is 0-indexed!
-    CUDA.device!(dev_id)
+    dev_id = argmin(loads)  # nvidia is 0-indexed!
+    
+    println("Select GPU $(dev_id-1) with $str load: $(loads[dev_id])")
+    CUDA.device!(dev_id-1)
 end
 

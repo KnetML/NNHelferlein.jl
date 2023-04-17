@@ -11,8 +11,9 @@ Default Dense layer.
 
 ### Constructors:
 + `Dense(w, b, actf)`: default constructor, `w` are the weights and `b` the bias.
-+ `Dense(i::Int, j::Int; actf=sigm)`: layer of `j` neurons with
-        `i` inputs.
++ `Dense(i::Int, j::Int; actf=sigm, init=..)`: layer of `j` neurons with
+        `i` inputs. Initialiser is xavier_uniform for  `actf=sigm` and
+        xaview_normal otherwise.
 + `Dense(h5::HDF5.File, group::String; trainable=false, actf=sigm)`: kernel and bias are loaded by the specified `group`.
 + `Dense(h5::HDF5.File, kernel::String, bias::String;
         trainable=false, actf=sigm)`: layer
@@ -24,7 +25,8 @@ struct Dense  <: AbstractLayer
     b
     actf
     Dense(w, b, actf) = new(w, b, actf)
-    Dense(i::Int, j::Int; actf=Knet.sigm) = new(Knet.param(j,i), Knet.param0(j), actf)
+    Dense(i::Int, j::Int; actf=Knet.sigm, init=((actf==sigm) ? xavier_uniform : xavier_normal)) = 
+        new(Knet.param(j,i, init=init), Knet.param0(j), actf)
  end
 
 
@@ -86,8 +88,8 @@ The shape of the input tensor is preserved; only the size of the
 first dim is changed from in to out.
 
 ### Constructors:
-+ `Linear(i::Int, j::Int; bias=true, actf=identity)` where `i` is fan-in
-        and `j` is fan-out.
++ `Linear(i::Int, j::Int; bias=true, actf=identity, init=xaview_normal)` 
+        where `i` is fan-in and `j` is fan-out.
 
 ### Keyword arguments:
 + `bias=true`: if false biases are fixed to 0.0
@@ -98,8 +100,8 @@ struct Linear  <: AbstractLayer
     b
     actf
     Linear(w::Param, b::Param, actf) = new(w, b, actf)
-    Linear(i::Int, j::Int; bias=true, actf=identity) = new(Knet.param(j,i),
-            bias ? Knet.param0(j) : init0(j), actf)
+    Linear(i::Int, j::Int; bias=true, actf=identity, init=xavier_normal) = 
+        new(Knet.param(j,i, init=init), bias ? Knet.param0(j) : init0(j), actf)
  end
 
  function (l::Linear)(x)

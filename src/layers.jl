@@ -630,10 +630,6 @@ The onehot-vector is virtual, because not the vector, but only
 the index of the "one" in the vector has to be provided as Integer value
 (or a minibatch of integers).
 
-### Fields:
-+ w
-+ actf
-
 ### Constructors:
 + `Embed(v,d; actf=identity):` with
     vocab size `v`, embedding depth `d` and default activation function identity.

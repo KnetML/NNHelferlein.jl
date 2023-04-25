@@ -149,7 +149,7 @@ Ref.:  Y. LeCun, L. Bottou, Y. Bengio, and P. Haffner.
 
 
 ### Arguments:
-+ `force=false`: if `false`, the dataset download will be forced.
++ `force=false`: if `true`, the dataset download will be forced.
 """
 function dataset_mnist(; force=false)
 

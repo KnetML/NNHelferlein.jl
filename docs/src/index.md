@@ -100,7 +100,7 @@ just add layers to a network:
 ```julia
 julia> mdl = Classifier() + Dense(2,5)
 julia> mdl = mdl + Dense(5,5) + Dense(5,1, actf=identity)
-julia> print_network(mdl)
+julia> summary(mdl)
 
 NNHelferlein neural network summary:
 Classifier with 3 layers,                                           51 params
@@ -134,10 +134,10 @@ mlp = tb_train!(lenet2, Adam, dtrn, epochs=10, split=0.8,
                 acc_fun=accuracy, eval_size=0.2)
 ```
 
-Models can be summarised with the `print_network()`-helper:
+Models can be summarised with `summary()` or the `print_network()`-helper:
 
 ```julia
-julia> print_network(lenet)
+julia> summary(lenet)
 Neural network summary:
 Classifier with 7 layers,                                       440812 params
 Details:
@@ -204,15 +204,15 @@ layers to `Chains`.
 #### The forward signature:
 ```julia
 function (nn::LeNet)(x)
-    x = drop1(x)
-    x = conv1(x)
-    x = pool1(x)
-    x = conv2(x)
-    x = pool2(x)
-    x = flat(x)
-    x = drop2(x)
-    x = mlp(x)
-    x = predict(x)
+    x = nn.drop1(x)
+    x = nn.conv1(x)
+    x = nn.pool1(x)
+    x = nn.conv2(x)
+    x = nn.pool2(x)
+    x = nn.flat(x)
+    x = nn.drop2(x)
+    x = nn.mlp(x)
+    x = nn.predict(x)
     return x
 end
 ```

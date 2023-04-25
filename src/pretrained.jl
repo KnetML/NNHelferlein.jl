@@ -464,7 +464,7 @@ end
 """
     struct ResNetBlock <: AbstractChain
 
-Exectable type for one block of a ResNet-type network.
+Executable type for one block of a ResNet-type network.
 
 ### Constructors:
 + `ResNetBlock(layers; shortcut=[identity], post=[identity])`:

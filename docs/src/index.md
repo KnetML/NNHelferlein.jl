@@ -2,6 +2,8 @@
 
 The package provides helpers and utilities mainly to be
 used with the Knet package to build artificial neural networks.
+The German word *Helferlein* means something like *little helper*;
+please pronounce it like `hell-fur-line`.
 
 The package follows mainly the Knet-style; i.e. all networks can be
 trained with the Knet-iterators, all layers can be used together with

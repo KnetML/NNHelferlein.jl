@@ -179,7 +179,7 @@ Download Zalando's Fashion-MNIST datset with help of `MLDatasets.jl`
 from https://github.com/zalandoresearch/fashion-mnist.
 
 4 arrays `xtrn, ytrn, xtst, ytst` are returned in the 
-same structure as teh original MNIST dataset.
+same structure as the original MNIST dataset.
 
 
 The data is stored in the *Helferlein* data directory and only downloaded

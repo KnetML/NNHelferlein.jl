@@ -157,33 +157,80 @@ Ref.:  Y. LeCun, L. Bottou, Y. Bengio, and P. Haffner.
 """
 function dataset_mnist(; force=false)
 
-    mnist_dir = joinpath(NNHelferlein.DATA_DIR, MNIST_DIR)
-
-    if force && isdir(mnist_dir)
-        rm(mnist_dir, force=true, recursive=true)
-    end
-
-    if !isdir(mnist_dir)
-        println("Downloading MNIST dataset from Yann LeCun's website ...")
-    end
-
-    # pre-download not possible with MLDatasets >= 0.7:
-    #
-    # if !isdir(mnist_dir)
-    #     MLDatasets.MNIST.download(mnist_dir, i_accept_the_terms_of_use=true)
-    #  end
-
-    # read:
-    #
-    trn = MNIST(; Tx=Float32, split=:train, dir=mnist_dir)
-    xtrn, ytrn = trn.features, trn.targets
+    xtrn,ytrn,xtst,ytst = dataset_from_mldatasets(
+                            MNIST, MNIST_DIR, force=force)
+    
     ytrn[ytrn.==0] .= 10
     ytrn = Int8.(ytrn)
     
-    tst = MNIST(; Tx=Float32, split=:test, dir=mnist_dir)
-    xtst, ytst = tst.features, tst.targets
     ytst[ytst.==0] .= 10
     ytst = Int8.(ytst)
+
+    return xtrn, ytrn, xtst, ytst
+end
+    
+
+const FASHION_MNIST_DIR = "fashion_mnist"
+
+"""
+    function dataset_fashion_mnist(; force=false)
+
+Download Zalando's Fashion-MNIST datset with help of `MLDatasets.jl` 
+from https://github.com/zalandoresearch/fashion-mnist.
+
+4 arrays `xtrn, ytrn, xtst, ytst` are returned in the 
+same structure as teh original MNIST dataset.
+
+
+The data is stored in the *Helferlein* data directory and only downloaded
+the files are not already saved.
+
+Authors: Han Xiao, Kashif Rasul, Roland Vollgraf
+
+### Arguments:
++ `force=false`: if `true`, the dataset download will be forced.
+"""
+function dataset_fashion_mnist(; force=false)
+
+    xtrn,ytrn,xtst,ytst = dataset_from_mldatasets(
+                            FashionMNIST, FASHION_MNIST_DIR, force=force)
+    
+    ytrn[ytrn.==0] .= 10
+    ytrn = Int8.(ytrn)
+    
+    ytst[ytst.==0] .= 10
+    ytst = Int8.(ytst)
+
+    return xtrn, ytrn, xtst, ytst
+end
+
+
+
+
+
+
+
+
+
+function dataset_from_mldatasets(DataSet, dir; Tx=Float32, force=false)
+
+    data_dir = joinpath(NNHelferlein.DATA_DIR, dir)
+
+    if force && isdir(data_dir)
+        rm(data_dir, force=true, recursive=true)
+    end
+
+    if !isdir(data_dir)
+        println("Downloading dataset ...")
+    else
+        println("Dataset is already downloaded at $data_dir.")
+    end
+
+    trn = DataSet(; Tx=Float32, split=:train, dir=data_dir)
+    xtrn, ytrn = trn.features, trn.targets
+    
+    tst = DataSet(; Tx=Float32, split=:test, dir=data_dir)
+    xtst, ytst = tst.features, tst.targets
     
     return xtrn, ytrn, xtst, ytst
 end

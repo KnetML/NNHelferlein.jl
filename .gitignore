@@ -12,6 +12,7 @@ data/Tatoeba
 data/MIT-normal_sinus_rhythm
 data/pretrained
 data/mnist
+data/fashion_mnist
 test/logs
 codecov.token
 logs

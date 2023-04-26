@@ -19,7 +19,7 @@ using Knet #: KnetArray, Param, @diff
 import Images, Colors
 import Augmentor
 import MLDataUtils
-using MLDatasets: MNIST
+using MLDatasets: MNIST, FashionMNIST
 using TensorBoardLogger, Logging
 import MLBase: confusmat
 import Downloads
@@ -103,7 +103,8 @@ export AbstractNN, Classifier, Regressor, Chain,           # chains
        confusion_matrix,
        squared_error_acc, abs_error_acc, minibatch_eval,   # eval
        focal_nll, focal_bce,
-       dataset_mit_nsr, dataset_iris, dataset_mnist,
+       dataset_mit_nsr, dataset_iris, 
+       dataset_mnist, dataset_fashion_mnist,
        get_vgg16, get_resnet50v2, 
        preproc_imagenet_vgg, preproc_imagenet_resnet, preproc_imagenet_resnetv2,
        leaky_sigm, leaky_relu, leaky_tanh, swish

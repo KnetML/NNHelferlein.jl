@@ -162,7 +162,7 @@ function dataset_mnist(; force=false)
     # pre-download:
     #
     if !isdir(mnist_dir)
-        MNIST.download(mnist_dir, i_accept_the_terms_of_use=true)
+        MLDatasets.MNIST.download(mnist_dir, i_accept_the_terms_of_use=true)
     end
 
     # read:

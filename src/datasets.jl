@@ -3,6 +3,10 @@
 
 const ZENODO_URL = "https://zenodo.org"
 
+# no y/n dialog if a Download is requested
+#
+ENV["DATADEPS_ALWAYS_ACCEPT"] = true
+
 # ECG data: MIT Normal Sinus Rhythm database:
 #
 #
@@ -132,9 +136,9 @@ Yann LeCun's official website.
 array, and `ytrn` and `ytst` the corresponding labels as integers.
 
 The image(s) is/are returned in the horizontal-major memory layout as a single
-numeric array of eltype T. If T <: Integer, then all values will be within 0 and
-255, otherwise the values are scaled to be between 0 and 1. The integer values
-of the labels correspond 1-to-1 the digit that they represent.
+numeric array of eltype `Float32`. 
+The values are scaled to be between 0 and 1. 
+The labels are returned as a vector of `Int8`.
 
 In the 
 teaching input (i.e. `y`) the digit `0` is encoded as `10`.
@@ -159,19 +163,27 @@ function dataset_mnist(; force=false)
         rm(mnist_dir, force=true, recursive=true)
     end
 
-    # pre-download:
-    #
     if !isdir(mnist_dir)
-        MLDatasets.MNIST.download(mnist_dir, i_accept_the_terms_of_use=true)
+        println("Downloading MNIST dataset from Yann LeCun's website ...")
     end
+
+    # pre-download not possible with MLDatasets >= 0.7:
+    #
+    # if !isdir(mnist_dir)
+    #     MLDatasets.MNIST.download(mnist_dir, i_accept_the_terms_of_use=true)
+    #  end
 
     # read:
     #
-    xtrn,ytrn = MNIST.traindata(Float32, dir=mnist_dir)
+    trn = MNIST(; Tx=Float32, split=:train, dir=mnist_dir)
+    xtrn, ytrn = trn.features, trn.targets
     ytrn[ytrn.==0] .= 10
+    ytrn = Int8.(ytrn)
     
-    xtst,ytst = MNIST.testdata(Float32, dir=mnist_dir)
+    tst = MNIST(; Tx=Float32, split=:test, dir=mnist_dir)
+    xtst, ytst = tst.features, tst.targets
     ytst[ytst.==0] .= 10
+    ytst = Int8.(ytst)
     
     return xtrn, ytrn, xtst, ytst
 end
@@ -179,8 +191,6 @@ end
 
 
 # IRIS data:
-#
-#
 #
 const IRIS_DIR = "iris"
 const IRIS_CSV = "iris150.csv"

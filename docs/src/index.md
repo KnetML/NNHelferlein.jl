@@ -275,6 +275,8 @@ end
 Here we use the `Knet.nll()` function to calculate the crossentropy. 
 
 That's it!
+Every object of type `LeNet` is now a fully functional model,
+which can be trained with `tb_train!()`.
 
 Belive it or not - that's all you need to leave the 
 limitations of the Python world behind and playfully design any 

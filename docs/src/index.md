@@ -204,6 +204,9 @@ layers to `Chains`.
 
 
 #### The forward signature:
+
+Brute-force definition:
+
 ```julia
 function (nn::LeNet)(x)
     x = nn.drop1(x)
@@ -215,6 +218,49 @@ function (nn::LeNet)(x)
     x = nn.drop2(x)
     x = nn.mlp(x)
     x = nn.predict(x)
+    return x
+end
+```
+
+... or a little bit more elegant:
+
+```julia
+
+function (nn::LeNet)(x)
+    layers = (nn.drop1, nn.conv1, nn.pool1, 
+              nn.conv2, nn.pool2, nn.flat, 
+              nn.drop2, nn.mlp, nn.predict)
+
+    for layer in layers
+        x = layer(x)
+    end
+    return x
+end
+```
+
+... or a little bit more elegant:
+
+```julia
+function (nn::LeNet)(x)
+    layers = (nn.drop1, nn.conv1, nn.pool1, 
+              nn.conv2, nn.pool2, nn.flat, 
+              nn.drop2, nn.mlp, nn.predict)
+
+    return foldl((x,layer)->layer(x), layers, init=x)
+end
+```
+
+... or a little bit different:
+
+```julia
+function (nn::LeNet)(x)
+    filters = Chain(nn.drop1, nn.conv1, nn.pool1, 
+              nn.conv2, nn.pool2)
+    classifier = Chain(nn.drop2, nn.mlp, nn.predict)
+
+    x = filters(x)
+    x = nn.flat(x)
+    x = classifier(x) 
     return x
 end
 ```

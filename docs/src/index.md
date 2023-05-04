@@ -250,7 +250,7 @@ function (nn::LeNet)(x)
 end
 ```
 
-... or a little bit different:
+... or a little more structured:
 
 ```julia
 function (nn::LeNet)(x)

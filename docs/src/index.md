@@ -175,7 +175,7 @@ The LeNet-like example network for MNIST may be written as:
 
 #### The type and constructor:
 ```julia
-struct LeNet
+struct LeNet  <: AbstractNN
     drop1
     conv1
     pool1
@@ -191,10 +191,11 @@ struct LeNet
                    Pool(),
                    Conv(5,5,20,50),
                    Pool(),
-                   Flatten(),
-                   Dropout(drop)
+                   Flat(),
+                   Dropout(drop),
                    Dense(800, 512),
                    Dense(512, 10, actf=identity))
+    end
 end
 ```
 Of course the model may be configured by giving the constructor

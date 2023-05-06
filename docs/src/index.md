@@ -303,8 +303,7 @@ julia> lenet(x)  |> x->softmax(x, dims=1)
  0.0242452  0.0240787  0.0251508     0.0251202  0.0253443  0.0244217
  0.0522174  0.0531308  0.0512095     0.0512213  0.05218    0.0517014
  0.0561568  0.0580765  0.0577915     0.0577029  0.056594   0.0575527
- ```
-
+```
 
 
  ... with a minibatch and the corresponding teaching input (i.e. labels)
@@ -317,7 +316,7 @@ julia>  lenet(x,y)
 
 y = Int8[5, 10, 4, 1, 9, 2, 1, 3]
 2.3798099f0
- ```
+```
 
 
 ... or with an iterator of minibatches to get the mean loss for the

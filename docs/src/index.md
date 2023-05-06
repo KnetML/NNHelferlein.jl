@@ -209,7 +209,7 @@ layers to `Chains`.
 Brute-force definition:
 
 ```julia
-function (nn::LeNet)(x)
+function (nn::LeNet)(x::AbstractArray)
     x = nn.drop1(x)
     x = nn.conv1(x)
     x = nn.pool1(x)

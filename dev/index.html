@@ -129,7 +129,7 @@ julia&gt; lenet(x)  |&gt; x-&gt;softmax(x, dims=1)
  0.181409   0.178959   0.180939      0.182545   0.183172   0.179674
  0.0242452  0.0240787  0.0251508     0.0251202  0.0253443  0.0244217
  0.0522174  0.0531308  0.0512095     0.0512213  0.05218    0.0517014
- 0.0561568  0.0580765  0.0577915     0.0577029  0.056594   0.0575527</code></pre><p>... with a minibatch and the corresponding teaching input (i.e. labels)  to get the loss (<em>nll</em> of the untrained network should be about 2.30  (<em>-log(1/n_classes))</em>):</p><pre><code class="language-julia hljs">julia&gt;  @show y
+ 0.0561568  0.0580765  0.0577915     0.0577029  0.056594   0.0575527</code></pre><p>... with a minibatch and the corresponding teaching input (i.e. labels)  to get the loss:</p><pre><code class="language-julia hljs">julia&gt;  @show y
 julia&gt;  lenet(x,y)
 
 y = Int8[5, 10, 4, 1, 9, 2, 1, 3]

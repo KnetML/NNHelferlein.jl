@@ -307,8 +307,7 @@ julia> lenet(x)  |> x->softmax(x, dims=1)
 
 
  ... with a minibatch and the corresponding teaching input (i.e. labels)
- to get the loss (*nll* of the untrained network should be about 2.30
- (*-log(1/n_classes))*):
+ to get the loss:
 
  ```julia
 julia>  @show y

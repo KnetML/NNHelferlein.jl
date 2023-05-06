@@ -227,12 +227,268 @@ end
 # 
 # """
 # 
+"""
+    TFEncoderLayer
+
+A Bert-like encoder layer to be used as part of a Bert-like
+transformer.
+The layer consists of a multi-head attention sub-layer followed by
+a feed-forward network of size depth -> 4*depth -> depth. 
+Both parts have separate residual connections and layer normalisation.
+
+The design follows the original paper "Attention is all you need" 
+by Vaswani, 2017.
+
+### Constructor:
+
+    TFEncoderLayer(depth, n_heads, drop)
+
++ `depth`: Embedding depth
++ `n_heads`: number of heads for the multi-head attention
++ `drop_rate`: dropout rate
+
+### Signature:
+
+    (el::TFEncoderLayer)(x; mask=nothing)
+
+Objects of type `TFEncoderLayer` are callable and expect a 
+3-dimensional array of size [embedding_depth, seq_len, minibatch_size] 
+as input. 
+The optional `mask` must be of size [seq_len, minibatch_size] and
+mark masked positions with 1.0.
+
+It returns a tensor of the same size as the input and the self-attention
+factors of size [seq_len, seq_len, minibatch_size].
+"""
+mutable struct TFEncoderLayer
+    mha           # multi-head attn
+    drop1
+    norm1         # layer-norm
+    ffwd1; ffwd2  # final feed forward 4*depth
+    drop2
+    norm2
+
+    TFEncoderLayer(depth, n_heads, drop_rate) = new(MultiHeadAttn(depth, n_heads),
+                                                Dropout(drop_rate),
+                                                LayerNorm(depth),
+                                                Linear(depth, depth*4, actf=relu),
+                                                Linear(depth*4, depth),
+                                                Dropout(drop_rate),
+                                                LayerNorm(depth)
+                                                )
+    end
+
+function (el::TFEncoderLayer)(x; mask=nothing)
+
+    c, α = el.mha(x, x, x, mask=mask)   # always: [depth, seq_len, mb_size]
+    c = el.drop1(c)
+    o1 = el.norm1(x .+ c)
+
+    o2 = el.ffwd1(o1)                   # [depth*4, seq_len, mb_size]
+    o2 = el.ffwd2(o2)                   # back: [depth, seq_len, mb_size]
+    o2 = el.drop2(o2)
+    o2 = el.norm2(o1 .+ o2)
+    return o2, α
+end
+
+"""
+    TFEncoder
+
+A Bert-like encoder to be used as part of a tranformer. 
+The encoder is build as a stack of `TFEncoderLayer`s 
+which is entered after embedding, positional encoding and
+generation of a padding mask.
+
+### Constructor:
+    
+    TFEncoder(n_layers, depth, n_heads, vocab_size; 
+              pad_id=NNHelferlein.TOKEN_PAD, drop_rate=0.1)
+
+### Signature:
+
+    (e::TFEncoder)(x)
+
+The encoder is called with a matrix of token ids of size
+`[seq_len, n_minibatch]` and returns a tensor of size
+`[depth, seq_len, n_minibatch]`.
+"""
+mutable struct TFEncoder
+    depth          # embeding depth
+    embed          # embedding layer
+    pad_id         # id of padding word
+    n_layers
+    layers         # list of actual encoder layers
+    drop           # dropout layer
+
+    TFEncoder(n_layers, depth, n_heads, vocab_size; pad_id=NNHelferlein.TOKEN_PAD, drop_rate=0.1) =
+            new(depth,
+                Embed(vocab_size, depth),
+                pad_id,
+                n_layers,
+                [TFEncoderLayer(depth, n_heads, drop_rate) for i in 1:n_layers],
+                Dropout(drop_rate))
+end
+
+
+function (e::TFEncoder)(x)
+
+    n_seq = size(x)[1]
+    m_pad = mk_padding_mask(x, pad=e.pad_id, add_dims=true)
+    x = e.embed(x)                                          # [depth, seq_len, mb_size]
+    x = x .+ positional_encoding_sincos(e.depth, n_seq)
+    x = e.drop(x)
+
+    for l in e.layers
+        x,α = l(x, mask=m_pad)
+    end
+    return x
+end
+
+
 # 
 # 
 # """
 #     struct BertDecoder
 # 
 # """
+"""
+    TFDecoderLayer
+
+A Bert-like decoder layer to be used as part of a Bert-like
+transformer.
+The layer consists of a multi-head self-attention sub-layer,
+a multi-head attention sub-layer followed by
+a feed-forward network of size depth -> 4*depth -> depth. 
+All three parts have separate residual connections and layer normalisation.
+
+The design follows the original paper "Attention is all you need" 
+by Vaswani, 2017.
+
+### Constructor:
+
+    TFDecoderLayer(depth, n_heads, drop)
+
++ `depth`: Embedding depth
++ `n_heads`: number of heads for the multi-head attention
++ `drop`: dropout rate
+
+### Signature:
+
+    (el::TFDecoderLayer)(x, h_encoder; enc_m_pad=nothing, m_combi=nothing)
+
+Objects of type `TFDecoderLayer` are callable and expect a 
+minibatch of embedded sequences as input.
++ `x`: 3-dimensional array of size [embedding_depth, seq_len, minibatch_size] 
++ `h_encoder`: output of the encoder stack
++ `enc_m_pad`: optional padding mask for the encoder output
++ `m_combi`: optional mask for the decoder self-attention
+             combining padding and peek-ahead mask.
+
+
+It returns a tensor of the same size as the input, the self-attention
+factors and the decoder-encoder attention factors.
+"""
+mutable struct TFDecoderLayer
+    mhsa          # multi-head attn
+    drop1
+    norm1         # layer-norm
+    mha
+    drop2
+    norm2
+    ffwd1; ffwd2  # final feed forward
+    drop3
+    norm3
+
+    TFDecoderLayer(depth, n_heads; drop_rate=0.1) = new(MultiHeadAttn(depth, n_heads),
+                                             Dropout(drop_rate),
+                                             LayerNorm(depth),
+                                             MultiHeadAttn(depth, n_heads),
+                                             Dropout(drop_rate),
+                                             LayerNorm(depth),
+                                             Linear(depth, depth*4, actf=relu),
+                                             Linear(depth*4, depth),
+                                             Dropout(drop_rate),
+                                             LayerNorm(depth)
+                                             )
+    end
+
+function (dec::TFDecoderLayer)(x, h_encoder; enc_m_pad=nothing, m_combi=nothing)
+
+    self_c, α1 = dec.mhsa(x, x, x, mask=m_combi)    # c: [depth, seq_len, mb_size]
+                                                    # α: [seq1_len, seq2_len, n_heads, mb_size]
+    self_c = dec.drop1(self_c)
+    self_c = dec.norm1(x .+ self_c)
+
+    o1, α2 = dec.mha(self_c, h_encoder, h_encoder, mask=enc_m_pad)
+    o1 = dec.drop2(o1)
+    o1 = dec.norm2(o1 .+ self_c)
+
+    o2 = dec.ffwd1(o1)
+    o2 = dec.ffwd2(o2)
+    o2 = dec.drop2(o2)
+    o2 = dec.norm2(o1 + o2)
+    return o2, α1, α2
+end
+
+
+mutable struct TFDecoder
+    depth          # embeding depth
+    embed          # embedding layer
+    pad_id
+    n_layers
+    layers         # list of actual encoder layers
+    drop           # dropout layer
+
+    TFDecoder(n_layers, depth, n_heads, vocab_size; pad_id=NNHelferlein.TOKEN_PAD, drop_rate=0.1) =
+                new(depth,
+                Embed(vocab_size, depth),
+                pad_id,
+                n_layers,
+                [DecoderLayer(depth, n_heads, drop_rate=drop_rate) for i in 1:n_layers],
+                Dropout(drop_rate))
+end
+
+
+
+
+"""
+    TFDecoder
+
+A Bert-like decoder to be used as part of a tranformer. 
+The decoder is build as a stack of `TFDecoderLayer`s 
+which is entered after embedding, positional encoding and
+generation of a padding mask and a peek-ahead mask.
+
+### Constructor:
+    
+    TFDecoder(n_layers, depth, n_heads, vocab_size; 
+              pad_id=NNHelferlein.TOKEN_PAD, drop_rate=0.1)
+
+### Signature:
+
+    (e::TFdecoder)(x)
+
+The decoder is called with a matrix of token ids of size
+`[seq_len, n_minibatch]` and returns a tensor of size
+`[depth, seq_len, n_minibatch]` and the attention factors.
+"""
+function (d::TFDecoder)(y, h_enc; enc_m_pad=nothing)
+
+    n_seq = size(y)[1]
+    m_peek = mk_peek_ahead_mask(y)                           
+    m_pad = mk_padding_mask(y, pad=d.pad_id, add_dims=true)  
+    m_combi = max.(m_peek, m_pad)                            # combined target sequence mask needed
+                                                             # for self-attn
+    y = d.embed(y)                                           # [depth, seq_len, mb_size]
+    y = y .+ positional_encoding_sincos(d.depth, n_seq)
+    y = d.drop(y)
+
+    α2 = init0(0,0,0)
+    for l in d.layers
+        y,α1,α2 = l(y, h_enc, enc_m_pad=enc_m_pad, m_combi=m_combi)
+    end
+    return y, α2
+end
 
 
 

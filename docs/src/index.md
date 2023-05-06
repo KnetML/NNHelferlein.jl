@@ -227,7 +227,7 @@ end
 
 ```julia
 
-function (nn::LeNet)(x)
+function (nn::LeNet)(x::AbstractArray)
     layers = (nn.drop1, nn.conv1, nn.pool1, 
               nn.conv2, nn.pool2, nn.flat, 
               nn.drop2, nn.mlp, nn.predict)
@@ -242,7 +242,7 @@ end
 ... or a little bit more elegant:
 
 ```julia
-function (nn::LeNet)(x)
+function (nn::LeNet)(x::AbstractArray)
     layers = (nn.drop1, nn.conv1, nn.pool1, 
               nn.conv2, nn.pool2, nn.flat, 
               nn.drop2, nn.mlp, nn.predict)
@@ -254,7 +254,7 @@ end
 ... or a little more structured:
 
 ```julia
-function (nn::LeNet)(x)
+function (nn::LeNet)(x::AbstractArray)
     filters = Chain(nn.drop1, nn.conv1, nn.pool1, 
               nn.conv2, nn.pool2)
     classifier = Chain(nn.drop2, nn.mlp, nn.predict)

@@ -276,12 +276,58 @@ end
 Here we use the `Knet.nll()` function to calculate the crossentropy. 
 
 That's it!
-Every object of type `LeNet` is now a fully functional model,
-which can be trained with `tb_train!()`.
 
 Belive it or not - that's all you need to leave the 
 limitations of the Python world behind and playfully design any 
 innovative neural network in just a couple of lines of Julia code.
+
+Every object of type `LeNet` is now a fully functional model,
+which can be trained with `tb_train!()`.
+
+With the signatures defined above, the model can be executed with
+an array of data (i.e. one minibatch) to get the prediction:
+
+```julia
+x,y = first(dtrn)
+lenet = LeNet()
+lenet(x)  |> x->softmax(x, dims=1)
+
+    10×8 CuArray{Float32, 2, CUDA.Mem.DeviceBuffer}:
+     0.211679   0.214012   0.215643   …  0.208102   0.215791   0.212072
+     0.141102   0.134484   0.132739      0.136913   0.135558   0.134883
+     0.0590838  0.0632321  0.0624464     0.0624035  0.0603432  0.0610424
+     0.221033   0.222141   0.222283      0.223187   0.216619   0.226215
+     0.0203605  0.0201211  0.0212645     0.0207431  0.0212106  0.0206721
+     0.0327132  0.0317656  0.0305331  …  0.0320621  0.033188   0.031767
+     0.181409   0.178959   0.180939      0.182545   0.183172   0.179674
+     0.0242452  0.0240787  0.0251508     0.0251202  0.0253443  0.0244217
+     0.0522174  0.0531308  0.0512095     0.0512213  0.05218    0.0517014
+     0.0561568  0.0580765  0.0577915     0.0577029  0.056594   0.0575527
+ ```
+
+
+
+ ... with a minibatch and the corresponding teaching input (i.e. labels)
+ to get the loss (*nll* of the untrained network should be about 2.30
+ (*-log(1/n_classes))*):
+
+ ```julia
+ @show y
+ lenet(x,y)
+
+    y = Int8[5, 10, 4, 1, 9, 2, 1, 3]
+    2.3798099f0
+ ```
+
+
+... or with an iterator of minibatches to get the mean loss for the
+dataset:
+
+```julia
+lenet(dtrn)
+
+    2.6070921f0
+```
 
 The next step is to have a look at the examples
 in the GitHub repo:

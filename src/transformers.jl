@@ -81,10 +81,11 @@ end
 
 """
     function mk_peek_ahead_mask(x; dim=1)
+    function mk_peek_ahead_mask(n_seq)
 
 Return a matrix of size `[n_seq, n_seq]` filled with 1.0 and the *uppper triangle*
 set to 0.0.
-Type is `KnetArray{Float32}` in GPU context, `Array{Float32}` otherwise.
+Type is `CuArray{Float32}` in GPU context, `Array{Float32}` otherwise.
 The matrix can be used as peek-ahead mask in transformers.
 
 `dim=1` specifies the dimension in which the sequence length is
@@ -92,10 +93,15 @@ represented. For un-embedded data this is normally `1`, i.e. the
 shape of `x` is [n_seq, n_mb]. After embedding the shape probably is
 [depth, n_seq, n_mb].
 """
-function mk_peek_ahead_mask(x; dim=1)
+function mk_peek_ahead_mask(x::AbstractArray; dim=1)
 
     n_seq = size(x)[dim]
-    return convert2KnetArray(1 .- UpperTriangular(ones(n_seq, n_seq)))
+    return mk_peek_ahead_mask(n_seq)
+end
+
+function mk_peek_ahead_mask(n_seq::Int)
+
+    return ifgpu(1 .- UpperTriangular(ones(n_seq, n_seq)))
 end
 
 
@@ -301,45 +307,41 @@ generation of a padding mask.
 
 ### Constructor:
     
-    TFEncoder(n_layers, depth, n_heads, vocab_size; 
-              pad_id=NNHelferlein.TOKEN_PAD, drop_rate=0.1)
+    TFEncoder(n_layers, depth, n_heads; drop_rate=0.1)
 
 ### Signature:
 
     (e::TFEncoder)(x)
 
-The encoder is called with a matrix of token ids of size
-`[seq_len, n_minibatch]` and returns a tensor of size
+The encoder is called with a matrix of embedded tokens of size
+`[depth, seq_len, n_minibatch]` and returns a tensor of size
 `[depth, seq_len, n_minibatch]`.
 """
 mutable struct TFEncoder
     depth          # embeding depth
-    embed          # embedding layer
-    pad_id         # id of padding word
     n_layers
     layers         # list of actual encoder layers
     drop           # dropout layer
 
-    TFEncoder(n_layers, depth, n_heads, vocab_size; pad_id=NNHelferlein.TOKEN_PAD, drop_rate=0.1) =
+    TFEncoder(n_layers, depth, n_heads, drop_rate=0.1) =
             new(depth,
-                Embed(vocab_size, depth),
-                pad_id,
                 n_layers,
                 [TFEncoderLayer(depth, n_heads, drop_rate) for i in 1:n_layers],
                 Dropout(drop_rate))
 end
 
-
-function (e::TFEncoder)(x)
+# x is [depth, seq_len, mb_size]
+# mask is the padding mask of size [seq_len, mb_size] with 1.0 at masked positions
+#
+function (e::TFEncoder)(x, mask=nothing)
 
     n_seq = size(x)[1]
-    m_pad = mk_padding_mask(x, pad=e.pad_id, add_dims=true)
     x = e.embed(x)                                          # [depth, seq_len, mb_size]
     x = x .+ positional_encoding_sincos(e.depth, n_seq)
     x = e.drop(x)
 
     for l in e.layers
-        x,α = l(x, mask=m_pad)
+        x,α = l(x, mask=mask)
     end
     return x
 end
@@ -431,23 +433,6 @@ function (dec::TFDecoderLayer)(x, h_encoder; enc_m_pad=nothing, m_combi=nothing)
 end
 
 
-mutable struct TFDecoder
-    depth          # embeding depth
-    embed          # embedding layer
-    pad_id
-    n_layers
-    layers         # list of actual encoder layers
-    drop           # dropout layer
-
-    TFDecoder(n_layers, depth, n_heads, vocab_size; pad_id=NNHelferlein.TOKEN_PAD, drop_rate=0.1) =
-                new(depth,
-                Embed(vocab_size, depth),
-                pad_id,
-                n_layers,
-                [DecoderLayer(depth, n_heads, drop_rate=drop_rate) for i in 1:n_layers],
-                Dropout(drop_rate))
-end
-
 
 
 
@@ -472,9 +457,29 @@ The decoder is called with a matrix of token ids of size
 `[seq_len, n_minibatch]` and returns a tensor of size
 `[depth, seq_len, n_minibatch]` and the attention factors.
 """
-function (d::TFDecoder)(y, h_enc; enc_m_pad=nothing)
+mutable struct TFDecoder
+    depth          # embeding depth
+    embed          # embedding layer
+    n_layers
+    layers         # list of actual encoder layers
+    drop           # dropout layer
 
-    n_seq = size(y)[1]
+    TFDecoder(n_layers, depth, n_heads, vocab_size; drop_rate=0.1) =
+                new(depth,
+                Embed(vocab_size, depth),
+                n_layers,
+                [DecoderLayer(depth, n_heads, drop_rate=drop_rate) for i in 1:n_layers],
+                Dropout(drop_rate))
+end
+
+# y is [depth, seq_len, mb_size]
+# h_enc is encoder output
+# enc_mask is the padding mask of enoder input (x) with 1.0 at masked positions
+# dec_mask is the padding mask of decoder input (y) with 1.0 at masked positionso#
+#
+function (d::TFDecoder)(y, h_enc; dec_mask=nothing, enc_mask=nothing)
+
+    n_seq = size(y)[2]
     m_peek = mk_peek_ahead_mask(y)                           
     m_pad = mk_padding_mask(y, pad=d.pad_id, add_dims=true)  
     m_combi = max.(m_peek, m_pad)                            # combined target sequence mask needed

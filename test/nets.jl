@@ -105,6 +105,11 @@ function test_vae()
         p = get_beta(vae)
         r = get_beta(vae, ramp=true)
         
+        set_beta!(vae, 0.5, ramp_up=false, steps=100)
+
+        x,y = first(mb)
+        p = vae(x)
+
         return loss isa Real &&
                p isa Dict &&
                r isa AbstractArray && length(r) == 100

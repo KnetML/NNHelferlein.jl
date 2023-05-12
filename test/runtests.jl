@@ -106,6 +106,11 @@ using Statistics: mean
 @test test_layer_RNN_2d()
 @test test_get_set_rnn()
 
+@test test_summary()
+@test test_print()
+
+
+
 
 # acc_funs:
 #
@@ -146,6 +151,7 @@ using Statistics: mean
 @test test_mit_nsr_download()
 # @test test_mit_nsr_saved()
 @test test_dataset_mnist()
+@test test_dataset_fashion()
 @test test_dataset_iris()
 
 
@@ -163,9 +169,6 @@ using Statistics: mean
 @test test_add_layers()
 
 
-
-@test test_summary()
-@test test_print()
 
 
 @show include("pretrained.jl")

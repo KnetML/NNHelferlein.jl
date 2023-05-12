@@ -353,6 +353,7 @@ function test_print()
             Conv(3,3,100,50))
     cl = Classifier(ch, Flat(), Linear(100,10))
     n = print_network(cl)
+    summary(cl)
 
     return n == 5
 end

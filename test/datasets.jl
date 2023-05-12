@@ -26,6 +26,12 @@ function test_dataset_mnist()
     return length(mnist) == 4
 end
 
+function test_dataset_fashion()
+    mnist = dataset_fasion_mnist()
+
+    return length(mnist) == 4
+end
+
 function test_dataset_iris()
     iris = dataset_iris()
 

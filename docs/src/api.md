@@ -67,10 +67,10 @@ TFEncoder
 TFEncoderLayer
 TFDecoder
 TFDecoderLayer
-Transformer
-TokenTransformer
 ```
-
+These layers are used by the 
+[`Transformer`](@ref) and [`TokenTransformer`](@ref) types
+to build Bert-like transformer networks.
 ## Others
 
 ```@docs

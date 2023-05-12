@@ -323,7 +323,7 @@ mutable struct TFEncoder
     layers         # list of actual encoder layers
     drop           # dropout layer
 
-    TFEncoder(n_layers, depth, n_heads, drop_rate=0.1) =
+    TFEncoder(n_layers, depth, n_heads; drop_rate=0.1) =
             new(depth,
                 n_layers,
                 [TFEncoderLayer(depth, n_heads, drop_rate) for i in 1:n_layers],
@@ -333,10 +333,9 @@ end
 # x is [depth, seq_len, mb_size]
 # mask is the padding mask of size [seq_len, mb_size] with 1.0 at masked positions
 #
-function (e::TFEncoder)(x, mask=nothing)
+function (e::TFEncoder)(x; mask=nothing)
 
-    n_seq = size(x)[1]
-    x = e.embed(x)                                          # [depth, seq_len, mb_size]
+    n_seq = size(x)[2]
     x = x .+ positional_encoding_sincos(e.depth, n_seq)
     x = e.drop(x)
 
@@ -414,14 +413,14 @@ mutable struct TFDecoderLayer
                                              )
     end
 
-function (dec::TFDecoderLayer)(x, h_encoder; enc_m_pad=nothing, m_combi=nothing)
+function (dec::TFDecoderLayer)(x, h_encoder; enc_mask=nothing, dec_mask=nothing)
 
-    self_c, α1 = dec.mhsa(x, x, x, mask=m_combi)    # c: [depth, seq_len, mb_size]
+    self_c, α1 = dec.mhsa(x, x, x, mask=dec_mask)    # c: [depth, seq_len, mb_size]
                                                     # α: [seq1_len, seq2_len, n_heads, mb_size]
     self_c = dec.drop1(self_c)
     self_c = dec.norm1(x .+ self_c)
 
-    o1, α2 = dec.mha(self_c, h_encoder, h_encoder, mask=enc_m_pad)
+    o1, α2 = dec.mha(self_c, h_encoder, h_encoder, mask=enc_mask)
     o1 = dec.drop2(o1)
     o1 = dec.norm2(o1 .+ self_c)
 
@@ -459,16 +458,14 @@ The decoder is called with a matrix of token ids of size
 """
 mutable struct TFDecoder
     depth          # embeding depth
-    embed          # embedding layer
     n_layers
     layers         # list of actual encoder layers
     drop           # dropout layer
 
-    TFDecoder(n_layers, depth, n_heads, vocab_size; drop_rate=0.1) =
+    TFDecoder(n_layers, depth, n_heads; drop_rate=0.1) =
                 new(depth,
-                Embed(vocab_size, depth),
                 n_layers,
-                [DecoderLayer(depth, n_heads, drop_rate=drop_rate) for i in 1:n_layers],
+                [TFDecoderLayer(depth, n_heads, drop_rate=drop_rate) for i in 1:n_layers],
                 Dropout(drop_rate))
 end
 
@@ -477,23 +474,166 @@ end
 # enc_mask is the padding mask of enoder input (x) with 1.0 at masked positions
 # dec_mask is the padding mask of decoder input (y) with 1.0 at masked positionso#
 #
-function (d::TFDecoder)(y, h_enc; dec_mask=nothing, enc_mask=nothing)
+function (d::TFDecoder)(y, h_enc; enc_mask=nothing, dec_mask=nothing)
 
     n_seq = size(y)[2]
-    m_peek = mk_peek_ahead_mask(y)                           
-    m_pad = mk_padding_mask(y, pad=d.pad_id, add_dims=true)  
-    m_combi = max.(m_peek, m_pad)                            # combined target sequence mask needed
+    peek_mask = mk_peek_ahead_mask(n_seq)                           
+    if isnothing(dec_mask)
+        dec_mask = zeros(Float32, n_seq, n_seq) |> ifgpu
+    end
+    combi_mask = max.(peek_mask, dec_mask)                            # combined target sequence mask needed
                                                              # for self-attn
-    y = d.embed(y)                                           # [depth, seq_len, mb_size]
     y = y .+ positional_encoding_sincos(d.depth, n_seq)
     y = d.drop(y)
 
     α2 = init0(0,0,0)
     for l in d.layers
-        y,α1,α2 = l(y, h_enc, enc_m_pad=enc_m_pad, m_combi=m_combi)
+        y,α1,α2 = l(y, h_enc, enc_mask=enc_mask, dec_mask=combi_mask)
     end
     return y, α2
 end
 
 
+"""
+    mutable struct Transformer
 
+A Bert-like transformer network consisting of an encoder and a decoder
+stack.
+
+### Constructor:
+
+    Transformer(n_layers, depth, heads; drop_rate=0.1)
+
++ `n_layers`: number of layers in encoder and decoder
++ `depth`: embedding depth
++ `heads`: number of heads for the multi-head attention
++ `drop_rate`: dropout rate used in all layers
+
+### Signature:
+    
+    (tf::Transformer)(x, y; enc_mask=nothing, dec_mask=nothing)
+
+The transformer is called with two 3-d-arrays of embedded sequences
+`x` and `y` of size `[depth, seq_len, n_minibatch]` and returns a tensor of size
+`[depth, seq_len_y, n_minibatch]`. 
+Sequences `x` and `y` may be of different lengths; output has always the
+same dimensions as `y`.
+
+Attention factors of the last rund 
+are stored in the field `α` of the transformer object.
+
+`enc_mask` and `dec_mask` are optional padding masks for the encoder
+and decoder input, respectively. They must be of size `[seq_len, n_minibatch]`.
+"""
+mutable struct Transformer
+    n_layers
+    depth
+    encoder
+    decoder
+    α       # attn-matrix dec to enc of the last return
+
+    Transformer(n_layers, depth, heads; drop_rate=0.1) = 
+        new(n_layers,
+            depth,
+            TFEncoder(n_layers, depth, heads, drop_rate=drop_rate),
+            TFDecoder(n_layers, depth, heads, drop_rate=drop_rate),
+            nothing)
+end
+
+
+function (tf::Transformer)(x, y; enc_mask=nothing, dec_mask=nothing)
+
+    h_enc = tf.encoder(x, mask=enc_mask)
+    y, tf.α = tf.decoder(y, h_enc, dec_mask=dec_mask, enc_mask=enc_mask)
+    return y
+end
+
+
+"""
+    mutable struct TokenTransformer
+
+A wrapper around the `Transformer` object that takes sequences of
+token ids as input.
+
+### Constructor:
+
+    TokenTransformer(n_layers, depth, heads, 
+                     x_vocab, y_vocab;
+                     drop_rate=0.1)
+
++ `n_layers`: number of layers in encoder and decoder
++ `depth`: embedding depth
++ `heads`: number of heads for the multi-head attention
++ `x_vocab`: vocabulary size of the input sequences as integer value
+             or a `WordTokenizer` object
++ `y_vocab`: vocabulary size of the output sequences as integer value
+                or a `WordTokenizer` object
++ `drop_rate`: dropout rate used in all layers
+
+### Signature:
+        
+        (tt::TokenTransformer)(x, y; enc_mask=nothing, dec_mask=nothing
+                               de_embed=false)
+
+The transformer is called with two 2-d-arrays of token ids
+`x` and `y` of size `[seq_len, n_minibatch]` which may be of 
+different lengths. It returns a tensor of size
+`[y_vocab, seq_len_y, n_minibatch]` with the raw activations 
+of output neurons or, if
+`de_embed` is set to `true`, a 2-d-array of size
+`[seq_len_y, n_minibatch]` with the sequences of generated tokens.
+"""
+mutable struct TokenTransformer
+    n_layers
+    depth
+    embed_enc
+    embed_dec
+    predict
+    transformer
+    x_len        # number of vocab items
+    y_len
+    α            # attn-matrix dec to enc of the last return
+
+    function TokenTransformer(n_layers, depth, heads,
+                              x_vocab, y_vocab;
+                              drop_rate=0.1)
+
+        if x_vocab isa WordTokenizer
+            x_len = length(x_vocab)
+        else
+            x_len = x_vocab
+        end
+        if y_vocab isa WordTokenizer
+            y_len = length(y_vocab)
+        else
+            y_len = y_vocab
+        end
+
+        return new(n_layers, depth,
+            Embed(x_len, depth),
+            Embed(y_len, depth),
+            Linear(depth, y_len),
+            Transformer(n_layers, depth, heads, drop_rate=drop_rate),
+            x_len, 
+            y_len, 
+            nothing)
+    end
+end
+
+function (tt::TokenTransformer)(x, y; enc_mask=nothing, dec_mask=nothing,
+                                embedded=true)
+
+    x = tt.embed_enc(x)
+    y = tt.embed_enc(y)
+
+    y = tt.transformer(x, y, enc_mask=enc_mask, dec_mask=dec_mask)
+    y = tt.predict(y)
+    tt.α = tt.transformer.α
+ 
+    if !embedded
+        y = de_embed(y, remove_dim=true)
+    end
+    return y
+end
+
+# function fo flip 1 and zero in a array:

@@ -22,6 +22,9 @@ a dictionary `w2i` with the words as keys.
 The constants `TOKEN_START, TOKEN_END, TOKEN_PAD` and `TOKEN_UNKOWN`
 are exported.
 
+The WordTokenizer implements `length`, so `length(vt::WordTokenizer)`
+reuturns the number of words in the vocabulary.
+
 ### Constructor:
 
     function WordTokenizer(texts; len=nothing, add_ctls=true)

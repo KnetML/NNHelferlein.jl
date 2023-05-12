@@ -27,7 +27,7 @@ function test_dataset_mnist()
 end
 
 function test_dataset_fashion()
-    mnist = dataset_fasion_mnist()
+    mnist = dataset_fashion_mnist()
 
     return length(mnist) == 4
 end

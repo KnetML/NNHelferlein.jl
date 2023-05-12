@@ -108,7 +108,7 @@ function test_vae()
         set_beta!(vae, 0.5, ramp_up=false, steps=100)
 
         x,y = first(mb)
-        p = vae(x)
+        o = vae(x)
 
         return loss isa Real &&
                p isa Dict &&

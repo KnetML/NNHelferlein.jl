@@ -126,7 +126,6 @@ using Statistics: mean
 @test test_focal_loss()
 
 
-
 # utils:
 #
 @show include("util.jl")
@@ -145,6 +144,7 @@ using Statistics: mean
 #
 @show include("funs.jl")
 @test test_leaky()
+@test test_swish()
 
 # datasets:
 @show include("datasets.jl")

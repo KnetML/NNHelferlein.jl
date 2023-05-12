@@ -13,6 +13,8 @@ print_network
 ```@docs
 Classifier
 Regressor
+Transformer
+TokenTransformer
 Chain
 VAE
 get_beta
@@ -56,6 +58,17 @@ set_hidden_states!
 set_cell_states!
 reset_hidden_states!
 reset_cell_states!
+```
+
+## Transformers
+
+```@docs
+TFEncoder
+TFEncoderLayer
+TFDecoder
+TFDecoderLayer
+Transformer
+TokenTransformer
 ```
 
 ## Others

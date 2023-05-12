@@ -20,6 +20,10 @@ For variational autoencoders the type `VAE` exists.
 
 The type `Chain` wraps a list of layers that are executed sequentially.
 
+Types `Transformer` and `TokenTransformer` are provided to build
+Bert-like transformer networks from the rspective `TFEncoder` 
+and `TFDecoder` layers.
+
 A network summary can be printed with `summary(mdl::AbstractNN)` and
 a more detailed list of all layers with `print_network(mdl::AbstractNN)`.
 

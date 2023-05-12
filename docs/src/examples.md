@@ -67,6 +67,12 @@ All examples are at [GitHub/examples](https://github.com/KnetML/NNHelferlein.jl/
   *NNHelferlein*-utils.
 
 
++ [`Simple Transformer API for Bert-like architectures`]
+  (https://github.com/KnetML/NNHelferlein.jl/blob/main/examples/81-transformer-api.ipynb):
+  A simple transformer architecture is set up with the *NNHelferlein* transformer API.
+
+
+
 ### Pretrained Nets
 Based on the Keras import constructors, it is easy to 
 import  pretrained models from the TF/Keras ecosystem.

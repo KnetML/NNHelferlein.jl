@@ -75,6 +75,8 @@ export AbstractNN, Classifier, Regressor, Chain,           # chains
        AttnInFeed,
        leaky_sigm, leaky_relu, leaky_tanh,
        PositionalEncoding, positional_encoding_sincos,  # transformers
+       Transformer, TokenTransformer,
+       TFEncoder, TFDecoder, TFEncoderLayer, TFDecoderLayer,
        mk_padding_mask, mk_peek_ahead_mask,
        dot_prod_attn, MultiHeadAttn,
        separate_heads, merge_heads,

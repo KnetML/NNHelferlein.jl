@@ -25,6 +25,8 @@ using Statistics: mean
 @test test_dotp_attn()
 @test test_mha()
 
+@test test_transformer()
+
 
 
 # data loader:

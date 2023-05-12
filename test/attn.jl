@@ -116,3 +116,81 @@ function test_mha()
 end
 
 
+
+# test transformer API:
+#
+    mutable struct AllYouNeed
+        t::TokenTransformer
+        vocab_enc
+        vocab_dec
+        
+        AllYouNeed(n_layers, depth, heads, x_vocab, y_vocab; drop_rate=0.1) = 
+            new(TokenTransformer(n_layers, depth, heads, x_vocab, y_vocab; drop_rate),
+            x_vocab,
+            y_vocab)
+    end
+    function (ayn::AllYouNeed)(x,y)   # calc loss
+        
+        y_in = y[1:end-1,:]       # shift y against teaching output
+        y_teach = y[2:end,:]
+            
+        x_mask = mk_padding_mask(x)
+        y_mask = mk_padding_mask(y_in)
+            
+        o = ayn.t(x, y_in)
+            
+        o_mask = (mk_padding_mask(y_teach) .== 0.0) |> Array{Float32}
+        y_m = y_teach .* o_mask .|> Int   # make class ID 0 for padded positions
+        loss = nll(o, y_m, average=true)  # Xentropy loss of unmasked positions only
+        
+        return loss
+    end
+
+
+
+function test_transformer()
+    de = ["Ich liebe Julia",
+          "Peter liebt Python",
+          "Susi liebt sie alle",
+          "Ich programmiere immer in Julia"]
+    en = ["I love Julia",
+          "Peter loves Python",
+          "Susi loves them all",
+          "I always code Julia"]
+    
+    de_vocab = WordTokenizer(de)
+    d = de_vocab(de, add_ctls=true)
+    d = pad_sequence.(d, 8)
+    d = truncate_sequence.(d, 8)
+    
+    en_vocab = WordTokenizer(en)
+    e = en_vocab(en, add_ctls=true)
+    e = pad_sequence.(e, 8)
+    e = truncate_sequence.(e, 8)
+    
+    mbs = sequence_minibatch(d, e, 2)
+    x,y = first(mbs)
+    
+    tt =  TokenTransformer(5, 128, 4, de_vocab, en_vocab, drop_rate=0.1)
+    result = tt(x,y) |> de_embed
+    
+    translate = AllYouNeed(5, 128, 4, de_vocab, en_vocab, drop_rate=0.1)
+    translate(x,y)
+    
+    function tt_acc(mdl; data=nothing)
+    
+        tac = Float32(0.0)
+        for (x,y) in data
+            y_in = y[1:end-1,:]
+            y_teach = y[2:end,:]
+            o = mdl.t(x, y_in, embedded=false)
+    
+            tac += hamming_acc(o, y_teach, vocab=mdl.vocab_dec)
+        end
+    
+        return tac / length(data)
+    end
+    acc = tt_acc(translate, data=mbs)
+
+    return size(result) == (1,8,2)  && acc isa Real # seq, len, mb
+end

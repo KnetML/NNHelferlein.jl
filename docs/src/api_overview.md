@@ -100,7 +100,16 @@ Layers for recurrent networks:
 
 
 
-### Layers and helpers for transformers
+### Tranformer API
+
++ [`Transformer`](@ref) - generic transformer type, works on tensors
+                          of embedded sequences.
++ [`TokenTransformer`](@ref) - generic transformer type, works on
+                               tokenized sequences.
++ [`TFEncoderLayer`](@ref)
++ [`TFEncoder`](@ref) - Bert-like transformer encoder
++ [`TFDecoderLayer`](@ref)
++ [`TFDecoder`](@ref) - Bert-like transformer decoder
 
 + [`PositionalEncoding`](@ref)
 

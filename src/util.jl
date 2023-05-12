@@ -340,42 +340,42 @@ function de_embed(x; remove_dim=false)
     end
 end
 
-"""
-    function get_gpu_load()
-
-Return a list of tuples with cpu- and memory- utilisation for all
-GPUs.
-"""
-function get_gpu_load()
-
-    devs = collect(CUDA.NVML.DeviceIterator())
-    return [(c,m) for (c,m) in CUDA.NVML.utilization_rates.(devs)]
-end
-
-
-"""
-    function select_gpu!(look=:memory)
-
-Select the GPU with the lowest cpu-load, based on CPU ormemory-utilisation.
-
-### Arguments:
-+ `look=:memory`: If `:cpu` the GPU with the smallsed CPU-load will be set,
-                  if `:memory` the GPU with most available memeory will be 
-                  selected.
-"""
-function set_free_gpu!(look=:memory)
-
-    if look == :memory
-        loads = [m for (c,m) in get_gpu_load()]
-        str = "memory"
-    else
-        loads = [c for (c,m) in get_gpu_load()]
-        str = "cpu"
-    end
-
-    dev_id = argmin(loads)  # nvidia is 0-indexed!
-    
-    println("Select GPU $(dev_id-1) with $str load: $(loads[dev_id])")
-    CUDA.device!(dev_id-1)
-end
+#  """
+#      function get_gpu_load()
+#  
+#  Return a list of tuples with cpu- and memory- utilisation for all
+#  GPUs.
+#  """
+#  function get_gpu_load()
+#  
+#      devs = collect(CUDA.NVML.DeviceIterator())
+#      return [(c,m) for (c,m) in CUDA.NVML.utilization_rates.(devs)]
+#  end
+#  
+#  
+#  """
+#      function select_gpu!(look=:memory)
+#  
+#  Select the GPU with the lowest cpu-load, based on CPU ormemory-utilisation.
+#  
+#  ### Arguments:
+#  + `look=:memory`: If `:cpu` the GPU with the smallsed CPU-load will be set,
+#                    if `:memory` the GPU with most available memeory will be 
+#                    selected.
+#  """
+#  function set_free_gpu!(look=:memory)
+#  
+#      if look == :memory
+#          loads = [m for (c,m) in get_gpu_load()]
+#          str = "memory"
+#      else
+#          loads = [c for (c,m) in get_gpu_load()]
+#          str = "cpu"
+#      end
+#  
+#      dev_id = argmin(loads)  # nvidia is 0-indexed!
+#      
+#      println("Select GPU $(dev_id-1) with $str load: $(loads[dev_id])")
+#      CUDA.device!(dev_id-1)
+#  end
 

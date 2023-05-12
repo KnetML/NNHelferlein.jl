@@ -519,7 +519,7 @@ The transformer is called with two 3-d-arrays of embedded sequences
 Sequences `x` and `y` may be of different lengths; output has always the
 same dimensions as `y`.
 
-Attention factors of the last rund 
+Attention factors of the last run 
 are stored in the field `α` of the transformer object.
 
 `enc_mask` and `dec_mask` are optional padding masks for the encoder
@@ -573,14 +573,14 @@ token ids as input.
 ### Signature:
         
         (tt::TokenTransformer)(x, y; enc_mask=nothing, dec_mask=nothing
-                               de_embed=false)
+                               embedded=true)
 
 The transformer is called with two 2-d-arrays of token ids
 `x` and `y` of size `[seq_len, n_minibatch]` which may be of 
 different lengths. It returns a tensor of size
 `[y_vocab, seq_len_y, n_minibatch]` with the raw activations 
 of output neurons or, if
-`de_embed` is set to `true`, a 2-d-array of size
+`embedded` is set to `false`, a 2-d-array of size
 `[seq_len_y, n_minibatch]` with the sequences of generated tokens.
 """
 mutable struct TokenTransformer

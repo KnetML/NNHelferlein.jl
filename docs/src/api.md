@@ -18,13 +18,13 @@ TokenTransformer
 Chain
 VAE
 get_beta
-set_beta
+set_beta!
 ```
 
 # Layers
 
 ```@docs
-Layer
+AbstractLayer
 ```
 
 ## Fully connected layers

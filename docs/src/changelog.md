@@ -2,6 +2,10 @@
 
 ### wip
 + GPU selection added (not yet exported)
+
+### v1.3
++ Transformer API added for Bert-like architectures
++ Transformer example
 + ramp-up of beta added to VAE
 + disambiguate vae signature
 

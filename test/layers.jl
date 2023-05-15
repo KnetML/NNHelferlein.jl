@@ -346,6 +346,24 @@ function test_summary()
     return n == 15
 end
 
+# test summary for abstract layer:
+#
+mutable struct AL <: AbstractLayer
+    w
+    function AL(i,o)
+        w = param(o,i)
+        return new(w)
+    end
+end
+
+function test_abstract_layer_summary()
+
+    al = AL(100,100)
+    n = summary(al)
+    return n == 1
+end
+
+
 function test_print()
 
     ch = Chain(Conv(3, 3, 3, 100),

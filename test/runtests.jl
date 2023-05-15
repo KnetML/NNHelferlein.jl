@@ -107,6 +107,7 @@ using Statistics: mean
 @test test_get_set_rnn()
 
 @test test_summary()
+@test test_abstract_layer_summary()
 @test test_print()
 
 

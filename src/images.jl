@@ -5,7 +5,7 @@
 const UNKNOWN_CLASS = "unknwon_class"
 
 """
-    function mk_image_minibatch(dir, batchsize; split=false, fr=0.2,
+    function mk_image_minibatch(dir, batchsize; split=false, at=0.8,
                                 balanced=false, shuffle=true, train=true,
                                 pre_load=false,
                                 aug_pipl=nothing, pre_proc=nothing)
@@ -22,7 +22,7 @@ vector of class IDs as Int.
 
 ### Keyword arguments:
 + `split`: return two iterators for training and validation
-+ `fr`: split fraction
++ `at`: split fraction
 + `balanced`: return balanced data (i.e. same number of instances
         for all classes). Balancing is achieved via oversampling
 + `shuffle`: if true, shuffle the images everytime the iterator
@@ -41,7 +41,7 @@ vector of class IDs as Int.
 + `pre_load=false`: read all images from disk once when populating the
         loader (requires loads of memory, but speeds up training).
 """
-function mk_image_minibatch(dir, batchsize; split=false, fr=0.5,
+function mk_image_minibatch(dir, batchsize; split=false, at=0.8,
                             balanced=false, shuffle=true, train=true,
                             pre_load=false,
                             aug_pipl=nothing, pre_proc=nothing)
@@ -61,7 +61,7 @@ function mk_image_minibatch(dir, batchsize; split=false, fr=0.5,
 
 
     if split                    # return train_loader, valid_loader
-        ((xvld,yvld),(xtrn,ytrn)) = do_split(i_paths, i_classes, at=fr)
+        ((xtrn,ytrn), (xvld,yvld)) = do_split(i_paths, i_classes, at=at)
         if balanced
             (xtrn,ytrn) = do_balance(xtrn, ytrn)
             (xvld,yvld) = do_balance(xvld, yvld)

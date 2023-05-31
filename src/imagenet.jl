@@ -48,7 +48,7 @@ pipl = Either(1=>FlipX(), 1=>FlipY(), 2=>NoOp()) |>
        RCropSize(224,224)
 
 dtrn, dvld = mk_image_minibatch("./example_pics", 16;
-                    split=true, fr=0.2, balanced=false,
+                    split=true, at=0.8, balanced=false,
                     shuffle=true, train=true,
                     aug_pipl=pipl,
                     pre_proc=preproc_imagenet_vgg)

@@ -7,7 +7,7 @@ function test_lenet()
 
     augm = CropSize(28,28)
     trn, vld = mk_image_minibatch(joinpath("data", "flowers"),
-                4; split=true, fr=0.2,
+                4; split=true, at=0.8,
                 balanced=false, shuffle=true,
                 train=true,
                 aug_pipl=augm, pre_proc=preproc_imagenet_resnetv2)
@@ -34,7 +34,7 @@ function test_lenet()
     acc = accuracy(mdl, data=vld)
 
     tst = mk_image_minibatch(joinpath("data", "flowers"),
-                4; split=false, fr=0.2,
+                4; split=false, at=0.8,
                 balanced=false, shuffle=true,
                 train=false,
                 aug_pipl=augm, pre_proc=nothing)

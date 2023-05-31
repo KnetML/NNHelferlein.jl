@@ -5,7 +5,7 @@ import Pkg; Pkg.add("Augmentor"); using Augmentor
 function test_image_loader()
     augm = CropSize(28,28)
     trn, vld = mk_image_minibatch(joinpath("data", "flowers"),
-                4; split=true, fr=0.2,
+                4; split=true, at=0.8,
                 balanced=true, shuffle=true,
                 train=true,
                 aug_pipl=augm, pre_proc=preproc_imagenet_vgg)
@@ -19,7 +19,7 @@ end
 
 function test_image_preload()
     tst = mk_image_minibatch(joinpath("data", "flowers"),
-                4; split=false, fr=0.2,
+                4; split=false, at=0.8,
                 balanced=false, shuffle=false,
                 train=false, pre_load=true,
                 aug_pipl=nothing, pre_proc=nothing)

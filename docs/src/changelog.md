@@ -2,6 +2,7 @@
 
 ### wip
 + GPU selection added (not yet exported)
++ mk_imagebatch not working with tensorboard
 
 ### v1.3
 + Transformer API added for Bert-like architectures

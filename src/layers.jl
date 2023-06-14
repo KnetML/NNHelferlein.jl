@@ -300,7 +300,7 @@ struct DepthwiseConv  <: AbstractLayer
     groups
     kwargs
     
-    function DepthwiseConv(w::AbstractArray, b::AbstractArray, actf::Function, 
+    function DepthwiseConv(w, b, actf, 
                            groups::Int; kwargs...)
         depthwise_warn()
         new(w, b, actf, groups, kwargs)

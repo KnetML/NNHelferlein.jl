@@ -280,8 +280,8 @@ Conv layer with seperate filters per input channel.
 on only one input channel. `o` must be a multiple of `i`.
 
 ### Constructors:
-+ `DepthwiseConv(w, b, padding, actf)`: default constructor
-+ `Conv(w1::Int, w2::Int,  i::Int, o::Int; actf=relu; kwargs...)`: layer with
++ `DepthwiseConv(w, b, actf; kwargs)`: default constructor
++ `Conv(w1::Int, w2::Int,  i::Int, o::Int; actf=relu, kwargs...)`: layer with
     `o` kernels of size (w1,w2) for every input channel of an 2-d input of `i` layers.
     `o` must be a multiple of `i`; if `o == i`, each output feature map is 
     generated from one channel. If `o == n*i`, `n` feature maps are 
@@ -297,18 +297,20 @@ struct DepthwiseConv  <: AbstractLayer
     w
     b
     actf
-    padding
-    stride
-    dilation
     group
+    kwargs
     
-    DepthwiseConv(w, b, actf; kwargs...) = (depthwise_warn(); new(w, b, actf, kwargs))
+    function DepthwiseConv(w, b, actf; kwargs...)
+        depthwise_warn()
+        new(w, b, actf, size(w)[end], kwargs)
+    end
+
     function DepthwiseConv(w1::Int, w2::Int, i::Int, o::Int; actf=Knet.relu, 
-                           padding=0, stride=1, dilation=1)
+                            kwargs...) 
         
         depthwise_warn()
-        new(Knet.param(w1,w2,1,o; init=xavier_normal), Knet.param0(1,1,o,1),
-                actf, padding, stride, dilation, i)
+        DepthwiseConv(Knet.param(w1,w2,1,o; init=xavier_normal), Knet.param0(1,1,o,1),
+                actf,  kwargs...)
     end
 end
 

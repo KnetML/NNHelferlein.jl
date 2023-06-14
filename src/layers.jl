@@ -300,7 +300,8 @@ struct DepthwiseConv  <: AbstractLayer
     groups
     kwargs
     
-    function DepthwiseConv(w, b, actf, groups; kwargs...)
+    function DepthwiseConv(w::AbstractArray, b::AbstractArray, actf::Function, 
+                           groups::Int; kwargs...)
         depthwise_warn()
         new(w, b, actf, groups, kwargs)
     end
@@ -310,7 +311,7 @@ struct DepthwiseConv  <: AbstractLayer
         
         depthwise_warn()
         DepthwiseConv(Knet.param(w1,w2,1,o; init=xavier_normal), Knet.param0(1,1,o,1),
-                actf,  i, kwargs...)
+                actf,  i; kwargs...)
     end
 end
 

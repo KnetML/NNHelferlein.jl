@@ -297,12 +297,12 @@ struct DepthwiseConv  <: AbstractLayer
     w
     b
     actf
-    group
+    groups
     kwargs
     
-    function DepthwiseConv(w, b, actf; kwargs...)
+    function DepthwiseConv(w, b, actf, groups; kwargs...)
         depthwise_warn()
-        new(w, b, actf, size(w)[end], kwargs)
+        new(w, b, actf, groups, kwargs)
     end
 
     function DepthwiseConv(w1::Int, w2::Int, i::Int, o::Int; actf=Knet.relu, 
@@ -310,7 +310,7 @@ struct DepthwiseConv  <: AbstractLayer
         
         depthwise_warn()
         DepthwiseConv(Knet.param(w1,w2,1,o; init=xavier_normal), Knet.param0(1,1,o,1),
-                actf,  kwargs...)
+                actf,  i, kwargs...)
     end
 end
 
@@ -319,8 +319,7 @@ function (c::DepthwiseConv)(x)
     if depthwise_warn()
         return x
     else
-        return c.actf.(Knet.conv4(c.w, x; group=c.group, 
-                            padding=c.padding, stride=c.stride, dilation=c.dilation) .+ c.b)
+        return c.actf.(Knet.conv4(c.w, x; group=c.groups, c.kwargs...) .+ c.b)
     end
 end
 
@@ -339,7 +338,8 @@ function Base.summary(l::DepthwiseConv; indent=0)
     n = get_n_params(l)
 
     siz = size(l.w)  
-    i,o = siz[end-1:end]
+    o = siz[end]
+    
     w_siz = siz[1:end-2]
     
     if length(l.kwargs) > 0
@@ -347,7 +347,7 @@ function Base.summary(l::DepthwiseConv; indent=0)
     else
         kwa = ""
     end
-    s1 = "DepthwiseConv layer $i → $o ($w_siz) $kwa with $(l.actf),"
+    s1 = "DepthwiseConv layer → $o ($w_siz) in $(l.groups) groups $kwa with $(l.actf),"
     println(print_summary_line(indent, s1, n))
     return 1
 end

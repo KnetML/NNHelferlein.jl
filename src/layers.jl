@@ -163,9 +163,17 @@ Default Conv layer.
 
 ### Constructors:
 + `Conv(w1::Int, w2::Int,  i::Int, o::Int; actf=relu; kwargs...)`: layer with
-    o kernels of size (w1,w2) for an input of i layers.
+    o kernels of size (w1,w2) for an input of i channels.
 + `Conv(w1::Int, w2::Int, w3::Int, i::Int, o::Int; actf=relu; kwargs...)`: layer 
-        with 3-dimensional kernels for 3D convolution (requires 5-dimensional input)
+        with 3-dimensional kernels for 3D convolution 
+        (requires 5-dimensional input)
++ `Conv(w1::Int,  i::Int, o::Int; actf=relu; kwargs...)`: layer with
+    o kernels of size (1,w1) for an input of i channels.
+    This 1-dimensional convolution uses a 2-dimensional kernel with a first 
+    dimension of size 1. Input and output contain an empty firfst dimension
+    of size 1. If `padding`, `stride` or `dilation` are specified, 2-tuples
+    must be specified to correspond with the 2-dimensional kernel
+    (e.g. `padding=(0,1)` for a 1-padding along the 1D sequence).
 
 ### Constructors to read parameters from Tensorflow/Keras HDF-files:
 + `Conv(h5::HDF5.File, kernel::String, bias::String; trainable=false, actf=Knet.relu, 
@@ -197,6 +205,9 @@ struct Conv  <: AbstractLayer
     kwargs
     Conv(w::Param, b::Param, actf::Function, kwargs) = new(w, b, actf, kwargs)
     Conv(w, b, actf; kwargs...) = new(w, b, actf, kwargs)
+    Conv(w1::Int, i::Int, o::Int; actf=Knet.relu, kwargs...) =
+            new(Knet.param(1,w1,i,o; init=xavier_normal), Knet.param0(1,1,o,1),
+                actf, kwargs)
     Conv(w1::Int, w2::Int,  i::Int, o::Int; actf=Knet.relu, kwargs...) =
             new(Knet.param(w1,w2,i,o; init=xavier_normal), Knet.param0(1,1,o,1),
                 actf, kwargs)

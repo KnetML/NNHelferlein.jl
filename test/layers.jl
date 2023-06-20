@@ -46,6 +46,13 @@ function test_layer_conv()
     return size(y) == (26,26,8,16)
 end
 
+function test_layer_conv1d()
+    l = Conv(3,4,8)
+    x = randn(1,12,4,2) |> ifgpu
+    y = l(x)
+    return size(y) == (1,10,8,2)
+end
+
 function test_layer_depthwise()
     l = DepthwiseConv(3,3,4,8)
     x = ifgpu(rand(Float32, 28,28,4,16))

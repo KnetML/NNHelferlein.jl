@@ -1,7 +1,9 @@
 # ChangeLog of NNHelferlein package
 
+exMPLE ecg tAGGER - DNN...
 ### wip
 + GPU selection added (not yet exported)
++ dataframe_minibatch default "y" changed to nothing.
 
 ### v1.3.1 - unreleased
 + grouped convolutions fixed

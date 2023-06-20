@@ -53,7 +53,7 @@ with one sample per row.
 
 ### Arguments:
 + `ignore`: defines a list of column names to be ignored
-+ `teaching="y"`: defines the column name with teaching input. Default is "y".
++ `teaching=nothing`: defines the column name with teaching input. 
                 `teaching` is handled differently, depending on its type:
                 If `Int`, the teaching input is interpreted as
                 class IDs and directly used for training (this assumes that
@@ -63,6 +63,9 @@ with one sample per row.
                 order can be created by calling `mk_class_ids(data.y)[2]`.
                 If teaching is a scalar value, regression context is assumed,
                 and the value is used unchanged for training.
+                
+                If `teaching` is `nothing`, no teaching input is used and
+                minibatches of x-data only are returned.
 + `verbose=1`: if > 0, a summary of how the dataframe is used is echoed.
 + other keyword arguments: all keyword arguments accepted by
                 `Knet.minibatch()` may be used.
@@ -70,7 +73,7 @@ with one sample per row.
 Allowed column definitions for `ignore` and `teaching` include names (as Strings),
 column names (as Symbols) or column indices (as Integer values).
 """
-function dataframe_minibatch(data; size=16, ignore=[], teaching="y", 
+function dataframe_minibatch(data; size=16, ignore=[], teaching=nothing, 
                                verbose=1, o...)
 
     if !(ignore isa(AbstractArray))

@@ -22,16 +22,13 @@ vector of class IDs as Int.
 
 ### Keyword arguments:
 + `split`: return two iterators for training and validation
-+ `at`: split fraction
++ `at`: split fraction (for training; the rest is for validation).
 + `balanced`: return balanced data (i.e. same number of instances
         for all classes). Balancing is achieved via oversampling
 + `shuffle`: if true, shuffle the images everytime the iterator
         restarts
 + `train`: if true, minibatches with (x,y) tuples are provided,
         if false only x (for prediction)
-+ `pre_load`: if `true` all images are loaded in advance;
-        otherwise images are loaded on demand during training.
-        (option is *not implemented yet!*)
 + `aug_pipl`: augmentation pipeline for Augmentor.jl. Augmentation
         is performed before the pre_proc-function is applied
 + `pre_proc`: function with preprocessing

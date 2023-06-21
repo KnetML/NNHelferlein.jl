@@ -42,8 +42,10 @@ end
 
 
 """
-    dataframe_minibatch(data::DataFrames.DataFrame; size=256, ignore=[], teaching="y", 
-                          verbose=1, o...)
+    dataframe_minibatch(data::DataFrames.DataFrame; size=256, 
+                        ignore=[], teaching=nothing, 
+                        verbose=1, o...)
+
     dataframe_minibatches()
 
 Make Knet-conform minibatches of type `Knet.data` from a dataframe
@@ -62,8 +64,7 @@ with one sample per row.
                 by calling `mk_class_ids()`. The list of valid lables and their
                 order can be created by calling `mk_class_ids(data.y)[2]`.
                 If teaching is a scalar value, regression context is assumed,
-                and the value is used unchanged for training.
-                
+                and the value is used unchanged for training.     
                 If `teaching` is `nothing`, no teaching input is used and
                 minibatches of x-data only are returned.
 + `verbose=1`: if > 0, a summary of how the dataframe is used is echoed.

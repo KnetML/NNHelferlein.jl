@@ -62,7 +62,7 @@ function test_mlp()
                         x7=randn(16), x8=randn(16),
                         y=collect(range(0, 1, length=16)))
 
-        mb = dataframe_minibatches(trn, size=4)
+        mb = dataframe_minibatch(trn, size=4, teaching=:y)
 
         mlp = Regressor(Dense(8,8, actf=relu),
                          Dense(8,8),
@@ -89,7 +89,7 @@ function test_vae()
                         x7=randn(16), x8=randn(16),
                         y=collect(range(0, 1, length=16)))
 
-        mb = dataframe_minibatches(trn, size=4)
+        mb = dataframe_minibatch(trn, size=4, teaching=:y)
 
 
         enc = Chain(Dense(8,16), Dense(16,8))
@@ -124,7 +124,7 @@ function test_signatures()
                         x7=randn(16), x8=randn(16),
                         y=collect(range(0, 1, length=16)))
 
-        mb = dataframe_minibatches(trn, size=4)
+        mb = dataframe_minibatch(trn, size=4, teaching=:y)
 
         mlp = Regressor(Dense(8,8, actf=relu),
                          Dense(8,8),
@@ -159,7 +159,7 @@ function test_decay_cp()
                         x7=randn(16), x8=randn(16),
                         y=collect(range(0, 1, length=16)))
 
-        mb = dataframe_minibatches(trn, size=4)
+        mb = dataframe_minibatch(trn, size=4, teaching=:y)
 
         chain = Chain(Dense(8,8, actf=relu),
                       Dense(8,8))
@@ -181,7 +181,7 @@ function test_stats()
                         x7=randn(16), x8=randn(16),
                         y=collect(range(0, 1, length=16)))
 
-        mb = dataframe_minibatches(trn, size=4)
+        mb = dataframe_minibatch(trn, size=4, teaching=:y)
 
         mlp = Regressor(Dense(8,8, actf=relu),
                          Dense(8,8),

@@ -20,14 +20,14 @@ function test_df_loader()
                            "blue", "red", "green", "green",
                            "blue", "red", "green", "green"])
 
-        mb1 = dataframe_minibatches(trn, size=4, teaching="y", ignore="x1")
+        mb1 = dataframe_minibatch(trn, size=4, teaching=:y, ignore=:x1)
 
         trn.iy = [1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4]
         @show mb2 = dataframe_minibatches(trn, size=4, teaching="iy", ignore=["x1", "y"])
         @show first(mb2)[2]
 
         trn.is = [:a,:a,:a,:a,:b,:b,:b,:b,:c,:c,:c,:c,:d,:d,:d,:d]
-        mb3 = dataframe_minibatches(trn, size=4, teaching="is", ignore=["iy", "y"])
+        mb3 = dataframe_minibatch(trn, size=4, teaching="is", ignore=["iy", "y"])
 
         return first(mb1)[2] == UInt8[0x01  0x03  0x02  0x02] &&
                first(mb2)[2] == UInt8[0x01 0x01 0x01 0x01]    &&
@@ -51,7 +51,7 @@ end
 
 function test_df_minibatch()
     df = dataframe_read(joinpath("data", "iris150.csv"))
-    mb = dataframe_minibatches(df, size=10, teaching="species")
+    mb = dataframe_minibatch(df, size=10, teaching="species")
     return size(first(mb)[1]) == (4,10)
 end
 

@@ -1,7 +1,7 @@
 # ChangeLog of NNHelferlein package
 
-exMPLE ecg tAGGER - DNN...
 ### wip
++ Padding added to emebdding layer
 + GPU selection added (not yet exported)
 + dataframe_minibatch default "y" changed to nothing.
 

@@ -645,7 +645,7 @@ the index of the "one" in the vector has to be provided as Integer value
 (or a minibatch of integers).
 
 ### Constructors:
-+ `Embed(v,d; actf=identity):` with
++ `Embed(v,d; actf=identity, pad=0):` with
     vocab size `v`, embedding depth `d` and default activation function identity.
 
 ### Signatures:
@@ -657,15 +657,31 @@ The embedding is constructed by adding a first dimension to the input tensor
 with number of rows = embedding depth.
 If `x` is a column vector, the value is a matrix. If `x` is as row-vector or
 a matrix, the value is a 3-d array, etc.
+
+#### Padding values:
+Padding values (by default zeros) in the input are mapped to 
+a zero vector in the embedding space.
+
 """
 struct Embed <: AbstractLayer
     w
     actf
-    Embed(w::Param, actf::Function) = new= Embed(w, actf)
-    Embed(i, embed; actf=identity) = new(Knet.param(embed,i), actf)
+    pad
+    Embed(w::Param, actf::Function, pad::Int) = new(w, actf, pad)
+    function Embed(i, embed; actf=identity, pad=0)
+        w = Knet.param(embed,i+1)
+        w[:,1] .= 0.0
+        return new(w, actf, pad)
+    end
 end
 
-(l::Embed)(x) = l.actf.(l.w[:,x])
+function (l::Embed)(x)
+
+    if l.pad != 0
+        x[x .== l.pad] .= 0
+    end
+    return l.actf.(l.w[:,x.+1])
+end
 
 
 function Base.summary(l::Embed; indent=0)

@@ -658,14 +658,12 @@ with number of rows = embedding depth.
 If `x` is a column vector, the value is a matrix. If `x` is as row-vector or
 a matrix, the value is a 3-d array, etc.
 
-### Padding values:
-If a token value is defined as `mask`, occurences are embedded as a zero vector.
-This can be used for padding values in a sequence with zeros. The masking/padding
-token counts to the vocab size. If padding tokend are not masked, their embedding
+### Padding and masking:
+If a token value is defined as `mask`, occurences are embedded as zero vector.
+This can be used for padding sequence with zeros. The masking/padding
+token counts to the vocab size. If padding tokens are not masked, their embedding
 will be optimised during training (which is not recommended but still possible
 for many applications).
-
-
 """
 struct Embed <: AbstractLayer
     w
@@ -681,15 +679,6 @@ end
 function (l::Embed)(x)
 
     y = l.actf.(l.w[:,x])
-
-#    # add padding mask by multiplication:
-#    #
-#    if !isnothing(l.mask)
-#        positions = findall(x->x==l.mask, Array(x))
-#        mask = ones(Float32, size(y)) |> ifgpu
-#        mask[:,positions] .= 0.0
-#        y = y .* mask
-#    end
 
     if !isnothing(l.mask)
         mask = ifgpu(x .!= l.mask)

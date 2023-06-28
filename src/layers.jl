@@ -692,7 +692,7 @@ function (l::Embed)(x)
 #    end
 
     if !isnothing(l.mask)
-        mask = ifgpu(x .!= pad)
+        mask = ifgpu(x .!= l.mask)
         mask = reshape(mask, 1,size(mask)...)
         y = y .* mask
     end

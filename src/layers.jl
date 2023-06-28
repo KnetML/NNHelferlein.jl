@@ -680,7 +680,7 @@ struct Embed <: AbstractLayer
         #
         w[:,1] .= 0.0       
         if make_pad_zeros
-            w[:,pad] .= 0.0     
+            w[:,pad+1] .= 0.0     
         end
         return new(w, actf, pad)
     end

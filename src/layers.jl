@@ -672,7 +672,8 @@ struct Embed <: AbstractLayer
     w
     actf
     pad
-    Embed(w::Param, actf::Function, pad::Int) = new(w, actf, pad)
+    make_pad_zeros
+    Embed(w::Param, actf::Function, pad::Int, make_pad_zeros=true) = new(w, actf, pad, make_pad_zeros)
     function Embed(i, embed; actf=identity, pad=0, make_pad_zeros=true)
         w = Knet.param(embed,i+1)
         # make column for padding token zeros if requested and
@@ -682,13 +683,13 @@ struct Embed <: AbstractLayer
         if make_pad_zeros
             w[:,pad+1] .= 0.0     
         end
-        return new(w, actf, pad)
+        return new(w, actf, pad, make_pad_zeros)
     end
 end
 
 function (l::Embed)(x)
     l.w[:,1] .= 0.0   
-    if make_pad_zeros
+    if l.make_pad_zeros
         l.w[:,pad+1] .= 0.0     
     end
     return l.actf.(l.w[:,x.+1])

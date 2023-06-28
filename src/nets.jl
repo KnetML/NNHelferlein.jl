@@ -221,7 +221,7 @@ end
 
 
 """
-    function summary(model)
+    function summary(mdl)
 
 Print a network summary of any model of Type `AbstractNN`, 
 `AbstractChain` or `AbstractLayer`.
@@ -234,9 +234,9 @@ function Base.summary(mdl::AbstractNN; n=0, indent=0)
     indent += 2
     n += summary_scan_properties(mdl, n=0, indent=indent)
 
-    if hasproperty(model, :loss)
+    if hasproperty(mdl, :loss)
         println(" ")
-        println("  Loss function: $(model.loss)")
+        println("  Loss function: $(mdl.loss)")
     end
 
     println(" ")

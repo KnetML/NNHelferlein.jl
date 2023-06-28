@@ -645,7 +645,7 @@ the index of the "one" in the vector has to be provided as Integer value
 (or a minibatch of integers).
 
 ### Constructors:
-+ `Embed(v,d; actf=identity, pad=0, make_pad_zeros):` with
++ `Embed(v,d; actf=identity, pad=0, make_pad_zeros=true):` with
     vocab size `v`, embedding depth `d` and default activation function identity.
 
 ### Signatures:
@@ -690,7 +690,7 @@ end
 function (l::Embed)(x)
     l.w[:,1] .= 0.0   
     if l.make_pad_zeros
-        l.w[:,pad+1] .= 0.0     
+        l.w[:,l.pad+1] .= 0.0     
     end
     return l.actf.(l.w[:,x.+1])
 end

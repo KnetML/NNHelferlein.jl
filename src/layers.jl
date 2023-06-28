@@ -642,14 +642,14 @@ Simple type for an embedding layer to embed a virtual onehot-vector
 into a smaller number of neurons by linear combination.
 The onehot-vector is virtual, because not the vector, but only
 the index of the "one" in the vector has to be provided as Integer value
-(or a minibatch of integers).
+(or a minibatch of integers) with values between 1 and the vocab size.
 
 ### Constructors:
-+ `Embed(v,d; actf=identity, pad=0, make_pad_zeros=true):` with
++ `Embed(v,d; actf=identity, mask=nothing):` with
     vocab size `v`, embedding depth `d` and default activation function identity.
 
 ### Signatures:
-+ `(l::Embed)(x) = l.actf.(w[:,x])` default
++ `(l::Embed)(x)`: default
   embedding of input tensor `x`.
 
 ### Value:
@@ -659,40 +659,32 @@ If `x` is a column vector, the value is a matrix. If `x` is as row-vector or
 a matrix, the value is a 3-d array, etc.
 
 ### Padding values:
-+ Zero values in the input are always mapped to 
-  a zero vector in the embedding space (implicit padding).
-+ If explicit padding (i.e. 'pad > 0') is used, the padding token
-  counts to the vocabulary size. If '0' (implicit) is used for padding, the padding token
-  does not count to the vocabulary size.
-+ If `make_pad_zeros=true` (default) padding values are mapped to a zero vector,
-  otherwise embedding of pad is optimised.
+If a token value is defined as `mask`, occurences are embedded as a zero vector.
+This can be used for padding values in a sequence with zeros. The masking/padding
+token counts to the vocab size. If padding tokend are not masked, their embedding
+will be optimised during training (which is not recommended but still possible
+for many applications).
+
 
 """
 struct Embed <: AbstractLayer
     w
     actf
-    pad
-    make_pad_zeros
-    Embed(w::Param, actf::Function, pad::Int, make_pad_zeros=true) = new(w, actf, pad, make_pad_zeros)
-    function Embed(i, embed; actf=identity, pad=0, make_pad_zeros=true)
-        w = Knet.param(embed,i+1)
-        # make column for padding token zeros if requested and
-        # always first column zeros for pad == 0
-        #
-        w[:,1] .= 0.0       
-        if make_pad_zeros
-            w[:,pad+1] .= 0.0     
-        end
-        return new(w, actf, pad, make_pad_zeros)
+    mask
+    Embed(w::Param, actf::Function, mask) = new(w, actf, mask)
+    function Embed(i, embed; actf=identity, mask=nothing)
+        w = Knet.param(embed,i)
+        return new(w, actf, mask)
     end
 end
 
 function (l::Embed)(x)
-    l.w[:,1] .= 0.0   
-    if l.make_pad_zeros
-        l.w[:,l.pad+1] .= 0.0     
+    y = l.actf.(l.w[:,x])
+    if !isnothing(l.mask)
+        positions = findall(x->x==l.mask, y)
+        y[:,positions] .= 0.0
     end
-    return l.actf.(l.w[:,x.+1])
+    return y
 end
 
 

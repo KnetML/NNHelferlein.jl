@@ -234,6 +234,11 @@ function Base.summary(mdl::AbstractNN; n=0, indent=0)
     indent += 2
     n += summary_scan_properties(mdl, n=0, indent=indent)
 
+    if hasproperty(model, :loss)
+        println(" ")
+        println("  Loss function: $(model.loss)")
+    end
+
     println(" ")
     println("Total number of layers: $n")
     println("Total number of parameters: $(get_n_params(mdl))")

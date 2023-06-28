@@ -681,7 +681,7 @@ end
 function (l::Embed)(x)
     y = l.actf.(l.w[:,x])
     if !isnothing(l.mask)
-        positions = findall(x->x==l.mask, y)
+        positions = findall(x->x==l.mask, x)
         y[:,positions] .= 0.0
     end
     return y

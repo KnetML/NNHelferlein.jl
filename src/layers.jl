@@ -645,7 +645,7 @@ the index of the "one" in the vector has to be provided as Integer value
 (or a minibatch of integers).
 
 ### Constructors:
-+ `Embed(v,d; actf=identity, pad=0):` with
++ `Embed(v,d; actf=identity, pad=0, make_pad_zeros):` with
     vocab size `v`, embedding depth `d` and default activation function identity.
 
 ### Signatures:
@@ -658,9 +658,14 @@ with number of rows = embedding depth.
 If `x` is a column vector, the value is a matrix. If `x` is as row-vector or
 a matrix, the value is a 3-d array, etc.
 
-#### Padding values:
-Padding values (by default zeros) in the input are mapped to 
-a zero vector in the embedding space.
+### Padding values:
++ Zero values in the input are always mapped to 
+  a zero vector in the embedding space (implicit padding).
++ If explicit padding (i.e. 'pad > 0') is used, the padding token
+  counts to the vocabulary size. If '0' (implicit) is used for padding, the padding token
+  does not count to the vocabulary size.
++ If `make_pad_zeros=true` (default) padding values are mapped to a zero vector,
+  otherwise embedding of pad is optimised.
 
 """
 struct Embed <: AbstractLayer
@@ -668,18 +673,20 @@ struct Embed <: AbstractLayer
     actf
     pad
     Embed(w::Param, actf::Function, pad::Int) = new(w, actf, pad)
-    function Embed(i, embed; actf=identity, pad=0)
+    function Embed(i, embed; actf=identity, pad=0, make_pad_zeros=true)
         w = Knet.param(embed,i+1)
-        w[:,1] .= 0.0
+        # make column for padding token zeros if requested and
+        # always first column zeros for pad == 0
+        #
+        w[:,1] .= 0.0       
+        if make_pad_zeros
+            w[:,pad] .= 0.0     
+        end
         return new(w, actf, pad)
     end
 end
 
 function (l::Embed)(x)
-
-    if l.pad != 0
-        x[x .== l.pad] .= 0
-    end
     return l.actf.(l.w[:,x.+1])
 end
 

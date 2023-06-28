@@ -680,9 +680,14 @@ end
 
 function (l::Embed)(x)
     y = l.actf.(l.w[:,x])
+
+    # add padding mask by multiplication:
+    #
     if !isnothing(l.mask)
         positions = findall(x->x==l.mask, Array(x))
-        y[:,positions] .= 0.0
+        mask = ones(Float32, size(y)) |> cu
+        mask[:,positions] .= 0.0
+        y = y .* mask
     end
     return y
 end

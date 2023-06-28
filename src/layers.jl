@@ -687,6 +687,10 @@ struct Embed <: AbstractLayer
 end
 
 function (l::Embed)(x)
+    w[:,1] .= 0.0   
+    if make_pad_zeros
+        w[:,pad+1] .= 0.0     
+    end
     return l.actf.(l.w[:,x.+1])
 end
 

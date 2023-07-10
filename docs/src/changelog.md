@@ -6,6 +6,7 @@
 + dataframe_minibatch default "y" changed to nothing.
 
 ### v1.3.1 - unreleased
++ Bioinformatics: Aminoacid tokenisation added
 + grouped convolutions fixed
 
 ### v1.3

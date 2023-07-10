@@ -179,4 +179,5 @@ using Statistics: mean
 
 # bifx tools:
 #
+@show include("bifx.jl")
 @test test_aa_tokenise()

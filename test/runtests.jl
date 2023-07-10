@@ -172,6 +172,11 @@ using Statistics: mean
 
 
 
-
+# pretrained:
+#
 @show include("pretrained.jl")
 @test test_pretrained()
+
+# bifx tools:
+#
+@test test_aa_tokenise()

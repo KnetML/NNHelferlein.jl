@@ -108,6 +108,7 @@ export AbstractNN, Classifier, Regressor, AbstractChain, Chain,           # chai
        focal_nll, focal_bce,
        dataset_mit_nsr, dataset_iris, 
        dataset_mnist, dataset_fashion_mnist,
+       dataset_pfam,
        get_vgg16, get_resnet50v2, 
        preproc_imagenet_vgg, preproc_imagenet_resnet, preproc_imagenet_resnetv2,
        leaky_sigm, leaky_relu, leaky_tanh, swish,

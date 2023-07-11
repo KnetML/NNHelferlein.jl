@@ -13,10 +13,12 @@ data/MIT-normal_sinus_rhythm
 data/pretrained
 data/mnist
 data/fashion_mnist
+data/pfam
 test/logs
 codecov.token
 logs
 .vscode
 try
+
 
 No-*

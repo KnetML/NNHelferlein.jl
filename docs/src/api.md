@@ -257,6 +257,7 @@ dataset_mit_nsr
 dataset_mnist
 dataset_fashion_mnist
 dataset_iris
+dataset_pfam
 ```
 
 # Pretrained networks

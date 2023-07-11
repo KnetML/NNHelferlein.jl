@@ -7,6 +7,97 @@ const ZENODO_URL = "https://zenodo.org"
 #
 ENV["DATADEPS_ALWAYS_ACCEPT"] = true
 
+
+# PFAM protein families database:
+# Curated sequences and families
+#
+#
+#
+const ZENODO_DATA_PFAM = "8135208"
+const URL_DATA_PFAM = "$ZENODO_URL/record/$ZENODO_DATA_PFAM/files"
+const PFAM_DIR = "pfam"
+const PFAM_RAW_FILE = "pfam_46872x62.csv"
+const PFAM_FAMILIES_FILE = "families.csv"
+const PFAM_AA_FILE = "aminoacids.csv"
+
+const PFAM_TRAIN_XY_FILE = "pfam-trn-xy.csv"
+const PFAM_TRAIN_LB_FILE = "pfam-trn-labels.csv"
+const PFAM_TEST_XY_FILE = "pfam-tst-xy.csv"
+const PFAM_TEST_LB_FILE = "pfam-tst-labels.csv"
+const PFAM_BAL_TRAIN_XY_FILE = "pfam-balanced-trn-xy.csv"
+const PFAM_BAL_TRAIN_LB_FILE = "pfam-balanced-trn-labels.csv"
+
+"""
+    function dataset_pfam(records; force=false)
+
+Retrieve the curated PFAM protein families database from Zenodo including
+46872 sequences from 62 families. Sequences are between 100 and 1000 amino acids long
+and families have between 100 and 200 memebers.
+Training and test data are padded to a length of 1000 amino acids with the padding token of
+the amino acid tokenizer (26).
+
+## Available records:
+
++ `:raw`: dataframe with all (46872) rows of data and the columns *ID* (PDB-ID), 
+            *family* (family name) and *sequence* (amino acid sequence)
++ `:families`: list of all family names as dataframe with the  columns 
+            *class* (cnumeric class ID 1-62), *family* (family name) and
+            and *count* (number of family members in the dataset)
++ `:aminoacids`: list of amino acid tokes as dataframe with the columns
+            *Token* (aa token 1-26), *One-Letter* (one-letter code of the amino acid),
+            and *Amino acid* (full name of the amino acid)
++ `:train`: dataframe with 42187 rows of training data and labels
+            with the class ID as first column and the 
+            amino acid tokens as columns 2-1001 (padded to 1000 amino acids)
++ `:test`: dataframe with 4687 rows of test data in the same format as the training data
++ `:balanced_train`: dataframe with 111601 rows of balanced training data in the same format 
+            as the training data. The data is balanced by sampling 1800 sequences from each family.
++ `:balanced_test`: dataframe with 12401 rows of balanced test data in the same format as the training data.
+"""
+function dataset_pfam(records; force=false)
+
+    if records == :raw
+        return download_pfam(PFAM_RAW_FILE, "raw PFAM family dataset", force=force)
+    elseif records == :families
+        return download_pfam(PFAM_FAMILIES_FILE, "protein families", force=force)
+    elseif records == :amoinoacids
+        return download_pfam(PFAM_AA_FILE, "amino acid tokens", force=force)
+    elseif records == :train
+        return download_pfam(PFAM_TRAIN_XY_FILE, "x/y training data", force=force)
+    elseif records == :test
+        return download_pfam(PFAM_TEST_FILE, "x/y test data", force=force)
+    elseif records == :train
+        return download_pfam(PFAM_BAL_TRAIN_XY_FILE, "x/y balanced training data", force=force)
+    elseif records == :test
+        return download_pfam(PFAM_BAL_TEST_FILE, "x/y balanced test data", force=force)
+    else
+        println("Unable to download unknown records $records")
+    end
+end
+
+function download_pfam(fname, msg; force=true)
+
+    dir=joinpath(NNHelferlein.DATA_DIR, PFAM_DIR)
+    if !isdir(dir)
+        mkpath(dir)
+    end
+
+    local_file = joinpath(dir, fname)
+    url = "$URL_DATA_PFAM/$fname?download=1"
+
+    if !isfile(local_file) || force
+        println("  downloading  $msg"); flush(stdout)
+        Downloads.download(url, local_file)
+    else
+        println("  skiping download for $msg (use force=true to overwrite local copy)")
+    end
+
+    return CSV.read(local_file, DataFrame)
+end
+
+
+
+
 # ECG data: MIT Normal Sinus Rhythm database:
 #
 #
@@ -260,5 +351,3 @@ end
 
 
 
-
-# TODO datasets fashion mnist und weitere einfache

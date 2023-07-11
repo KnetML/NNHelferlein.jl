@@ -259,6 +259,7 @@ provided as `actf` to the layer constructors.
 + [`dataset_mnist`](@ref) - MNIST
 + [`dataset_iris`](@ref) - Fisher's Iris dataset
 + [`get_tatoeba_corpus`](@ref) - machine translation text corpi
++ [`dataset_pfam`](@ref) - protein sequences dataset
 
 # Pretrained networks
 Pretrained network weights, derived from Keras applications.

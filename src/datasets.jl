@@ -36,6 +36,9 @@ and families have between 100 and 200 memebers.
 Training and test data are padded to a length of 1000 amino acids with the padding token of
 the amino acid tokenizer (26).
 
+More information about the data set can be found at 
+<https://zenodo.org/record/8138939>, including PDB sequence IDs for each data table.
+
 ## Available records:
 
 + `:raw`: dataframe with all (46872) rows of data and the columns *ID* (PDB-ID), 
@@ -66,9 +69,9 @@ function dataset_pfam(records; force=false)
         return download_pfam(PFAM_TRAIN_XY_FILE, "x/y training data", force=force)
     elseif records == :test
         return download_pfam(PFAM_TEST_XY_FILE, "x/y test data", force=force)
-    elseif records == :train
+    elseif records == :balanced_train
         return download_pfam(PFAM_BAL_TRAIN_XY_FILE, "x/y balanced training data", force=force)
-    elseif records == :test
+    elseif records == :balanced_test
         return download_pfam(PFAM_BAL_TEST_FILE, "x/y balanced test data", force=force)
     else
         println("Unable to download unknown records $records")

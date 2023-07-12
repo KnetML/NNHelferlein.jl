@@ -685,7 +685,7 @@ function (l::Embed)(x)
 
     # fix indices to be 1-based if 0 is used for padding:
     #
-    if !isnothing(mask) && mask == 0
+    if !isnothing(l.mask) && l.mask == 0
         x = x .+ 1
     end
 

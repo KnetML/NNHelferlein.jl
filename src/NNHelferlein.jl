@@ -10,7 +10,7 @@ using Statistics: mean, std
 using ProgressMeter, Dates
 using IterTools: ncycle, takenth
 import CSV
-import DataFrames
+using DataFrames
 import Random
 using Printf
 import CUDA

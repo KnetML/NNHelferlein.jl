@@ -647,6 +647,7 @@ the index of the "one" in the vector has to be provided as Integer value
 ### Constructors:
 + `Embed(v,d; actf=identity, mask=nothing):` with
     vocab size `v`, embedding depth `d` and default activation function identity.
+    `mask` defines the padding token (see below).
 
 ### Signatures:
 + `(l::Embed)(x)`: default
@@ -664,6 +665,10 @@ This can be used for padding sequence with zeros. The masking/padding
 token counts to the vocab size. If padding tokens are not masked, their embedding
 will be optimised during training (which is not recommended but still possible
 for many applications).
+
+Zero may be used as padding token, but it must count to the vocab size 
+(i.e. the vocab size must be one larger than the number of tokens)
+and the keyword arg `mask=0` must be specified.
 """
 struct Embed <: AbstractLayer
     w
@@ -677,6 +682,12 @@ struct Embed <: AbstractLayer
 end
 
 function (l::Embed)(x)
+
+    # fix indices to be 1-based if 0 is used for padding:
+    #
+    if !isnothing(mask) && mask == 0
+        x = x .+ 1
+    end
 
     y = l.actf.(l.w[:,x])
 

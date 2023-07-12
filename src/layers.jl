@@ -687,13 +687,16 @@ function (l::Embed)(x)
     #
     if !isnothing(l.mask) && l.mask == 0
         x = x .+ 1
+        mask_token = l.mask+1
+    else
+        mask_token = l.mask
     end
 
     y = l.actf.(l.w[:,x])
 
     if !isnothing(l.mask)
-        mask = ifgpu(x .!= l.mask)
-        mask = reshape(mask, 1,size(mask)...)
+        mask = ifgpu(x .!= mask_token)
+        mask = reshape(mask, 1, size(mask)...)
         y = y .* mask
     end
     return y

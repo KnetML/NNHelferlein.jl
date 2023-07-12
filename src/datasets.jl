@@ -65,7 +65,7 @@ function dataset_pfam(records; force=false)
     elseif records == :train
         return download_pfam(PFAM_TRAIN_XY_FILE, "x/y training data", force=force)
     elseif records == :test
-        return download_pfam(PFAM_TEST_FILE, "x/y test data", force=force)
+        return download_pfam(PFAM_TEST_XY_FILE, "x/y test data", force=force)
     elseif records == :train
         return download_pfam(PFAM_BAL_TRAIN_XY_FILE, "x/y balanced training data", force=force)
     elseif records == :test

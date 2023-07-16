@@ -20,6 +20,10 @@ const PFAM_RAW_FILE = "pfam_46872x62.csv"
 const PFAM_FAMILIES_FILE = "families.csv"
 const PFAM_AA_FILE = "aminoacids.csv"
 
+
+const PFAM_ALL_XY_FILE = "pfam-all-xy.csv"
+const PFAM_ALL_LB_FILE = "pfam-all-labels.csv"
+
 const PFAM_TRAIN_XY_FILE = "pfam-trn-xy.csv"
 const PFAM_TRAIN_LB_FILE = "pfam-trn-labels.csv"
 const PFAM_TEST_XY_FILE = "pfam-tst-xy.csv"
@@ -74,6 +78,8 @@ function dataset_pfam(records; force=false)
     elseif records == :balanced_train
         return download_pfam(PFAM_BAL_TRAIN_XY_FILE, "x/y balanced training data", force=force)
     elseif records == :balanced_test
+        return download_pfam(PFAM_BAL_TEST_XY_FILE, "x/y balanced test data", force=force)
+    elseif records == :all          # unducumented train and test together
         return download_pfam(PFAM_BAL_TEST_XY_FILE, "x/y balanced test data", force=force)
     else
         println("Unable to download unknown records $records")

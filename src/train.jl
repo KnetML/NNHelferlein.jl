@@ -248,10 +248,18 @@ function tb_train!(mdl, opti, trn, vld=nothing; epochs=1,
         end
     end
 
+    ## println()
+    ## ind = [x[1][1,:] for x in trn]
+    ## println("trn: $ind")
+    ## ind = [x[1][1,:] for x in vld]
+    ## println("trn: $ind")
+
     # Training:
     #
     mb_losses = Float32[]
     @showprogress for (i, (x,y)) in enumerate(ncycle(trn,epochs))
+
+        ## println("mb: $i, x: $x, y: $y")
 
         loss = @diff mdl(x,y)
         mb_loss = value(loss)
@@ -331,6 +339,11 @@ function tb_train!(mdl, opti, trn, vld=nothing; epochs=1,
             set_learning_rate(mdl, lr)
         end
     end
+    ## println()
+    ## ind = [x[1][1,:] for x in trn]
+    ## println("trn: $ind")
+    ## ind = [x[1][1,:] for x in vld]
+    ## println("trn: $ind")
 
     println("Training finished with:")
     println("Training loss:       $(calc_loss(mdl, data=trn))")

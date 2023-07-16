@@ -13,7 +13,8 @@ The function can be used to split an iterator of minibatches into train-
 and validation iterators, without copying any data.
 As the `PartialIterator` objects work with the states of the inner iterator,
 it is important *not* to shuffle the inner iterator (in this case the 
-composition of the partial iterators would change!).
+composition of the partial iterators would change and training and validation data 
+may be mixed!).
 
 ### Arguments:
 + `it`: Iterator to be splitted. The list of allowed states is created by
@@ -24,6 +25,17 @@ composition of the partial iterators would change!).
 """
 function split_minibatches(it, at=0.8; shuffle=true)
     
+    # make sure, the inner iterator is not shuffled:
+    #
+    if it.shuffle
+        println("shuffle=true not allowed for the splitted iterator!")
+        println("Instead, tarining and validation minibatches will be shuffeled seperately.")
+
+        it.shuffle = false
+        shuffle = true
+    end
+
+
     # collect all valid states of it
     # ann nothing for the first state and remove last state 
     # (that delivers nothing)

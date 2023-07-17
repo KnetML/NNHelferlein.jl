@@ -27,7 +27,7 @@ function split_minibatches(it, at=0.8; shuffle=true)
     
     # make sure, the inner iterator is not shuffled:
     #
-    if it.shuffle
+    if hasproperty(it, :shuffle) && it.shuffle
         println("Warning: shuffle=true not allowed for the iterator to be splitted!")
         println("Instead, training and validation minibatches will be shuffled seperately.")
 

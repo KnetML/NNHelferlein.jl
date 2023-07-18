@@ -265,7 +265,10 @@ Base.length(it::MBMasquerade) = length(it.it)
 function do_mask(x, ρ, value)
     
     mask = rand(size(x)...) .< ρ
-    x = x .- value
+    mask = ones(eltype(x), size(x)) .* mask       # make bool to numeric
+    mask = typeof(x)(mask)                         # make syme type as x
+    value = eltype(x)(value)
+    x = x .- value                                  # set msaked positions to value
     x = x .* mask
     x = x .+ value
     return x

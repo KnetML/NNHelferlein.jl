@@ -199,8 +199,8 @@ Iterator wrapper to partially mask training data of a minibatch
 iterator of type `Knet.Data` or `NNHelferlein.DataLoader`.
 
 ### Constructors:
-    Masquerade(it, rho=0.1; mode=:noise, value=0.0)
-    Masquerade(it; ρ=0.1, mode=:noise, value=0.0)
+    MBMasquerade(it, rho=0.1; mode=:noise, value=0)
+    MBMasquerade(it; ρ=0.1, mode=:noise, value=0)
 
 The constructor may be called with the density `rho` as normal
 argument or `ρ` as keyword argument.
@@ -210,13 +210,10 @@ argument or `ρ` as keyword argument.
         minibatches
 + `ρ=0.1` or `rho`: Density of mask; a value of 1.0 will mask everything,
         a value of 0.0 nothing.
-+ `value=0.0`: the value with which the masking is done.
-+ `mode=:noise`: type of masking:
++ `value=0`: the value with which the masking is done.
++ `mode=:noise`: type of masking (only `:noise` implemented yet):
     + `:noise`: randomly distributed single values of the 
             training data will be overwitten with `value`.
-    + `:patch`: a single rectangular region along the first two 
-            dimensions and covering all remaining dims 
-            will be overwritten.
 
 ### Examples:
 
@@ -224,11 +221,8 @@ argument or `ρ` as keyword argument.
 julia> dtrn 
 26-element Knet.Train20.Data{Tuple{CuArray{Float32}, Array{UInt8}}}
 
-julia> mtrn = Masquerade(dtrn, 0.5, value=2.0, mode=:patch)
-Masquerade(26-element Knet.Train20.Data{Tuple{CuArray{Float32}, Array{UInt8}}}, 0.5, 2.0, :patch)
-
-julia> dmask = Masquerade(dtrn, ρ=0.3) |> x->Masquerade(x, ρ=0.3, value=1.0)
-Masquerade(Masquerade(26-element Knet.Train20.Data{Tuple{CuArray{Float32}, Array{UInt8}}}, 0.3, 0.0, :noise), 0.3, 1.0, :noise)
+julia> mtrn = Masquerade(dtrn, 0.5, value=2.0h)
+Masquerade(26-element Knet.Train20.Data{Tuple{CuArray{Float32}, Array{UInt8}}}, 0.5, 2.0, :noise)
 ```
 """
 struct MBMasquerade  <: DataLoader
@@ -236,7 +230,7 @@ struct MBMasquerade  <: DataLoader
     ρ
     value
     mode
-    MBMasquerade(it, rho=0.1; ρ=rho, mode=:noise, value=0.0) = 
+    MBMasquerade(it, rho=0.1; ρ=rho, mode=:noise, value=0) = 
         new(it, ρ, Float32(value), mode)
 end
 
@@ -255,11 +249,11 @@ function Base.iterate(it::MBMasquerade, state)
     
     if it.mode == :noise
         x = do_mask(x, it.ρ, it.value)
-    elseif it.mode == :patch
-        x = do_patch(x, it.ρ, it.value)
+    #elseif it.mode == :patch
+    #    x = do_patch(x, it.ρ, it.value)
     end
     
-    return (ifgpu(x),y), next_state
+    return (x,y), next_state
 end
 
 Base.length(it::MBMasquerade) = length(it.it)
@@ -271,7 +265,9 @@ Base.length(it::MBMasquerade) = length(it.it)
 function do_mask(x, ρ, value)
     
     mask = rand(size(x)...) .< ρ
-    x[mask] .= value
+    x = x .- value
+    x = x .* mask
+    x = x .+ value
     return x
 end
 

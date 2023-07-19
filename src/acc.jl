@@ -370,7 +370,7 @@ function confusion_matrix(y, p; labels=nothing,
         # formatting:
         #
         println("\n\nPer-class Accuracy, Precision and Recall:")
-        if isnothing(labels)   # width of labels column fpr printf
+        if isnothing(labels)   # width of labels column for printf
             labels = ["$i" for i in 1:len]
         end
         len_labs = maximum(length.(labels)) +2
@@ -378,9 +378,15 @@ function confusion_matrix(y, p; labels=nothing,
             len_labs = 7
         end
 
-        fmt = Printf.Format("%$(len_labs)s: %5.2f %5.2f %5.2f\n")
-        fmt_title = Printf.Format("%$(len_labs)s %5s %5s %5s\n")
-        Printf.format(stdout, fmt_title, "class", "acc", "prec", "rec")
+        # format total num column:
+        #
+        nums = [sum(c[i,:]) for i in 1:len]
+        num_strs = string.(nums)
+        len_nums = maximum(length.(num_strs)) +2
+
+        fmt = Printf.Format("%$(len_labs)s: %$(len_nums)d %5.2f %5.2f %5.2f\n")
+        fmt_title = Printf.Format("%$(len_labs)s  %$(len_nums)s %5s %5s %5s\n")
+        Printf.format(stdout, fmt_title, "class", "#", "acc", "prec", "rec")
 
         acc_tot = 0.0
         for i in 1:len
@@ -403,7 +409,7 @@ function confusion_matrix(y, p; labels=nothing,
                 label = "$i"
             end
 
-            Printf.format(stdout, fmt, label, acc, precision, recall)
+            Printf.format(stdout, fmt, label, nums[i], acc, precision, recall)
         end
         acc_tot = acc_tot / len
         println("Average Accuracy: $acc_tot")

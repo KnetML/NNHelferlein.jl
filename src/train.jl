@@ -557,8 +557,8 @@ The second signature predicts a single Array of data.
 + `mdl`: executable network model
 + `data=iterator`: iterator providing minibatches
         of input data; if the minibatches include y-values 
-        (i.e. teaching input), predictions *and* the y-values 
-        will be returned. 
+        (i.e. teaching input), predictions (i.e. index of class with highest 
+        value *and* the y-values will be returned. 
 + `data`: single Array of input data (i.e. input for one minibatch)
 + `softmax`: if true or if model is of type `Classifier` the predicted
         softmax probabilities are returned instead of raw
@@ -569,7 +569,7 @@ function predict(mdl; data, softmax=false)
     if first(data) isa Tuple
         py = [(mdl(x), y) for (x,y) in data]
         p = cat((p for (p,y) in py)..., dims=2)
-        y = cat((y for (p,y) in py)..., dims=2)
+        y = cat((y for (p,y) in py)..., dims=1)
     else
         p = cat((mdl(x) for x in data)..., dims=2)
     end
@@ -580,7 +580,7 @@ function predict(mdl; data, softmax=false)
     end
 
     if first(data) isa Tuple
-        return p, y
+        return de_embed(p, remove_dim=true), y
     else
         return p
     end

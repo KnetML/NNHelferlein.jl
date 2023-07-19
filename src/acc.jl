@@ -332,7 +332,8 @@ provided by the package `MLBase`.
 + `accuracy=true`: if `true`, accuracy, precisiomn and recall is printed 
         for all classes.
 """
-function confusion_matrix(mdl; data, labels=nothing, pretty_print=true)
+function confusion_matrix(mdl; data, labels=nothing, 
+                                pretty_print=true, accuracy=true)
 
     p, y = predict(mdl, data=data)
     p = de_embed(p)

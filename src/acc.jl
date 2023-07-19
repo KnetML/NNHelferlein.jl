@@ -348,6 +348,7 @@ function confusion_matrix(y, p; labels=nothing,
     p = vec(p)
     y = vec(y)
     len = length(unique(y))
+    @show (len, y, p)
 
     # compute confusion matrix 
     #

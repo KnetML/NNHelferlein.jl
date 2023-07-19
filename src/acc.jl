@@ -413,7 +413,7 @@ function confusion_matrix(y, p; labels=nothing,
             Printf.format(stdout, fmt, label, nums[i], acc, precision, recall)
         end
         acc_tot = acc_tot / len
-        println("Average Accuracy: $acc_tot")
+        println("\nAverage Accuracy: $acc_tot")
     end
 
     return c

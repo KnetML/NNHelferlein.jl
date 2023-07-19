@@ -310,8 +310,9 @@ end
     
 
 """
-    function confusion_matrix(mdl; data, labels=nothing, pretty_print=true)
-    function confusion_matrix(y, p; labels=nothing, pretty_print=true)
+    function confusion_matrix(mdl; data, labels=nothing, pretty_print=true, accuracy=true)
+    function confusion_matrix(y, p; labels=nothing, pretty_print=true, accuracy=true)
+
 
 Compute and display the confusion matrix of  
 (x,y)-minibatches. Predictions are calculated with model `mdl` for which 
@@ -324,10 +325,12 @@ The function is an interface to the function `confusmat`
 provided by the package `MLBase`.
 
 ### Arguments:
-`mdl`: mdl with signature `mdl(x)` to generate predictions
-`data`: minibatches of (x,y)-tuples
-`pretty_print=true`: if `true`, the matrix will pe displayed to stdout
-`labels=nothing`: a vecor of human readable labels can be provided 
++ `mdl`: mdl with signature `mdl(x)` to generate predictions
++ `data`: minibatches of (x,y)-tuples
++ `pretty_print=true`: if `true`, the matrix will pe displayed to stdout
++ `labels=nothing`: a vecor of human readable labels can be provided
++ `accuracy=true`: if `true`, accuracy, precisiomn and recall is printed 
+        for all classes.
 """
 function confusion_matrix(mdl; data, labels=nothing, pretty_print=true)
 
@@ -338,7 +341,8 @@ function confusion_matrix(mdl; data, labels=nothing, pretty_print=true)
 end
 
 
-function confusion_matrix(y, p; labels=nothing, pretty_print=true)
+function confusion_matrix(y, p; labels=nothing, 
+                                pretty_print=true, accuracy=true)
 
     p = vec(p)
     y = vec(y)
@@ -361,6 +365,50 @@ function confusion_matrix(y, p; labels=nothing, pretty_print=true)
 
         Base.print_matrix(stdout, dc)
     end
+
+    if accuracy 
+        # formatting:
+        #
+        println("\n\nPer-class Accuracy, Precision and Recall:")
+        if isnothing(labels)   # width of labels column fpr printf
+            labels = ["$i" for i in 1:len]
+        end
+        len_labs = maximum(length.(labels)) +2
+        if len_labs < 7
+            len_labs = 7
+        end
+
+        fmt = Printf.Format("%$(len_labs)s: %5.2f %5.2f %5.2f\n")
+        fmt_title = Printf.Format("%$(len_labs)s %5s %5s %5s\n")
+        Printf.format(stdout, fmt_title, "class", "acc", "prec", "rec")
+
+        acc_tot = 0.0
+        for i in 1:len
+            tp = c[i,i]
+            fp = sum(c[:,i]) - tp
+            fn = sum(c[i,:]) - tp
+            tn = sum(c) - tp - fp - fn
+
+            acc = tp / sum(c[i,:])
+            acc_tot += acc
+            recall = tp / (tp + fn)
+            precision = tp / (tp + fp)
+            f1 = 2tp / (2tp + fp + fn)
+            g_mean = √(precision * recall)
+            iou = tp / (tp + fp + fn)
+
+            if !isnothing(labels)
+                label = "$(labels[i])"
+            else
+                label = "$i"
+            end
+
+            Printf.format(stdout, fmt, label, acc, precision, recall)
+        end
+        acc_tot = acc_tot / len
+        println("Average Accuracy: $acc_tot")
+    end
+
     return c
 end
 

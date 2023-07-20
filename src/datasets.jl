@@ -13,7 +13,7 @@ ENV["DATADEPS_ALWAYS_ACCEPT"] = true
 #
 #
 #
-const ZENODO_DATA_PFAM = "8138939"
+const ZENODO_DATA_PFAM = "8167436"
 const URL_DATA_PFAM = "$ZENODO_URL/record/$ZENODO_DATA_PFAM/files"
 const PFAM_DIR = "pfam"
 const PFAM_RAW_FILE = "pfam_46872x62.csv"

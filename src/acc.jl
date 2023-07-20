@@ -370,7 +370,7 @@ function confusion_matrix(y, p; labels=nothing,
     if accuracy 
         # formatting:
         #
-        println("\n\nPer-class Accuracy, Precision and Recall:")
+        println("\n\nPer-class accuracy, precision, recall and f1:")
         if isnothing(labels)   # width of labels column for printf
             labels = ["$i" for i in 1:len]
         end
@@ -385,11 +385,13 @@ function confusion_matrix(y, p; labels=nothing,
         num_strs = string.(nums)
         len_nums = maximum(length.(num_strs)) +2
 
-        fmt = Printf.Format("%$(len_labs)s: %$(len_nums)d %5.2f %5.2f %5.2f\n")
-        fmt_title = Printf.Format("%$(len_labs)s  %$(len_nums)s %5s %5s %5s\n")
-        Printf.format(stdout, fmt_title, "class", "#", "acc", "prec", "rec")
+        fmt = Printf.Format("%$(len_labs)s: %$(len_nums)d %5.2f %5.2f %5.2f %5.2f\n")
+        fmt_title = Printf.Format("%$(len_labs)s  %$(len_nums)s %5s %5s %5s %5s\n")
+        Printf.format(stdout, fmt_title, "class", "#", "acc", "prec", "rec", "f1")
 
-        acc_tot = 0.0
+        rec_tot = 0.0
+        prec_tot = 0.0
+        f1_tot = 0.0
         for i in 1:len
             tp = c[i,i]
             fp = sum(c[:,i]) - tp
@@ -397,12 +399,15 @@ function confusion_matrix(y, p; labels=nothing,
             tn = sum(c) - tp - fp - fn
 
             acc = tp / sum(c[i,:])
-            acc_tot += acc
             recall = tp / (tp + fn)
             precision = tp / (tp + fp)
             f1 = 2tp / (2tp + fp + fn)
             g_mean = √(precision * recall)
             iou = tp / (tp + fp + fn)
+
+            prec_tot += precision
+            rec_tot += recall
+            f1_tot += f1
 
             if !isnothing(labels)
                 label = "$(labels[i])"
@@ -410,10 +415,14 @@ function confusion_matrix(y, p; labels=nothing,
                 label = "$i"
             end
 
-            Printf.format(stdout, fmt, label, nums[i], acc, precision, recall)
+            Printf.format(stdout, fmt, label, nums[i], recall, precision, recall, f1)
         end
-        acc_tot = acc_tot / len
-        println("\nAverage Accuracy: $acc_tot")
+        prec_tot = prec_tot / len
+        rec_tot = rec_tot / len
+        f1_tot = f1_tot / len
+        println("\nAveraged metrics: ")
+        Printf.format(stdout, fmt_title, " ", "#", "acc", "prec", "rec", "f1")
+        Printf.format(stdout, fmt, "mean", sum(nums), rec_tot, prec_tot, rec_tot, f1_tot)
     end
 
     return c

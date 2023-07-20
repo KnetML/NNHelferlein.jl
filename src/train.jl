@@ -569,7 +569,7 @@ function predict(mdl; data, softmax=false)
     if first(data) isa Tuple
         py = [(mdl(x), y) for (x,y) in data]
         p = cat((p for (p,y) in py)..., dims=2)
-        y = cat((y for (p,y) in py)..., dims=1)
+        y = cat((vec(y) for (p,y) in py)..., dims=1)
     else
         p = cat((mdl(x) for x in data)..., dims=2)
     end

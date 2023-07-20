@@ -111,7 +111,7 @@ function test_confusion_matrix()
      end
 
      mb = [(collect(1:10), [1 1 1 1 1 2 2 2 2 2])]
-     c = confusion_matrix(mdl, data=mb, pretty_print=true)
+     c = confusion_matrix(mdl, data=mb, pretty_print=false, accuracy=false)
      return c ≈ [5 0; 0 5]
 end
 

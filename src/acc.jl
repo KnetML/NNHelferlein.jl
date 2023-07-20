@@ -335,7 +335,7 @@ provided by the package `MLBase`.
 function confusion_matrix(mdl; data, labels=nothing, 
                                 pretty_print=true, accuracy=true)
 
-    p, y = predict(mdl, data=data)
+    p, y = predict(mdl, data=data, softmax=true)
 
     return confusion_matrix(y, p, labels=labels, pretty_print=pretty_print)
 end
@@ -347,7 +347,7 @@ function confusion_matrix(y, p; labels=nothing,
     p = vec(p)
     y = vec(y)
     len = length(unique(y))
-    @show (len, size(y), size(p))
+    #@show (len, size(y), size(p))
 
     # compute confusion matrix 
     #

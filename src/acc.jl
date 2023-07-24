@@ -340,13 +340,13 @@ function confusion_matrix(mdl; data, labels=nothing,
 end
 
 
-function confusion_matrix(y, p; labels=nothing, 
-                                pretty_print=true, accuracy=true)
+function confusion_matrix(y, p; labels=nothing,
+    pretty_print=true, accuracy=true)
 
     p = vec(p)
     y = vec(y)
-    len = length(unique(y))
-    #@show (len, size(y), size(p))
+    len = maximum(vcat(p, y))
+    @show (len, size(y), size(p))
 
     # compute confusion matrix 
     #
@@ -357,7 +357,7 @@ function confusion_matrix(y, p; labels=nothing,
         if isnothing(labels)
             rows = ["pred/true", cols...]
         else
-            labels = ["$i: $r" for (i,r) in enumerate(labels)]
+            labels = ["$i: $r" for (i, r) in enumerate(labels)]
             rows = ["pred/true", labels...]
         end
         dc = vcat(cols, c)
@@ -366,23 +366,23 @@ function confusion_matrix(y, p; labels=nothing,
         Base.print_matrix(stdout, dc)
     end
 
-    if accuracy 
+    if accuracy
         # formatting:
         #
         println("\n\nPer-class accuracy, precision, recall and f1:")
         if isnothing(labels)   # width of labels column for printf
             labels = ["$i" for i in 1:len]
         end
-        len_labs = maximum(length.(labels)) +2
+        len_labs = maximum(length.(labels)) + 2
         if len_labs < 7
             len_labs = 7
         end
 
         # format total num column:
         #
-        nums = [sum(c[i,:]) for i in 1:len]
+        nums = [sum(c[i, :]) for i in 1:len]
         num_strs = string.(nums)
-        len_nums = maximum(length.(num_strs)) +2
+        len_nums = maximum(length.(num_strs)) + 2
 
         fmt = Printf.Format("%$(len_labs)s: %$(len_nums)d %5.2f %5.2f %5.2f %5.2f\n")
         fmt_title = Printf.Format("%$(len_labs)s  %$(len_nums)s %5s %5s %5s %5s\n")
@@ -392,17 +392,21 @@ function confusion_matrix(y, p; labels=nothing,
         prec_tot = 0.0
         f1_tot = 0.0
         for i in 1:len
-            tp = c[i,i]
-            fp = sum(c[:,i]) - tp
-            fn = sum(c[i,:]) - tp
+            tp = c[i, i]
+            fp = sum(c[:, i]) - tp
+            fn = sum(c[i, :]) - tp
             tn = sum(c) - tp - fp - fn
 
-            acc = tp / sum(c[i,:])
-            recall = tp / (tp + fn)
-            precision = tp / (tp + fp)
-            f1 = 2tp / (2tp + fp + fn)
-            g_mean = √(precision * recall)
-            iou = tp / (tp + fp + fn)
+            if tp == 0
+                acc = recall = precision = f1 = 0.0
+            else
+                acc = tp / sum(c[i, :])
+                recall = tp / (tp + fn)
+                precision = tp / (tp + fp)
+                f1 = 2tp / (2tp + fp + fn)
+                #g_mean = √(precision * recall)
+                #iou = tp / (tp + fp + fn)
+            end
 
             prec_tot += precision
             rec_tot += recall
@@ -426,7 +430,6 @@ function confusion_matrix(y, p; labels=nothing,
 
     return c
 end
-
 
 function mean_squared_error(p, y)
     

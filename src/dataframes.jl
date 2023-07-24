@@ -240,7 +240,7 @@ function dataframe_split(df::DataFrames.DataFrame; teaching="y",
         (vld,yvld) = do_balance(vld, yvld)
     end
 
-    return trn, vld
+    return DataFrame(trn), DataFrame(vld)
 end
 
 

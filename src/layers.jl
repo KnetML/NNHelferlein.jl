@@ -1161,7 +1161,7 @@ or a 3-dimensional array of [fan-in, steps, batchsize].
 
 #### Arguments:
 
-+ `c=nothing`, `h=nothing`: inits the hidden and cell state.
++ `c=0`, `h=0`: inits the hidden and cell state.
     If `nothing`,  states `h` or `c` keep their values. 
     If `c=0` or `h=0`, the states are reseted to `0`;
     otherwise an array of states of the correct dimensions can be supplied 
@@ -1223,7 +1223,7 @@ struct Recurrent <: AbstractLayer
 end
 
 
-function (rnn::Recurrent)(x; c=nothing, h=nothing, 
+function (rnn::Recurrent)(x; c=0, h=0, 
                           return_all=false, mask=nothing)
     
     if ndims(x) == 3    # x is [fan-in, steps, mb]

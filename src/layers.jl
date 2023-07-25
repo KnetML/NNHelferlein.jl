@@ -1261,10 +1261,10 @@ function (rnn::Recurrent)(x; c=0, h=0,
     else
         #println("manual")
         if isnothing(rnn.back_rnn)   # not bidirectional:
-            hidden = rnn_loop(rnn.rnn, x, rnn.n_units, mask)     
+            hidden = rnn_loop(rnn.rnn, x, rnn.n_units, mask, false, return_all)     
         else        
-            h_f = rnn_loop(rnn.rnn, x, rnn.n_units, mask)
-            h_r = rnn_loop(rnn.back_rnn, x, rnn.n_units, mask, true)
+            h_f = rnn_loop(rnn.rnn, x, rnn.n_units, mask, true , return_all)
+            h_r = rnn_loop(rnn.back_rnn, x, rnn.n_units, mask, true, return_all)
             
             if return_all
                 hidden = cat(h_f, h_r[:,:,end:-1:1], dims=1)
@@ -1289,7 +1289,8 @@ end
 # inner loop for rnn - not exposed!
 # x is [fanin, mb, steps]
 #
-function rnn_loop(rnn, x, n_units, mask=nothing, backward=false)
+function rnn_loop(rnn, x, n_units, mask=nothing, backward=false,
+                  return_all=true)
 
     fanin, mb, steps = size(x)
 
@@ -1305,7 +1306,9 @@ function rnn_loop(rnn, x, n_units, mask=nothing, backward=false)
 
     # init h collection:
     #
-    hs = emptyKnetArray(n_units, mb, 0)
+    if return_all
+        hs = emptyKnetArray(n_units, mb, 0)
+    end
 
     if backward
         step_range = steps:-1:1
@@ -1333,9 +1336,14 @@ function rnn_loop(rnn, x, n_units, mask=nothing, backward=false)
         end
 
         rnn.h = h_step
-        hs = cat(hs, h_step, dims=3)  
+        if return_all
+            hs = cat(hs, h_step, dims=3)  
+        end
     end
-    return hs
+    if !return_all
+        hs = reshape(rnn.h, n_units, mb, 1)
+    end
+        return hs
 end
 
 function Base.summary(l::Recurrent; indent=0)

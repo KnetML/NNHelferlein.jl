@@ -1144,7 +1144,7 @@ steps for all smaples of the minibatch (with model depth as first and samples of
 + `bidirectional=false`: if true, 2 layers of `n_units` units will be defined
         and run in forward and backward direction respectively. The hidden
         state is `[2*n_units*mb]` or `[2*n_units,steps,mb]` id `return_all==true`.
-+ `allow_mask=false`: if maskin is allowed a slower algorithm is used to be 
++ `allow_mask=false`: if masking is allowed, a slower algorithm is used to be 
         able to ignore any masked step. Arbitrary sequence positions may be 
         masked for any sequence.
 Any keyword argument of `Knet.RNN` or 
@@ -1163,12 +1163,12 @@ or a 3-dimensional array of [fan-in, steps, batchsize].
 
 + `c=0`, `h=0`: inits the hidden and cell state.
     If `nothing`,  states `h` or `c` keep their values. 
-    If `c=0` or `h=0`, the states are reseted to `0`;
+    If `c=0` or `h=0`, the states are resetted to `0`;
     otherwise an array of states of the correct dimensions can be supplied 
     to be used as initial states.
-+ `return_all=true`: if `true` an array with all hidden states of all steps 
++ `return_all=false`: if `true` an array with all hidden states of all steps 
     is returned (size is [units, time-steps, minibatch]).
-    Otherwise only the hidden states of the last step is returned
+    Otherwise only the hidden states of the last step are returned
     ([units, minibatch]).
 + `mask`: optional mask for the input sequence minibatch of shape 
     [steps, minibatch]. Values in the mask must be 1.0 for masked positions
@@ -1177,10 +1177,10 @@ or a 3-dimensional array of [fan-in, steps, batchsize].
     `mk_padding_mask()`.
 
 Bidirectional layers can be constructed by specifying `bidirectional=true`, if
-the unit-type supports it (Knet.RNN does.). 
-Please be aware that the actual number of units is 2*n_units for 
-bidirectional layers and the output dimension is [2*units, steps, mb] or
-[2*units, mb].
+the unit-type supports it (Knet.RNN does). 
+Please be aware that the actual number of units is 2 x n_units for 
+bidirectional layers and the output dimension is [2 x units, steps, mb] or
+[2 x units, mb].
 """
 struct Recurrent <: AbstractLayer
     n_inputs

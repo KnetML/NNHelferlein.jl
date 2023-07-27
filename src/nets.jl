@@ -194,7 +194,7 @@ function summary_scan_properties(mdl; n=0, indent=0)
 
         if p isa AbstractChain || p isa AbstractLayer || p isa AbstractLayer
             n += summary(p, indent=indent)
-        elseif pn == :layers || pn isa AbstractArray
+        elseif pn == :layers || p isa AbstractArray
             for l in p
                 if l isa AbstractChain || l isa AbstractLayer || l isa AbstractLayer
                     n += summary(l, indent=indent)

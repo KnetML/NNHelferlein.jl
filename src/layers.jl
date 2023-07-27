@@ -1315,6 +1315,7 @@ function rnn_loop(rnn, x, n_units, mask=nothing, backward=false,
     else
         step_range = 1:steps
     end
+
     for i in step_range
         last_h = value(rnn.h)
         last_c = value(rnn.c)
@@ -1343,7 +1344,7 @@ function rnn_loop(rnn, x, n_units, mask=nothing, backward=false,
     if !return_all
         hs = reshape(rnn.h, n_units, mb, 1)
     end
-        return hs
+    return hs
 end
 
 function Base.summary(l::Recurrent; indent=0)

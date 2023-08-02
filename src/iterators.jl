@@ -103,10 +103,11 @@ mutable struct PartialIterator <: DataLoader
     PartialIterator(inner, indices; shuffle=true) = new(inner, indices, length(indices), shuffle)
 end
 
-function Base.iterate(it::PartialIterator, state=0)
+function Base.iterate(it::PartialIterator, state=nothing)
     
-    if it.shuffle && state == 0
+    if isnothing(state) && it.shuffle 
         Random.shuffle!(it.indices)
+        state = 0
     end
     
     if state >= it.l
@@ -158,16 +159,15 @@ end
 # TODO: size on-the-fly
 
 
-# first call:
-#
-function Base.iterate(nr::MBNoiser) 
-    return iterate(nr,0)
-end
-
 # subsequent calls with state:
 #
-function Base.iterate(nr::MBNoiser, state)
-    next_inner = iterate(nr.mbs, state)
+function Base.iterate(nr::MBNoiser, state=nothing)
+    
+    if isnothing(state)
+        next_inner = iterate(nr.mbs)
+    else
+        next_inner = iterate(nr.mbs, state)
+    end
     if isnothing(next_inner)
         return nothing
     else
@@ -234,13 +234,14 @@ struct MBMasquerade  <: DataLoader
         new(it, ρ, Float32(value), mode)
 end
 
-function Base.iterate(it::MBMasquerade)
-    return iterate(it, 0)
-end
 
-function Base.iterate(it::MBMasquerade, state)
+function Base.iterate(it::MBMasquerade, state=nothing)
     
-    next_inner = iterate(it.it, state)
+    if isnothing(state)
+        next_inner = iterate(it.it)
+    else
+        next_inner = iterate(it.it, state)
+    end
     if isnothing(next_inner)
         return nothing
     end
@@ -300,3 +301,37 @@ function do_patch(x, ρ, value)
     x[ranges...] .= value
     return x
 end
+
+
+
+
+struct GPUIterator  <: DataLoader
+    inner
+    GPUIterator(inner) = new(inner)
+end
+
+# first call w/o state, subsequent calls with state:
+#
+function Base.iterate(nr::GPUIterator, state=nothing)
+    if isnothing(state)
+        next_inner = iterate(nr.inner)
+    else 
+        next_inner = iterate(nr.inner, state)
+    end
+    if isnothing(next_inner)
+        return nothing
+    else
+        next_mb, next_state = next_inner
+        if CUDA.functional()
+            return CUDA.cu(next_mb), next_state
+        else
+            return next_mb, next_state
+        end
+    end
+end
+
+# and length = length of inner iterator:
+#
+Base.length(it::GPUIterator) = length(it.inner)
+
+

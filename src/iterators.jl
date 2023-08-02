@@ -105,9 +105,11 @@ end
 
 function Base.iterate(it::PartialIterator, state=nothing)
     
-    if isnothing(state) && it.shuffle 
-        Random.shuffle!(it.indices)
+    if isnothing(state)
         state = 0
+        if it.shuffle 
+            Random.shuffle!(it.indices)
+        end
     end
     
     if state >= it.l

@@ -100,7 +100,7 @@ struct Regressor <: AbstractNN
     Regressor(layers...; loss=mean_squared_error) = new(Any[layers...], loss)
 end
 #(m::Regressor)(x,y) = mean(abs2, ifgpu(y) .- m(x))
-(m::Regressor)(x,y) = m.loss(m(x), ifgpu(y))
+(m::Regressor)(x,y) = m.loss(m(x), y)
 
 
 

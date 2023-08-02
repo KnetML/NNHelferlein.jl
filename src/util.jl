@@ -129,7 +129,7 @@ function ifgpu(x, innerType=Float32)
 end
 
 @doc (@doc ifgpu)
-ifgpu(x, innerType=Float32) = ifgpu(x, innerType)
+convert2CuArray(x, innerType=Float32) = ifgpu(x, innerType)
 
 @doc (@doc ifgpu)
 convert2KnetArray(x, innerType=Float32) = ifgpu(x, innerType)

@@ -119,15 +119,8 @@ By converting, the data is copied to the GPU.
 `ifgpu()` is an alias/shortcut to `convert2KnetArray()`.
 
 """
-function convert2CuArray(x, innerType=Float32)
+function ifgpu(x, innerType=Float32) 
 
-    # check if GPU and accept all type of Array-like x:
-    #
-    # if CUDA.functional()
-    #     return CuArray{innerType}(Array(x))
-    # else
-    #     return Array{innerType}(x)
-    # end
     if CUDA.functional()
         return CuArray{innerType}(Array(x))
     else
@@ -135,11 +128,11 @@ function convert2CuArray(x, innerType=Float32)
     end
 end
 
-@doc (@doc convert2CuArray)
-convert2KnetArray(x, innerType=Float32) = convert2CuArray(x, innerType)
+@doc (@doc ifgpu)
+ifgpu(x, innerType=Float32) = ifgpu(x, innerType)
 
-@doc (@doc convert2CuArray)
-ifgpu(x, innerType=Float32) = convert2CuArray(x, innerType)
+@doc (@doc ifgpu)
+convert2KnetArray(x, innerType=Float32) = ifgpu(x, innerType)
 
 
 """

@@ -307,6 +307,16 @@ end
 
 
 
+"""
+    GPUIterator(iterator)
+
+Wraps any iterator and makes it return CuArrays. Element types 
+are preserved except of Float-Types, ehich are casted to `Float32`
+for performance reasons).
+
+### Contsructor:
+`GPUIterator(iterator)`
+"""
 struct GPUIterator  <: DataLoader
     inner
     GPUIterator(inner) = new(inner)

@@ -113,6 +113,7 @@ PartialIterator
 split_minibatches
 MBNoiser
 MBMasquerade
+GPUIterator
 ```
 
 ## Tabular data

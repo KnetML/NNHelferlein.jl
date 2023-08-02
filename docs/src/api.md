@@ -240,6 +240,15 @@ ifgpu
 emptyCuArray
 ```
 
+## Utils for Bioinformatics
+
+```@docs
+aminoacid_tokenizer
+embed_blosum62
+embed_vhse8
+EmbedAminoAcids
+```
+
 ## Saving, loading and inspection of models
 
 ```@docs

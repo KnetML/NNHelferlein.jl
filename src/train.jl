@@ -38,7 +38,8 @@ The model is updated (in-place) and the trained model is returned.
         `lr_decay` is only applied if both start learning rate
         `lr` and final learning rate `lr_decay` are defined explicitly.
         Example: `lr=0.01, lr_decay=0.001` will reduce the lr from
-        0.01 to 0.001 during the training (by default in 5 steps).
+        0.01 to 0.001 during the training (by default in 5 steps).     
+        `lr_decay` is applied to `l1` and `l2` with the same decay rate.
 + `lrd_steps=5`: number of learning rate decay steps. Default is `5`, i.e.
         modify the lr 4 times during the training (resulting in 5 different 
         learning rates).
@@ -335,7 +336,19 @@ function tb_train!(mdl, opti, trn, vld=nothing; epochs=1,
         if (!isnothing(lr_decay)) && i > 1 && ((i-1) % lr_nth == 0)
             lr = first(params(mdl)).opt.lr
             lr = lrd_linear ? lr + lr_decay : lr * lr_decay
-            @printf("\nSetting learning rate to η=%.2e in epoch %.1f\n", lr, i/n_trn)
+
+            l1_report = ""
+            l2_report = ""
+            if !isnothing(l1)
+               il1 = lrd_linear ? l1 + lr_decay : l1 * lr_decay 
+               l1_report = @sprintf(", l1=%.2e", l1)
+            end
+            if !isnothing(l2)
+               l2 = lrd_linear ? l2 + lr_decay : l2 * lr_decay 
+               l2_report = @sprintf(", l2=%.2e", l2)
+            end
+            @printf("\nSetting learning rate to η=%.2e%s%s in epoch %.1f\n", 
+                lr, l1_report, l2_report, i/n_trn)
             set_learning_rate(mdl, lr)
         end
     end
@@ -596,5 +609,3 @@ function predict(mdl, x; softmax=false )
     return p
 end
 
-# TODO: add de_embed?
-# predict und docu testen!

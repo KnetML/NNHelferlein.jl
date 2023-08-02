@@ -157,5 +157,17 @@ minibatch loss, training and validation loss and accuracy.
 
 ## Utilities
 
-A number of additional utilities is included. Please have a look at
+A number of additional utilities are included. Please have a look at
 the utilities section of the API documentation.
+
+
+## Bioinformatics
+
+A number of utilities for bioinformatics are provided, including
+an amino acid tokenizer to convert amino acid sequences from String to 
+vectors of integers and
+embedding of amino acids with BLOSUM62 or VHSE8 parameter sets.
+
+Please have a look at
+the bioinformatics section of the API documentation.
+

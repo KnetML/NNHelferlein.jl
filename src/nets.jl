@@ -192,11 +192,11 @@ function summary_scan_properties(mdl; n=0, indent=0)
     for pn in propertynames(mdl)
         p = getproperty(mdl, pn)
 
-        if p isa AbstractChain || p isa AbstractLayer || p isa AbstractLayer
+        if p isa AbstractChain || p isa AbstractLayer 
             n += summary(p, indent=indent)
         elseif pn == :layers || p isa AbstractArray
             for l in p
-                if l isa AbstractChain || l isa AbstractLayer || l isa AbstractLayer
+                if l isa AbstractChain || l isa AbstractLayer 
                     n += summary(l, indent=indent)
                 else
                     n += any_summary(l, indent=indent)

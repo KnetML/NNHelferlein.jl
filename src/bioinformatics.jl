@@ -112,3 +112,133 @@ function aminoacid_tokenizer(sec; ignore_unknown=true)
 
     return [AMINO_ACIDS[string(aa)] for aa in sec]
 end
+
+
+
+
+# Aminoacid encoding:
+#
+const BIFX_DIR = "bifx"
+const BLOSUM62_FILE = "blosum62.csv"
+const VHSE8_FILE = "vhse8.csv"
+
+# tbl is a table of size depthx21 with the AS embeddinge one per column.
+# the last column is just zeros and is used for all tokens > 20 and < 1.
+#
+function embed_aminoacids(x::AbstractArray, tbl)
+    x[x .< 1] .= 21
+    x[x .> 20] .= 21
+    return tbl[:,x] 
+end
+
+function embed_aminoacids(x::Int, tbl)
+    if x < 1 || x > 20
+        return tbl[:,21]
+    else
+        return tbl[:,x]
+    end
+end
+
+
+function read_embedding_matrix(file)
+    df = dataframe_read(joinpath(DATA_DIR, BIFX_DIR, file))
+    tokens = nrow(df)
+    depth = ncol(df) - 1
+
+    tbl = df[1:tokens, 2:depth+1] |> Matrix 
+    tbl = permutedims(tbl, (2,1))
+    tbl = hcat(tbl, zeros(depth,1)) |> ifgpu
+    return tbl
+end
+
+
+
+
+
+
+"""
+    embed_blosum62(x)
+
+Embed a protein sequence into a 21-dimensional vector using the BLOSUM62
+amino acid substitution matrix. Aminoacid are encoded as with 
+*NNHelferleins* `aminoacid tokenizer` function.
+`x` can be any `AbstractArray` of `Int` and a dimension of size 21 will be
+added as the first dimension. 
+"""
+function embed_blosum62(x)
+
+    tbl = read_embedding_matrix(BLOSUM62_FILE)
+    return embed_aminoacids(x, tbl)
+end
+
+"""
+    embed_vhse8(x)
+
+Embed a protein sequence into a 8-dimensional vector using the VHSE8
+amino acid embedding scheme. Aminoacid are encoded as with 
+*NNHelferleins* `aminoacid tokenizer` function.
+`x` can be any `AbstractArray` of `Int` and a dimension of size 21 will be
+added as the first dimension. 
+"""
+function embed_vhse8(x)
+
+    tbl = read_embedding_matrix(VHSE8_FILE)
+    return embed_aminoacids(x, tbl)
+end
+
+
+
+
+"""
+    EmbedAminoAcids <: AbstractLayer
+
+Embed a protein sequence into a 21-dimensional vector using the BLOSUM62
+amino acid substitution matrix
+or as a 8-dimensional vector using the VHSE8 parameters.
+Aminoacids must be encoded acording to 
+*NNHelferlein's* `aminoacid tokenizer` function.
+
+Layer input a is a n-dimensional array of an Integer type. Output is a
+(n+1)-dimensional array of Float32 type with a first (added) dimension 
+of size 21 or 8.
+
+## Constructor:
++ `EmbedAminoAcids(embedding::Symbol=:blosum62)`: 
+    + `embedding=:blosum62`: Either `:blosum62` or `:vhse8` 
+                to select the embedding scheme.
+"""
+struct EmbedAminoAcids <: AbstractLayer
+    scheme
+    tbl::AbstractArray
+    function EmbedAminoAcids(scheme=:blosum62)
+        if scheme == :blosum62
+            tbl = read_embedding_matrix(BLOSUM62_FILE)
+            return new(scheme, tbl)
+        elseif scheme == :vhse8
+            tbl = read_embedding_matrix(VHSE8_FILE)
+            return new(scheme, tbl)
+        else
+            error("Unknown embedding scheme: $scheme")
+        end
+    end
+end
+
+(e::EmbedAminoAcids)(x) = embed_aminoacids(x, e.tbl)
+
+function Base.summary(l::EmbedAminoAcids; indent=0)
+    n = get_n_params(l)
+    if l.scheme == :blosum62
+        s1 = "Blosum62 embeding layer"
+        i,o = 21, 20
+    elseif l.scheme == :vhse8
+        s1 = "VHSE8 embeding layer"
+        i,o = 21, 8
+    else
+        s1 = "unknown amino acid embeding layer"
+    end
+    s = "$s1 $i tokens → depth $o,"
+
+    println(print_summary_line(indent, s, n))
+    return 1
+end
+

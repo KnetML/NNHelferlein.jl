@@ -514,7 +514,7 @@ function minibatch_eval(mdl, fun, data; o...)
     for (x,y) in data
         mb_size = size(x)[end]
         cnt += mb_size
-        sum += mb_size * fun(mdl(x), ifgpu(y); o...) 
+        sum += mb_size * fun(mdl(x), Array(y); o...) 
     end
     return sum / cnt
 end
@@ -555,6 +555,7 @@ a dataset of minibatches of (x,y)-tuples.
 function focal_nll(scores, labels::AbstractArray{<:Integer}; 
             γ=2.0, dims=1)
 
+    labels = Array(labels)
     indices = Knet.Ops20.findindices(scores,labels,dims=dims)
     lp = -logsoftmax(scores,dims=dims)[indices]
     p = softmax(scores,dims=dims)[indices]

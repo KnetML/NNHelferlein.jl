@@ -83,7 +83,7 @@ export AbstractNN, Classifier, Regressor, AbstractChain, Chain,           # chai
        separate_heads, merge_heads,
        dataframe_read, dataframe_split,         # import data
        dataframe_minibatches, dataframe_minibatch, mk_class_ids,
-       MBNoiser, MBMasquerade, GPUIterator,     # iterators
+       MBNoiser, MBMasquerade, #GPUIterator,  use CUDA.CuIterator instead
        mk_image_minibatch,
        tb_train!,
        predict_top5, predict_imagenet,

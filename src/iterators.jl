@@ -315,27 +315,40 @@ are preserved except of Float-Types, ehich are casted to `Float32`
 for performance reasons).
 
 ### Contsructor:
-`GPUIterator(iterator)`
+`GPUIterator(iterator; y=:cpu)`: 
+    + `iterator`: any iterator
+    + `y`: if `:gpu`, the labels of the iterator are also 
+            converted to `CuArray{}`. If `:cpu`, the labels
+            are not converted.   
+            For a classifier (labels are integers), keeping 
+            labels on the cpu is more efficient. For Regression
+            (labels are Floats), labels on the gpu is
+            recommended.
 """
 struct GPUIterator  <: DataLoader
     inner
-    GPUIterator(inner) = new(inner)
+    y
+    GPUIterator(inner; y=:cpu) = new(inner, y)
 end
 
 # first call w/o state, subsequent calls with state:
 #
-function Base.iterate(nr::GPUIterator, state=nothing)
+function Base.iterate(itr::GPUIterator, state=nothing)
     if isnothing(state)
-        next_inner = iterate(nr.inner)
+        next_inner = iterate(itr.inner)
     else 
-        next_inner = iterate(nr.inner, state)
+        next_inner = iterate(itr.inner, state)
     end
     if isnothing(next_inner)
         return nothing
     else
         next_mb, next_state = next_inner
         if CUDA.functional()
-            return CUDA.cu(next_mb), next_state
+            if next_mb isa Tuple && itr.y == :cpu
+                return (CUDA.cu(next_mb[1]), next_mb[2]), next_state
+            else
+                return CUDA.cu(next_mb), next_state
+            end
         else
             return next_mb, next_state
         end

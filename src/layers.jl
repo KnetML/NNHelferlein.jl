@@ -593,6 +593,15 @@ end
 (l::Flat)(x) = Knet.mat(x)
 
 
+"""
+    flatten(x)
+
+Flatten a tensor to a matrix, preserving the last dimension.
+"""
+function flatten(x)
+    return Knet.mat(x)
+end
+
 function Base.summary(l::Flat; indent=0)
     n = get_n_params(l)
     s1 = "Flatten layer,"
@@ -1103,13 +1112,24 @@ number of *output*-columns equals size of minibatch.
 struct GlobalAveragePooling  <: AbstractLayer
 end
 
-(l::GlobalAveragePooling)(x) = mean(x, dims=(Tuple(collect(1:ndims(x))[1:end-2]))) |> x-> reshape(x, size(x)[end-1],:)
-#(l::GlobalAveragePooling)(x) = mean(x, dims=(1,2)) |> x-> reshape(x, size(x)[end-1],:)
+(l::GlobalAveragePooling)(x) = global_average_pooling(x)
+# (l::GlobalAveragePooling)(x) = mean(x, dims=(Tuple(collect(1:ndims(x))[1:end-2]))) |> x-> reshape(x, size(x)[end-1],:)
+# (l::GlobalAveragePooling)(x) = mean(x, dims=(1,2)) |> x-> reshape(x, size(x)[end-1],:)
 
 function Base.summary(l::GlobalAveragePooling; indent=0)
     s1 = "Global average pooling layer"
     println(print_summary_line(indent, s1, 0))
     return 1
+end
+
+"""
+    global_average_pooling(x)
+
+Function to return a matrix with the mean values of all but the last two
+dimensions for each sample of the minibatch.
+"""
+function global_average_pooling(x)
+    return mean(x, dims=(Tuple(collect(1:ndims(x))[1:end-2]))) |> x-> reshape(x, size(x)[end-1],:)
 end
 
 

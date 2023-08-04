@@ -75,6 +75,7 @@ to build Bert-like transformer networks.
 
 ```@docs
 Flat
+flatten
 PyFlat
 FeatureSelection
 Activation
@@ -85,6 +86,7 @@ BatchNorm
 LayerNorm
 GaussianNoise
 GlobalAveragePooling
+global_average_pooling
 ```
 
 

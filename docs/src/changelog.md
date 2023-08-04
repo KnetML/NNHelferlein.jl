@@ -3,9 +3,10 @@
 ### wip
 + Padding added to emebdding layer
 + GPU selection added (not yet exported)
-+ dataframe_minibatch default "y" changed to nothing.
 
 ### v1.3.1 - unreleased
++ severeal bioinformatics tools (as embedding, blosum, vhse8)
++ dataframe_minibatch default "y" changed to nothing.
 + Bioinformatics: Aminoacid tokenisation added
 + grouped convolutions fixed
 

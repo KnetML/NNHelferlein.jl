@@ -202,6 +202,8 @@ confusion_matrix
 
 ```@docs
 preproc_imagenet_vgg
+preproc_imagenet_resnet
+preproc_imagenet_resnetv2,
 predict_imagenet
 get_imagenet_classes
 ```

@@ -54,7 +54,7 @@ export AbstractNN, Classifier, Regressor, AbstractChain, Chain,           # chai
        RecurrentUnit,
        add_layer!, 
        split_minibatches,
-       ImageLoader, preproc_imagenet,
+       ImageLoader, 
        get_class_labels,
        iterate, length,
        AbstractLayer, Dense, Conv, Pool, Flat, PyFlat,         # layers

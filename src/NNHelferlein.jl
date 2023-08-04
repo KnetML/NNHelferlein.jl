@@ -57,7 +57,7 @@ export AbstractNN, Classifier, Regressor, AbstractChain, Chain,           # chai
        ImageLoader, 
        get_class_labels,
        iterate, length,
-       AbstractLayer, Dense, Conv, Pool, Flat, PyFlat, flatten        # layers
+       AbstractLayer, Dense, Conv, Pool, Flat, PyFlat, flatten,        # layers
        Pad,
        FeatureSelection,
        DeConv, UnPool,  DepthwiseConv,
@@ -65,7 +65,7 @@ export AbstractNN, Classifier, Regressor, AbstractChain, Chain,           # chai
        Softmax, Logistic,
        Dropout, BatchNorm, LayerNorm,
        Linear, GaussianNoise,
-       GlobalAveragePooling, global_average_pooling
+       GlobalAveragePooling, global_average_pooling,
        Activation, Logistic, Sigm, Relu, Swish,
        ResNetBlock,
        get_hidden_states, get_cell_states,

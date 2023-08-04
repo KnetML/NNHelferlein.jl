@@ -311,7 +311,7 @@ end
     GPUIterator(iterator)
 
 Wraps any iterator and makes it return CuArrays. Element types 
-are preserved except of Float-Types, ehich are casted to `Float32`
+are preserved except of Float-Types, which are casted to `Float32`
 for performance reasons).
 
 ### Contsructor:
@@ -324,6 +324,11 @@ for performance reasons).
             labels on the cpu is more efficient. For Regression
             (labels are Floats), labels on the gpu is
             recommended.
+
+## Deprecation warning:
+
+Use of `GPUIterator` is deprecated in favour of 
+`CUDA.CuIterator`, which offeres similar functionality.
 """
 struct GPUIterator  <: DataLoader
     inner
@@ -358,5 +363,4 @@ end
 # and length = length of inner iterator:
 #
 Base.length(it::GPUIterator) = length(it.inner)
-
 

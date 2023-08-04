@@ -319,7 +319,8 @@ function tb_train!(mdl, opti, trn, vld=nothing; epochs=1,
 
             if tensorboard
                 TensorBoardLogger.log_value(tbl,
-                        "Minibatch loss (epoch = $n_trn steps)",
+#                        "Minibatch loss (epoch = $n_trn steps)",
+                        "Minibatches running loss",
                         mb_loss, step=i)
             end
             # println("mb_loss-mean: $(mean(mb_losses))"); flush(stdout)

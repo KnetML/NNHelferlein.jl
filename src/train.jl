@@ -48,7 +48,7 @@ The model is updated (in-place) and the trained model is returned.
         by a constant factor (e.g. 0.9) resulting in an exponential decay.
         If `true`, lr is modified by the same step size, i.e. linearly.
 + `l1=nothing`: L1 regularisation; implemented as weight decay per
-        parameter
+        parameter. If learning-rate decay is used, L1 and L2 are also decayed.
 + `l2=nothing`: L2 regularisation; implemented as weight decay per
         parameter
 + `opti_args...`: optional keyword arguments for the optimiser can be specified
@@ -154,7 +154,8 @@ function tb_train!(mdl, opti, trn, vld=nothing; epochs=1,
     # do lr-decay only if lr is explicitly defined:
     #
     if !isnothing(lr_decay) && haskey(opti_args, :lr)
-       lr_decay = calc_d_η(opti_args[:lr], lr_decay, lrd_linear, lrd_steps)
+       Δlr = calc_d_η(opti_args[:lr], lr_decay, lrd_linear, lrd_steps)
+       #println("Δlr: $Δlr")
     else
         lr_decay = nothing
     end
@@ -163,10 +164,22 @@ function tb_train!(mdl, opti, trn, vld=nothing; epochs=1,
     # prepare l1/l2:
     #
     if !isnothing(l2)
-        l2 = Float32(1 - l2/2)
+        l2_factor = Float32(1 - l2/2)
     end
     if !isnothing(l1)
-        l1 = Float32(1 - l1)
+        l1_factor = Float32(1 - l1)
+    end
+    if !isnothing(lr_decay)
+        if !isnothing(l2)
+            l2_decay = lr_decay/opti_args[:lr] * l2   # final l2
+            Δl2 = calc_d_η(l2, l2_decay, lrd_linear, lrd_steps) 
+            #println("l2_decay: $l2_decay, Δl2: $Δl2")
+        end
+        if !isnothing(l1)
+            l1_decay = lr_decay/opti_args[:lr] * l1   # final l1
+            Δl1 = calc_d_η(l1, l1_decay, lrd_linear, lrd_steps) 
+            #println("l1_decay: $l1_decay, Δl1: $Δl1")
+        end
     end
 
     # mk log directory:
@@ -275,10 +288,10 @@ function tb_train!(mdl, opti, trn, vld=nothing; epochs=1,
             Δw = grad(loss, p) 
 
             if !isnothing(l1)
-                p.value .= p.value .* l1 
+                p.value .= p.value .* l1_factor 
             end
             if !isnothing(l2)
-                p.value .= p.value .* l2
+                p.value .= p.value .* l2_factor
             end
             
             Knet.update!(value(p), Δw, p.opt) 
@@ -336,16 +349,18 @@ function tb_train!(mdl, opti, trn, vld=nothing; epochs=1,
         #
         if (!isnothing(lr_decay)) && i > 1 && ((i-1) % lr_nth == 0)
             lr = first(params(mdl)).opt.lr
-            lr = lrd_linear ? lr + lr_decay : lr * lr_decay
+            lr = lrd_linear ? lr + Δlr : lr * Δlr
 
             l1_report = ""
             l2_report = ""
             if !isnothing(l1)
-               il1 = lrd_linear ? l1 + lr_decay : l1 * lr_decay 
+               l1 = lrd_linear ? l1 + Δl1 : l1 * Δl1 
+               l1_factor = Float32(1 - l1)
                l1_report = @sprintf(", l1=%.2e", l1)
             end
             if !isnothing(l2)
-               l2 = lrd_linear ? l2 + lr_decay : l2 * lr_decay 
+               l2 = lrd_linear ? l2 + Δl2 : l2 * Δl2
+               l2_factor = Float32(1 - l2/2)
                l2_report = @sprintf(", l2=%.2e", l2)
             end
             @printf("\nSetting learning rate to η=%.2e%s%s in epoch %.1f\n", 

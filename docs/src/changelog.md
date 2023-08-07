@@ -1,10 +1,12 @@
 # ChangeLog of NNHelferlein package
 
 ### wip
++ use CUDA.CuIterator instead
 + Padding added to emebdding layer
 + GPU selection added (not yet exported)
 
 ### v1.3.1 - unreleased
++ l1 and l2 decay always parallel to learning rate decay
 + severeal bioinformatics tools (as embedding, blosum, vhse8)
 + dataframe_minibatch default "y" changed to nothing.
 + Bioinformatics: Aminoacid tokenisation added

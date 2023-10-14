@@ -1,7 +1,10 @@
 # ChangeLog of NNHelferlein package
 
-### wip
-+ use CUDA.CuIterator instead
+### todo
++ use CUDA.CuIterator in train?
+
+### 1.3.2
++ tidy-up dependency jungle
 + Padding added to emebdding layer
 
 ### v1.3.1 

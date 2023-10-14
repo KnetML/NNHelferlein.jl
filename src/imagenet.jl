@@ -1,7 +1,6 @@
 
 """
     function preproc_imagenet_vgg(img)
-    function preproc_imagenet_resnet(img)
     function preproc_imagenet_resnetv2(img)
 
 Image preprocessing for pre-trained ImageNet examples.

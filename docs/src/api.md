@@ -7,7 +7,6 @@ AbstractNN
 AbstractChain
 add_layer!
 +
-print_network
 ```
 
 ```@docs
@@ -205,7 +204,7 @@ confusion_matrix
 ```@docs
 preproc_imagenet_vgg
 preproc_imagenet_resnet
-preproc_imagenet_resnetv2,
+preproc_imagenet_resnetv2
 predict_imagenet
 get_imagenet_classes
 ```
@@ -260,7 +259,7 @@ EmbedAminoAcids
 save_network
 load_network
 copy_network
-summary
+Base.summary
 print_network
 ```
 

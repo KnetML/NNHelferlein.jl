@@ -63,12 +63,12 @@ function download_pretrained(url, name, file_name)
         end
 
         attempt = 1
-        while attempt < 11
+        while attempt <= 2
             try
                 Downloads.download(url, file_name)
-                attempt = 11
+                attempt = 3
             catch
-                println("Download $attempt of 10 failed, retrying in 5 seconds...")
+                println("Download $attempt of 2 failed, retrying in 5 seconds...")
                 attempt += 1
                 sleep(5)
             end

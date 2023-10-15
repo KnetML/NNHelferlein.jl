@@ -69,6 +69,7 @@ function download_pretrained(url, name, file_name)
                 attempt = 11
             catch
                 println("Download $attempt of 10 failed, retrying in 5 seconds...")
+                attempt += 1
                 sleep(5)
             end
         end

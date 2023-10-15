@@ -65,7 +65,7 @@ Layers for recurrent networks:
 + [`get_hidden_states`](@ref)
 + [`get_cell_states`](@ref)
 + [`set_hidden_states!`](@ref)
-+ [`set_cell_states`](@ref)!
++ [`set_cell_states!`](@ref)!
 + [`reset_hidden_states!`](@ref)
 + [`reset_cell_states!`](@ref)
 

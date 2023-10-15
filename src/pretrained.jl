@@ -73,7 +73,16 @@ function download_pretrained(url, name, file_name)
             mkpath(PRETRAINED_DIR)
         end
 
-        Downloads.download(url, file_name)
+        attempt = 1
+        while attempt < 10
+            try
+                Downloads.download(url, file_name)
+                attempt = 10
+            catch
+                println("Download failed, retrying in 5 seconds...")
+                sleep(5)
+            end
+        end
     end
 end
 

@@ -106,6 +106,7 @@ AttnInFeed
 
 ```@docs
 DataLoader
+SequenceData
 ```
 
 ## Iteration utilities
@@ -174,6 +175,7 @@ get_tatoeba_corpus
 sequence_minibatch
 pad_sequence
 truncate_sequence
+clean_sentence
 ```
 
 
@@ -216,6 +218,7 @@ get_imagenet_classes
 
 ```@docs
 PositionalEncoding
+positional_encoding_sincos
 mk_padding_mask
 mk_peek_ahead_mask
 dot_prod_attn

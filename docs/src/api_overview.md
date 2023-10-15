@@ -145,6 +145,7 @@ provided as `actf` to the layer constructors.
 # Data provider utilities
 
 + [`DataLoader`](@ref) - type for iterator of minibatches
++ [`SequenceData`](@ref) - type for iterator of minibatches of sequences
 
 ### For tabular data
 

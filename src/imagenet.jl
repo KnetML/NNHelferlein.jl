@@ -58,8 +58,21 @@ function preproc_imagenet_vgg(img)
     return img |> imagenet_scale_255 |> imagenet_center_colours |> imagenet_bgr
 end
 
-preproc_imagenet_resnet = preproc_imagenet_vgg
+"""
+    preproc_imagenet_resnet(img)
 
+See documentation of `preproc_imagenet_vgg`.
+"""
+function preproc_imagenet_resnet(img)
+    return preproc_imagenet_vgg(img)
+end
+
+
+"""
+    preproc_imagenet_resnetv2(img)
+
+See documentation of `preproc_imagenet_vgg`.
+"""
 function preproc_imagenet_resnetv2(img)
 
     ma = maximum(img)

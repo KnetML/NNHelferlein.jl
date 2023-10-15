@@ -47,18 +47,7 @@ function download_pretrained(name, file_name)
     url = "$ZENODO_URL_PRETRAINED/$file_name"
     local_file = "$PRETRAINED_DIR/$file_name"
 
-    if isfile(local_file)
-        println("Using already downloaded weights for $name")
-    else
-        println("Downloading weights for $name from Zenodo")
-        println("$url"); flush(stdout)
-
-        if !isdir(PRETRAINED_DIR)
-            mkpath(PRETRAINED_DIR)
-        end
-
-        Downloads.download(url, local_file)
-    end
+    download_pretrained(url, name, local_file)
     return local_file
 end
 
@@ -74,12 +63,12 @@ function download_pretrained(url, name, file_name)
         end
 
         attempt = 1
-        while attempt < 10
+        while attempt < 11
             try
                 Downloads.download(url, file_name)
-                attempt = 10
+                attempt = 11
             catch
-                println("Download failed, retrying in 5 seconds...")
+                println("Download $attempt of 10 failed, retrying in 5 seconds...")
                 sleep(5)
             end
         end
@@ -200,7 +189,7 @@ imagenet default procedure!
 In contrats image data format must be colour channels `RGB` and 
 colour values `0.0 - 1.0`.
 
-This can be re-built by using a preprocessing pipeline without 
+This can be re-built by using a preprocessing pipeline with
 application `preproc_imagenet_resnetv2()` from a directory
 `img_path` with images:
 

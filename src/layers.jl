@@ -433,51 +433,109 @@ end
 """
     struct Pad     <: AbstractLayer
     
-Pad an n-dimensional array along `dims` with one of the types
-supported by `Flux.NNlib`.
+Pad an n-dimensional array along dimensions with one of the types
+':zeros' (default), ':ones'.
 
 ### Constructors:
-+ `Pad(padding::Int; type=:zeros, dims=nothing)`: Pad with `padding`
-            along all dims.
++ `Pad(padding::Int...; mode=:zeros)`: Pad with `padding`
+            along all specified dims.
+            If `padding` is a single integer, it is applied to all 
+            but the last 2 dims (i.e. in context of a CNN the channel and 
+            minibatch dimension will be excluded from padding). 
+            If more then one padding value is 
+            specified, the values will be applied to the dims in the
+            order they are specified and missing values will be filled
+            with zeros.
 
 ### Keyword arguments:
-+ `type`: one of 
++ `mode`: one of 
     * `:zeros`: zero-padding
     * `:ones`: one-padding
-    * `:repeat`: repeat values on the border
-    * `:relect`: reflect values across the border
-+ `dims`: Tuple of dims to be padded. If `dims==nothing` 
-    all except of the last 2 dimensions (i.e. channel and 
-    minibatch dimension for convolution layers) are padded.
 """
 struct Pad     <: AbstractLayer
     padding
-    type
-    dims
-    Pad(padding, type, dims) = new(padding, type, dims)
-    Pad(padding::Int; type=:zeros, dims=nothing) = new(padding, type, dims)
+    mode
+    Pad(padding::Int...; mode=:zeros) = new(padding, mode)
 end
 
 function (l::Pad)(x) 
-    
-    if isnothing(l.dims)
-        dims = Tuple(i for i in 1:ndims(x)-2)
-    else
-        dims=l.dims
-    end
 
-    if l.type == :ones
-        return NNlib.pad_constant(x, l.padding, 1.0, dims=dims)
-    elseif l.type == :repeat
-        return NNlib.pad_repeat(x, l.padding, dims=dims)
-    elseif l.type == :reflect
-        return NNlib.pad_reflect(x, l.padding, dims=dims)
-    else # type == :zeros
-        return NNlib.pad_zeros(x, l.padding, dims=dims)
+    if l.mode == :zeros
+        value = 0.0
+    elseif l.mode == :ones
+        value = 1.0
     end
+    
+    nd = ndims(x)
+    if length(l.padding) == 1
+        p = fill(l.padding[1], nd-2)
+    else 
+        p = l.padding
+    end
+    pdims = zeros(Int, nd)
+    pdims[1:length(p)] .= p
+    
+    println("pads is $pdims")
+        
+    @show siz = size(x) .+ (2 .* pdims)
+    @show core = Tuple( (1+pdims[i]) : (size(x,i)+pdims[i]) for i in 1:nd)
+    
+    padded = fill!(similar(x, siz...), value)
+    padded[core...] = x
+    return padded
 end
 
 
+
+# use NNlib function instead - but does nor work with AutoGrad Result type!
+#
+#
+# """
+#     struct Pad     <: AbstractLayer
+#     
+# Pad an n-dimensional array along `dims` with one of the types
+# supported by `Flux.NNlib`.
+# 
+# ### Constructors:
+# + `Pad(padding::Int; type=:zeros, dims=nothing)`: Pad with `padding`
+#             along all dims.
+# 
+# ### Keyword arguments:
+# + `type`: one of 
+#     * `:zeros`: zero-padding
+#     * `:ones`: one-padding
+#     * `:repeat`: repeat values on the border
+#     * `:relect`: reflect values across the border
+# + `dims`: Tuple of dims to be padded. If `dims==nothing` 
+#     all except of the last 2 dimensions (i.e. channel and 
+#     minibatch dimension for convolution layers) are padded.
+# """
+# struct Pad     <: AbstractLayer
+#     padding
+#     type
+#     dims
+#     Pad(padding, type, dims) = new(padding, type, dims)
+#     Pad(padding::Int; type=:zeros, dims=nothing) = new(padding, type, dims)
+# end
+# 
+# function (l::Pad)(x) 
+#     
+#     if isnothing(l.dims)
+#         dims = Tuple(i for i in 1:ndims(x)-2)
+#     else
+#         dims=l.dims
+#     end
+# 
+#     if l.type == :ones
+#         return NNlib.pad_constant(x, l.padding, 1.0, dims=dims)
+#     elseif l.type == :repeat
+#         return NNlib.pad_repeat(x, l.padding, dims=dims)
+#     elseif l.type == :reflect
+#         return NNlib.pad_reflect(x, l.padding, dims=dims)
+#     else # type == :zeros
+#         return NNlib.pad_zeros(x, l.padding, dims=dims)
+#     end
+# end
 
 function Base.summary(l::Pad; indent=0)
     

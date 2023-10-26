@@ -2,6 +2,7 @@
 
 ### todo
 + use CUDA.CuIterator in train?
++ padding no longer imported from NNlib (incompatibility wirh AutoGrad)
 
 ### 1.3.2
 + tidy-up dependency jungle

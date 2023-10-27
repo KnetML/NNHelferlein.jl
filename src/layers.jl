@@ -475,10 +475,8 @@ function (l::Pad)(x)
     pdims = zeros(Int, nd)
     pdims[1:length(p)] .= p
     
-    println("pads is $pdims")
-        
-    @show siz = size(x) .+ (2 .* pdims)
-    @show core = Tuple( (1+pdims[i]) : (size(x,i)+pdims[i]) for i in 1:nd)
+    siz = size(x) .+ (2 .* pdims)
+    core = Tuple( (1+pdims[i]) : (size(x,i)+pdims[i]) for i in 1:nd)
     
     padded = fill!(similar(x, siz...), value)
     padded[core...] = x

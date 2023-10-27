@@ -539,7 +539,7 @@ end
 
 function Base.summary(l::Pad; indent=0)
     
-    s1 = "Padding layer: padding=$(l.padding), $(l.type),"
+    s1 = "Padding layer: padding=$(l.padding), $(l.mode),"
     println(print_summary_line(indent, s1, 0))
     return 1
 end

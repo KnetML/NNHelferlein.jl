@@ -49,7 +49,7 @@ must provide a custom implementation with the signature `chain(x)`.
                         the output
 ```
 """
-abstract type AbstractChain
+abstract type AbstractChain <: AbstractNN
 end
 (m::AbstractChain)(x) = (for l in m.layers; x = l(x); end; x)
 

@@ -479,7 +479,7 @@ function (l::Pad)(x)
     core = Tuple( (1+pdims[i]) : (size(x,i)+pdims[i]) for i in 1:nd)
     
     padded = fill!(similar(x, siz...), value)
-    padded[core...] .= x
+    padded[core...] = x
     return padded
 end
 

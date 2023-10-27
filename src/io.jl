@@ -37,11 +37,16 @@ end
 #
 function Adapt.adapt_structure(to, x::AbstractNN)
     T = typeof(x)
-    layers = Any[Adapt.adapt(to, l) for l in x.layers]
-    if hasproperty(x, :loss)
-        return T(layers, x.loss)
+    if hasproperty(x, :layers)
+        layers = Any[Adapt.adapt(to, l) for l in x.layers]
+        if hasproperty(x, :loss)
+            return T(layers, x.loss)
+        else
+            return T(layers)
+        end
     else
-        return T(layers)
+        new_fields = [Adapt.adapt(to, getfield(x, pn)) for pn in propertynames(x)]
+        return(T(new_fields...))
     end
 end
 

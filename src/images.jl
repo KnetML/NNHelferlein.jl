@@ -122,7 +122,7 @@ mutable struct ImageLoader <: DataLoader
     classes             # unique list of class names
     batchsize           #
     shuffle             # if true: shuffle for each start
-    i_sequence          # actual sequrence of images to take
+    i_sequence          # actual sequence of images to take in this epoch
     train               # if true: inlcude y in minibatches
     aug_pipl            # Augmentor.jl pipeline
     pre_proc            # function to process one 3d image tensor (RGB)

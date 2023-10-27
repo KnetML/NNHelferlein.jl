@@ -15,6 +15,7 @@ data/mnist
 data/fashion_mnist
 data/pfam
 test/logs
+test/save_lenet.jld2
 codecov.token
 logs
 .vscode

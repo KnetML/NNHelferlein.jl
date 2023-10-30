@@ -25,7 +25,7 @@ Adapt.@adapt_structure AttnInFeed
 #
 # adapt for all Layers:
 #
-function Adapt.adapt_structure(to::Type, x::Unioin{Abstract_NN, Chain, AbstractLayer})
+function Adapt.adapt_structure(to::Type, x::Union{Abstract_NN, Chain, AbstractLayer})
     
 
     function adapt_property(to, x, pn)

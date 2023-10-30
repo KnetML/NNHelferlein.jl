@@ -203,7 +203,7 @@ struct Conv  <: AbstractLayer
     b
     actf
     kwargs
-    Conv(w::Param, b::Param, actf::Function, kwargs) = new(w, b, actf, kwargs)
+    #Conv(w::Param, b::Param, actf::Function, kwargs) = new(w, b, actf, kwargs)
     Conv(w, b, actf; kwargs...) = new(w, b, actf, kwargs)
     Conv(w1::Int, i::Int, o::Int; actf=Knet.relu, kwargs...) =
             new(Knet.param(1,w1,i,o; init=xavier_normal), Knet.param0(1,1,o,1),

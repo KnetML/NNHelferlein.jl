@@ -25,29 +25,65 @@ Adapt.@adapt_structure AttnInFeed
 #
 # adapt for all Layers:
 #
-function Adapt.adapt_structure(to::Type, x::AbstractLayer)
+function Adapt.adapt_structure(to::Type, x::Unioin{Abstract_NN, Chain, AbstractLayer})
     
+
+    function adapt_property(to, x, pn)
+        
+        p = getfield(x, pn)
+        
+        println("adapt_property: ", pn)
+        println("type: $(typeof(p))")
+        println("$(summary(p))")
+        println(" ")
+
+        if p isa Tuple
+            return Tuple([Adapt.adapt(to, elem) for elem in p])
+        elseif p isa AbstractArray
+            return Array([Adapt.adapt(to, elem) for elem in p])
+        elseif p isa Base.Pairs
+            return Adapt.adapt(to, p)
+            # for (k, v) in p
+            #     println("key: $k, value: $v")
+            # end
+            # ks = keys(p)
+            # vs = values(p)
+            # nvs = [Adapt.adapt(to, elem) for elem in vs]
+            # return typeof(p)((nvs), (ks))
+        else
+            return Adapt.adapt(to, getfield(x, pn))
+        end
+    end
+
+    println(">> adapt_structure, Layer: $(summary(x)) \n")
     T = typeof(x)
-    new_fields = [Adapt.adapt(to, getfield(x, pn)) for pn in propertynames(x)]
+    new_fields = [adapt_property(to, x, pn) for pn in propertynames(x)]
     return T(new_fields...)
 end
 
 
 # adapt for all Nets and Chains:
 #
-function Adapt.adapt_structure(to, x::AbstractNN)
-    T = typeof(x)
-    if hasproperty(x, :layers)
-        layers = Any[Adapt.adapt(to, l) for l in x.layers]
-        if hasproperty(x, :loss)
-            return T(layers, x.loss)
-        else
-            return T(layers)
-        end
-    else
-        new_fields = [Adapt.adapt(to, getfield(x, pn)) for pn in propertynames(x)]
-        return(T(new_fields...))
-    end
+# function Adapt.adapt_structure(to, x::AbstractNN)
+#     T = typeof(x)
+#     if hasproperty(x, :layers)
+#         layers = Any[Adapt.adapt(to, l) for l in x.layers]
+#         if hasproperty(x, :loss)
+#             return T(layers, x.loss)
+#         else
+#             return T(layers)
+#         end
+#     else
+#         new_fields = [Adapt.adapt(to, getfield(x, pn)) for pn in propertynames(x)]
+#         return(T(new_fields...))
+#     end
+# end
+
+function Adapt.adapt_structure(to::Type, x::NNHelferlein.Conv)
+
+    wn = Adapt.adapt(to, x.w)
+    bn = Adapt.adapt(to, x.b)
+    return Conv(wn, bn, x.actf; x.kwargs... )
 end
 
 
